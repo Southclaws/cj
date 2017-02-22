@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
+	gocache "github.com/patrickmn/go-cache"
 	dbg "github.com/tj/go-debug"
 )
 
@@ -27,6 +29,7 @@ type App struct {
 	discordClient *discordgo.Session
 	httpClient    *http.Client
 	ready         chan bool
+	cache         *gocache.Cache
 }
 
 func main() {
@@ -36,6 +39,7 @@ func main() {
 	app := App{
 		config:     Config{},
 		httpClient: &http.Client{},
+		cache:      gocache.New(5*time.Minute, 30*time.Second),
 	}
 	configLocation := os.Getenv("CONFIG_FILE")
 	if configLocation == "" {
