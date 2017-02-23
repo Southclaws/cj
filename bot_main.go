@@ -21,6 +21,7 @@ type Config struct {
 	Heartbeat      int    `json:"heartbeat"`       // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
 	BotID          string `json:"bot_id"`          // the bot's client ID
 	Debug          bool   `json:"debug"`           // debug mode
+	DebugUser      string `json:"debug_user"`      // when set, only accept commands from this user
 }
 
 // App stores program state
@@ -30,6 +31,7 @@ type App struct {
 	httpClient    *http.Client
 	ready         chan bool
 	cache         *gocache.Cache
+	locale        Locale
 }
 
 func main() {
@@ -56,6 +58,10 @@ func main() {
 	log.Printf("- PrimaryChannel: %s\n", app.config.PrimaryChannel)
 	log.Printf("- Debug: %v\n", app.config.Debug)
 	log.Printf("~\n")
+
+	app.loadLanguages()
+
+	log.Print(app.locale.GetLangString("en", "WarnUserError", "test"))
 
 	if app.config.Debug {
 		dbg.Enable("main")

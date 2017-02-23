@@ -7,6 +7,12 @@ import "github.com/bwmarrin/discordgo"
 func (app App) HandlePrivateMessage(message discordgo.Message) error {
 	debug("[private:HandlePrivateMessage] %v", message)
 
+	if app.config.Debug && app.config.DebugUser != "" {
+		if message.Author.ID != app.config.DebugUser {
+			return nil
+		}
+	}
+
 	var err error
 
 	if message.Content == "verify" {

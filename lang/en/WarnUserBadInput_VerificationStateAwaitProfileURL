@@ -1,0 +1,5 @@
+Your input did not match the pattern for a valid profile URL or profile ID.
+The URL must be in one of the following formats:
+http://forum.sa-mp.com/member.php?u=50199
+forum.sa-mp.com/member.php?u=50199
+50199
