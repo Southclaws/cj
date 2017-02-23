@@ -4,7 +4,7 @@ import "github.com/bwmarrin/discordgo"
 
 // HandlePrivateMessage processes a private message sent directly to the bot
 // usually for direct commands such as account verification.
-func (app App) HandlePrivateMessage(message discordgo.Message) error {
+func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 	debug("[private:HandlePrivateMessage] message '%s'", message.Content)
 
 	if app.config.Debug && app.config.DebugUser != "" {
@@ -15,14 +15,28 @@ func (app App) HandlePrivateMessage(message discordgo.Message) error {
 
 	var err error
 
-	if message.Content == "verify" {
-		app.UserStartsVerification(message)
-	} else if message.Content == "done" {
-		app.UserConfirmsProfile(message)
-	} else if message.Content == "cancel" {
-		app.UserCancelsVerification(message)
+	verified, err := app.IsUserVerified(message.Author.ID)
+
+	if verified {
+		if message.Content == "kill" {
+			if message.Author.ID == app.config.Admin {
+				debug("[private:HandlePrivateMessage] kill signal received from '%s'", message.Author.ID)
+				app.done <- true
+			}
+		}
+
+		// todo: build command system for verified users and Discord admins.
+
 	} else {
-		app.UserProvidesProfileURL(message)
+		if message.Content == "verify" {
+			app.UserStartsVerification(message)
+		} else if message.Content == "done" {
+			app.UserConfirmsProfile(message)
+		} else if message.Content == "cancel" {
+			app.UserCancelsVerification(message)
+		} else {
+			app.UserProvidesProfileURL(message)
+		}
 	}
 
 	if err != nil {

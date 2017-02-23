@@ -23,6 +23,7 @@ type Config struct {
 	BotID          string `json:"bot_id"`          // the bot's client ID
 	Debug          bool   `json:"debug"`           // debug mode
 	DebugUser      string `json:"debug_user"`      // when set, only accept commands from this user
+	Admin          string `json:"admin"`           // user who has control over the bot
 }
 
 // App stores program state
@@ -34,6 +35,7 @@ type App struct {
 	cache         *gocache.Cache
 	locale        Locale
 	db            *gorm.DB
+	done          chan bool
 }
 
 func main() {
@@ -45,19 +47,21 @@ func main() {
 		httpClient: &http.Client{},
 		cache:      gocache.New(5*time.Minute, 30*time.Second),
 	}
+
 	configLocation := os.Getenv("CONFIG_FILE")
 	if configLocation == "" {
 		configLocation = "config.json"
 	}
 
-	err = app.LoadConfig(configLocation)
-	if err != nil {
-		log.Fatal(err)
+	dbLocation := os.Getenv("DB_FILE")
+	if dbLocation == "" {
+		dbLocation = "users.db"
 	}
 
+	app.LoadConfig(configLocation)
+	app.ConnectDB(dbLocation)
 	app.loadLanguages()
 
-	app.ConnectDB()
 	var count int
 	app.db.Model(&User{}).Count(&count)
 	log.Printf("Verified users: %d", count)
@@ -78,8 +82,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	done := make(chan bool)
-	<-done
+	app.done = make(chan bool)
+	<-app.done
+
+	err1 := app.discordClient.Close()
+	err2 := app.db.Close()
+	log.Printf("Closed database, shutting down %v %v", err1, err2)
 }
 
 // LoadConfig loads the specified config JSON file and returns the contents as
@@ -87,14 +95,14 @@ func main() {
 func (app *App) LoadConfig(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	json.NewDecoder(file).Decode(&app.config)
 
 	err = file.Close()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	return nil

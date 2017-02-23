@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -17,13 +15,8 @@ type User struct {
 }
 
 // ConnectDB connects the app to the database
-func (app *App) ConnectDB() {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db, err := gorm.Open("sqlite3", filepath.Join(dir, "users.db"))
+func (app *App) ConnectDB(dbpath string) {
+	db, err := gorm.Open("sqlite3", dbpath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,6 +39,22 @@ func (app App) StoreVerifiedUser(verification Verification) error {
 	}
 
 	return nil
+}
+
+// IsUserVerified returns a discord user, a blank string or an error
+func (app App) IsUserVerified(discordUserID string) (bool, error) {
+	var count int
+	result := app.db.Model(&User{}).Where(&User{DiscordUserID: discordUserID}).Count(&count)
+
+	if result.Error != nil {
+		return false, result.Error
+	}
+
+	if count == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 // GetDiscordUserForumUser returns a discord user, a blank string or an error

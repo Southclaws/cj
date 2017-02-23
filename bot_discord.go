@@ -19,7 +19,7 @@ type ChannelDM struct {
 	LastMessageID string         `json:"last_message_id"`
 }
 
-func (app App) connect() error {
+func (app *App) connect() error {
 	var err error
 
 	app.discordClient, err = discordgo.New("Bot " + app.config.DiscordToken)
@@ -43,7 +43,7 @@ func (app App) connect() error {
 	return nil
 }
 
-func (app App) onReady(s *discordgo.Session, event *discordgo.Ready) {
+func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	debug("discord ready")
 	app.ready <- true
 
@@ -53,9 +53,13 @@ func (app App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	}
 }
 
-func (app App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
+func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
 	if len(app.ready) > 0 {
 		<-app.ready
+	}
+
+	if event.Message.Author.ID == app.config.BotID {
+		return
 	}
 
 	message := event.Message
@@ -104,6 +108,6 @@ func (app App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
 	}
 }
 
-func (app App) onHeartbeat(t time.Time) {
+func (app *App) onHeartbeat(t time.Time) {
 	app.HandleHeartbeatEvent(t)
 }
