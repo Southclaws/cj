@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/jinzhu/gorm"
 	gocache "github.com/patrickmn/go-cache"
 	dbg "github.com/tj/go-debug"
 )
@@ -32,6 +33,7 @@ type App struct {
 	ready         chan bool
 	cache         *gocache.Cache
 	locale        Locale
+	db            *gorm.DB
 }
 
 func main() {
@@ -54,6 +56,8 @@ func main() {
 	}
 
 	app.loadLanguages()
+
+	app.connectDB()
 
 	log.Printf("Config:\n")
 	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))

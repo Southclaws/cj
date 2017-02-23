@@ -3,12 +3,10 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"strings"
-
+	"fmt"
 	"regexp"
 	"strconv"
-
-	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	gocache "github.com/patrickmn/go-cache"
@@ -184,6 +182,8 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 		_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Failure"))
 		return err
 	}
+
+	app.StoreVerifiedUser(verification)
 
 	debug("[verify:UserConfirmsProfile] user '%s' confirmed", message.Author.Username)
 	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Success", verification.forumUser))
