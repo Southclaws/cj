@@ -1,0 +1,8 @@
+{
+    "discord_token": "discord API token",
+    "primary_channel": "channel",
+    "heartbeat": 10,
+    "bot_id": "bot discord client id",
+    "debug": true,
+    "debug_user": "debug user"
+}

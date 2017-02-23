@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 	}
 	configLocation := os.Getenv("CONFIG_FILE")
 	if configLocation == "" {
-		configLocation = "config.json"
+		configLocation = "config_example.json"
 	}
 
 	err = app.LoadConfig(configLocation)
