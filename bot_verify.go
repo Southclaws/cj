@@ -183,7 +183,10 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 		return err
 	}
 
-	app.StoreVerifiedUser(verification)
+	err = app.StoreVerifiedUser(verification)
+	if err != nil {
+		return err
+	}
 
 	debug("[verify:UserConfirmsProfile] user '%s' confirmed", message.Author.Username)
 	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Success", verification.forumUser))

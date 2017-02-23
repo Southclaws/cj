@@ -1,35 +1,9 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"os"
 	"reflect"
 	"testing"
 )
-
-var app App
-
-func TestMain(m *testing.M) {
-	log.Print("initialising...")
-	var err error
-	app = App{
-		config:     Config{},
-		httpClient: &http.Client{},
-	}
-	configLocation := os.Getenv("CONFIG_FILE")
-	if configLocation == "" {
-		configLocation = "config.json"
-	}
-
-	err = loadConfig(configLocation, &app.config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Print("initialised.")
-
-	os.Exit(m.Run())
-}
 
 func TestApp_GetUserBio(t *testing.T) {
 	type args struct {

@@ -16,7 +16,8 @@ type User struct {
 	VerificationCode string `gorm:"not null"`
 }
 
-func (app *App) connectDB() {
+// ConnectDB connects the app to the database
+func (app *App) ConnectDB() {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
@@ -34,22 +35,39 @@ func (app *App) connectDB() {
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
-func (app App) StoreVerifiedUser(verification Verification) {
-	app.db.Create(&User{
+func (app App) StoreVerifiedUser(verification Verification) error {
+	err := app.db.Create(&User{
 		DiscordUserID:    verification.discordUser.ID,
 		ForumUserID:      verification.forumUser,
 		VerificationCode: verification.code,
-	})
+	}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// GetDiscordUserForumAccount returns a discord user, a blank string or an error
-func (app App) GetDiscordUserForumAccount(forumUserID string) (string, error) {
+// GetDiscordUserForumUser returns a discord user, a blank string or an error
+func (app App) GetDiscordUserForumUser(forumUserID string) (string, error) {
 	var user User
 
-	err := app.db.First(user, &User{ForumUserID: forumUserID}).Error
+	err := app.db.First(&user, &User{ForumUserID: forumUserID}).Error
 	if err != nil {
 		return "", err
 	}
 
 	return user.DiscordUserID, nil
+}
+
+// GetForumUserFromDiscordUser returns a discord user, a blank string or an error
+func (app App) GetForumUserFromDiscordUser(discordUserID string) (string, error) {
+	var user User
+
+	err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
+	if err != nil {
+		return "", err
+	}
+
+	return user.ForumUserID, nil
 }

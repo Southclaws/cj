@@ -50,14 +50,14 @@ func main() {
 		configLocation = "config.json"
 	}
 
-	err = loadConfig(configLocation, &app.config)
+	err = app.LoadConfig(configLocation)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	app.loadLanguages()
 
-	app.connectDB()
+	app.ConnectDB()
 	var count int
 	app.db.Model(&User{}).Count(&count)
 	log.Printf("Verified users: %d", count)
@@ -82,13 +82,15 @@ func main() {
 	<-done
 }
 
-func loadConfig(filename string, cfg *Config) error {
+// LoadConfig loads the specified config JSON file and returns the contents as
+// a pointer to a Config object.
+func (app *App) LoadConfig(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
 
-	json.NewDecoder(file).Decode(&cfg)
+	json.NewDecoder(file).Decode(&app.config)
 
 	err = file.Close()
 	if err != nil {
