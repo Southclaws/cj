@@ -2,24 +2,31 @@ package main
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 // User is a recorded and verified SA:MP forum user.
 type User struct {
-	gorm.Model
-	DiscordUserID    string `gorm:"primary_key;index"`
-	ForumUserID      string
-	VerificationCode string
+	DiscordUserID    string `gorm:"primary_key;index;not null;unique"`
+	ForumUserID      string `gorm:"not null;unique"`
+	VerificationCode string `gorm:"not null"`
 }
 
-func (app App) connectDB() {
-	db, err := gorm.Open("sqlite", "users.db")
+func (app *App) connectDB() {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	db, err := gorm.Open("sqlite3", filepath.Join(dir, "users.db"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.LogMode(true)
 	db.AutoMigrate(&User{})
 
 	app.db = db

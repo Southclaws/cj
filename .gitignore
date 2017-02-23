@@ -1,6 +1,8 @@
 # App files
 config.json
 debug
+*.db
+*.db-journal
 
 # Visual Studio Code
 .vscode/*

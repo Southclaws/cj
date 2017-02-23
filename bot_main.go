@@ -58,14 +58,15 @@ func main() {
 	app.loadLanguages()
 
 	app.connectDB()
+	var count int
+	app.db.Model(&User{}).Count(&count)
+	log.Printf("Verified users: %d", count)
 
 	log.Printf("Config:\n")
 	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))
 	log.Printf("- PrimaryChannel: %s\n", app.config.PrimaryChannel)
 	log.Printf("- Debug: %v\n", app.config.Debug)
 	log.Printf("~\n")
-
-	log.Print(app.locale.GetLangString("en", "WarnUserError", "test"))
 
 	if app.config.Debug {
 		dbg.Enable("main")
