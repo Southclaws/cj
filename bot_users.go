@@ -20,7 +20,7 @@ func (app *App) ConnectDB(dbpath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.LogMode(true)
+	db.LogMode(app.config.Debug)
 	db.AutoMigrate(&User{})
 
 	app.db = db

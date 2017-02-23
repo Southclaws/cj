@@ -69,7 +69,13 @@ func main() {
 	log.Printf("Config:\n")
 	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))
 	log.Printf("- PrimaryChannel: %s\n", app.config.PrimaryChannel)
+	log.Printf("- DiscordToken: %v\n", app.config.DiscordToken)
+	log.Printf("- PrimaryChannel: %v\n", app.config.PrimaryChannel)
+	log.Printf("- Heartbeat: %v\n", app.config.Heartbeat)
+	log.Printf("- BotID: %v\n", app.config.BotID)
 	log.Printf("- Debug: %v\n", app.config.Debug)
+	log.Printf("- DebugUser: %v\n", app.config.DebugUser)
+	log.Printf("- Admin: %v\n", app.config.Admin)
 	log.Printf("~\n")
 
 	if app.config.Debug {

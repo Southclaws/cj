@@ -278,8 +278,7 @@ func (app App) CheckUserPageForCode(url string, code string) (bool, error) {
 		debug("[verify:CheckUserPageForCode] code found in bio")
 		return true, nil
 	}
-	debug("[verify:CheckUserPageForCode] code not found in bio, search vm")
-
+	/*debug("[verify:CheckUserPageForCode] code not found in bio, search vm")
 	visitorMessages, err := app.GetFirstTenUserVisitorMessages(url)
 	if err != nil {
 		errors = append(errors, err)
@@ -290,8 +289,7 @@ func (app App) CheckUserPageForCode(url string, code string) (bool, error) {
 			return true, nil
 		}
 	}
-
-	debug("[verify:CheckUserPageForCode] code not found in vm")
+	debug("[verify:CheckUserPageForCode] code not found in vm")*/
 	return false, nil
 }
 

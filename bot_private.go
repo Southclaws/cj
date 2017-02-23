@@ -9,6 +9,7 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 
 	if app.config.Debug && app.config.DebugUser != "" {
 		if message.Author.ID != app.config.DebugUser {
+			debug("[private:HandlePrivateMessage] app.config.Debug true, user ID does not match app.config.DebugUser")
 			return nil
 		}
 	}
