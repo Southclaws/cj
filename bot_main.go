@@ -53,13 +53,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	app.loadLanguages()
+
 	log.Printf("Config:\n")
 	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))
 	log.Printf("- PrimaryChannel: %s\n", app.config.PrimaryChannel)
 	log.Printf("- Debug: %v\n", app.config.Debug)
 	log.Printf("~\n")
-
-	app.loadLanguages()
 
 	log.Print(app.locale.GetLangString("en", "WarnUserError", "test"))
 

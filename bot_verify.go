@@ -193,7 +193,21 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 // UserCancelsVerification is called when the user responds with 'cancel'
 func (app App) UserCancelsVerification(message discordgo.Message) error {
 	debug("[verify:UserCancelsVerification] user '%s' message '%s'", message.Author.Username, message.Content)
-	return nil
+	var verification Verification
+	var err error
+
+	result, found := app.cache.Get(message.Author.ID)
+	if !found {
+		err = app.WarnUserNoVerification(message.ChannelID)
+		return err
+	}
+
+	verification = result.(Verification)
+
+	app.cache.Delete(message.Author.ID)
+
+	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserCancelsVerification"))
+	return err
 }
 
 // WarnUserVerificationState tells a user their current verification state,

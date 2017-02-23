@@ -5,7 +5,7 @@ import "github.com/bwmarrin/discordgo"
 // HandlePrivateMessage processes a private message sent directly to the bot
 // usually for direct commands such as account verification.
 func (app App) HandlePrivateMessage(message discordgo.Message) error {
-	debug("[private:HandlePrivateMessage] %v", message)
+	debug("[private:HandlePrivateMessage] message '%s'", message.Content)
 
 	if app.config.Debug && app.config.DebugUser != "" {
 		if message.Author.ID != app.config.DebugUser {
