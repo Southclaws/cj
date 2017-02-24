@@ -32,7 +32,13 @@ func TestMain(m *testing.M) {
 
 	log.Print("initialised.")
 
-	os.Exit(m.Run())
+	ret := m.Run()
 
 	app.db.Close()
+	log.Printf("removing test database %s", dbLocation)
+	if err := os.Remove(dbLocation); err != nil {
+		panic(err)
+	}
+
+	os.Exit(ret)
 }

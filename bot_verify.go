@@ -269,7 +269,12 @@ func (app App) CheckUserPageForCode(url string, code string) (bool, error) {
 	debug("[verify:CheckUserPageForCode] url '%s' code '%s'", url, code)
 	var errors []error
 
-	bio, err := app.GetUserBio(url)
+	page, err := app.GetUserProfilePage(url)
+	if err != nil {
+		errors = append(errors, err)
+	}
+
+	bio, err := app.GetUserBio(page)
 	if err != nil {
 		errors = append(errors, err)
 	}
@@ -279,7 +284,7 @@ func (app App) CheckUserPageForCode(url string, code string) (bool, error) {
 		return true, nil
 	}
 	/*debug("[verify:CheckUserPageForCode] code not found in bio, search vm")
-	visitorMessages, err := app.GetFirstTenUserVisitorMessages(url)
+	visitorMessages, err := app.GetFirstTenUserVisitorMessages(page)
 	if err != nil {
 		errors = append(errors, err)
 	}
