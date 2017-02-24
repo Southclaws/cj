@@ -274,12 +274,7 @@ func (app App) CheckUserPageForCode(url string, code string) (bool, error) {
 		errors = append(errors, err)
 	}
 
-	bio, err := app.GetUserBio(page)
-	if err != nil {
-		errors = append(errors, err)
-	}
-
-	if strings.Contains(bio, code) {
+	if strings.Contains(page.BioText, code) {
 		debug("[verify:CheckUserPageForCode] code found in bio")
 		return true, nil
 	}
