@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/Southclaws/jeff.svg?style=svg)](https://circleci.com/gh/Southclaws/jeff)
 
-Jeff verifies SA:MP forum accounts and performs other tasks if you ask nicely.
+CJ verifies SA:MP forum accounts and performs other tasks if you ask nicely.
 
 In development. Features/Roadmap:
 
