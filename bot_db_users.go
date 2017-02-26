@@ -16,6 +16,7 @@ type User struct {
 
 // StoreVerifiedUser is for when a user finishes their verification.
 func (app App) StoreVerifiedUser(verification Verification) error {
+	debug("[users:StoreVerifiedUser] storing '%s' '%s' '%s' '%s'", verification.discordUser.ID, verification.forumUser, verification.code, verification.userProfile.UserName)
 	err := app.db.Create(&User{
 		DiscordUserID:    verification.discordUser.ID,
 		ForumUserID:      verification.forumUser,

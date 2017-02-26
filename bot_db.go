@@ -17,5 +17,5 @@ func (app *App) ConnectDB(dbpath string) {
 	db.AutoMigrate(&ChatLog{})
 
 	app.db = db
-	log.Print("Connected to database")
+	log.Printf("Connected to database '%s'", dbpath)
 }

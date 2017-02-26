@@ -1,6 +1,10 @@
 package main
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"log"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 // HandlePrivateMessage processes a private message sent directly to the bot
 // usually for direct commands such as account verification.
@@ -41,6 +45,7 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 	}
 
 	if err != nil {
+		log.Print(err)
 		app.WarnUserError(message.ChannelID, err.Error())
 	}
 
