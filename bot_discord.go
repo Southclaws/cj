@@ -63,9 +63,11 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	}
 
 	message := event.Message
+	primary := false
+	private := false
 
 	if message.ChannelID == app.config.PrimaryChannel {
-		app.HandleChannelMessage(*message)
+		primary = true
 	} else {
 		// discordgo has not implemented private channel objects (DM Channels)
 		// so we have to perform the request manually and unmarshal the response
@@ -91,19 +93,32 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		// https://discordapp.com/developers/docs/resources/channel#dm-channel-object
 
 		if channel.Private {
-			err := app.HandlePrivateMessage(*message)
-			if err != nil {
-				log.Print(err)
-			}
-		} else {
-			for i := range message.Mentions {
-				if message.Mentions[i].ID == app.config.BotID {
-					err := app.HandleSummon(*message)
-					if err != nil {
-						log.Print(err)
-					}
+			private = true
+		}
+	}
+
+	debug("private: %v primary %v", private, primary)
+
+	if private {
+		err := app.HandlePrivateMessage(*message)
+		if err != nil {
+			log.Print(err)
+		}
+	} else {
+		log.Printf("%p", app.chatLogger)
+		app.chatLogger.RecordChatLog(message.Author.ID, message.ChannelID, message.Content)
+
+		for i := range message.Mentions {
+			if message.Mentions[i].ID == app.config.BotID {
+				err := app.HandleSummon(*message)
+				if err != nil {
+					log.Print(err)
 				}
 			}
+		}
+
+		if primary {
+			app.HandleChannelMessage(*message)
 		}
 	}
 }

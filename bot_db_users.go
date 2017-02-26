@@ -1,30 +1,17 @@
 package main
 
 import (
-	"log"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 // User is a recorded and verified SA:MP forum user.
 type User struct {
+	gorm.Model
 	DiscordUserID    string `gorm:"primary_key;index;not null;unique"`
 	ForumUserID      string `gorm:"not null;unique"`
 	VerificationCode string `gorm:"not null"`
-}
-
-// ConnectDB connects the app to the database
-func (app *App) ConnectDB(dbpath string) {
-	db, err := gorm.Open("sqlite3", dbpath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	db.LogMode(app.config.Debug)
-	db.AutoMigrate(&User{})
-
-	app.db = db
-	log.Print("Connected to database")
+	ForumUserName    string `gorm:"not null"`
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
