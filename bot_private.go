@@ -28,6 +28,8 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 				debug("[private:HandlePrivateMessage] kill signal received from '%s'", message.Author.ID)
 				app.done <- true
 			}
+		} else if message.Content == "verify" {
+			_, err = app.discordClient.ChannelMessageSend(message.ChannelID, "You are already verified! If you are experiencing problems with the bot or verification, please contact an admin.")
 		}
 
 		// todo: build command system for verified users and Discord admins.
