@@ -23,6 +23,8 @@ type Config struct {
 	PrimaryChannel   string `json:"primary_channel"`    // main channel the bot hangs out in
 	Heartbeat        int    `json:"heartbeat"`          // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
 	BotID            string `json:"bot_id"`             // the bot's client ID
+	GuildID          string `json:"guild_id"`           // the discord channel ID
+	VerifiedRole     string `json:"verified_role"`      // ID of the role for verified members
 	DebugLogs        bool   `json:"debug_logs"`         // debug logging
 	DebugUser        string `json:"debug_user"`         // when set, only accept commands from this user
 	Admin            string `json:"admin"`              // user who has control over the bot

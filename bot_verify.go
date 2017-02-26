@@ -194,6 +194,11 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 		return err
 	}
 
+	err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, verification.discordUser.ID, app.config.VerifiedRole)
+	if err != nil {
+		return err
+	}
+
 	debug("[verify:UserConfirmsProfile] user '%s' confirmed", message.Author.Username)
 	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Success", verification.forumUser))
 	return err
