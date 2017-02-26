@@ -18,6 +18,7 @@ var debug = dbg.Debug("main")
 
 // Config stores configuration variables
 type Config struct {
+	LogFile          string `json:"log_file"`           // log file
 	DiscordToken     string `json:"discord_token"`      // discord API token
 	PrimaryChannel   string `json:"primary_channel"`    // main channel the bot hangs out in
 	Heartbeat        int    `json:"heartbeat"`          // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
@@ -66,10 +67,19 @@ func main() {
 
 	app.LoadConfig(configLocation)
 
+	f, err := os.Open(app.config.LogFile)
+	if err != nil {
+		f, err = os.Create(app.config.LogFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
 	log.Printf("Config:\n")
+	log.Printf("- LogFile: %s\n", app.config.LogFile)
 	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))
-	log.Printf("- PrimaryChannel: %s\n", app.config.PrimaryChannel)
-	log.Printf("- DiscordToken: %v\n", app.config.DiscordToken)
 	log.Printf("- PrimaryChannel: %v\n", app.config.PrimaryChannel)
 	log.Printf("- Heartbeat: %v\n", app.config.Heartbeat)
 	log.Printf("- BotID: %v\n", app.config.BotID)

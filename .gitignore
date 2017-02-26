@@ -3,6 +3,7 @@ config.json
 debug
 *.db
 *.db-journal
+log.txt
 
 # Visual Studio Code
 .vscode/*
