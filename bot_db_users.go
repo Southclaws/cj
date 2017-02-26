@@ -20,6 +20,7 @@ func (app App) StoreVerifiedUser(verification Verification) error {
 		DiscordUserID:    verification.discordUser.ID,
 		ForumUserID:      verification.forumUser,
 		VerificationCode: verification.code,
+		ForumUserName:    verification.userProfile.UserName,
 	}).Error
 	if err != nil {
 		return err

@@ -55,6 +55,7 @@ type Verification struct {
 	channelID   string
 	discordUser discordgo.User
 	forumUser   string
+	userProfile UserProfile
 	code        string
 	verifyState VerificationState
 }
@@ -172,7 +173,12 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 		return err
 	}
 
-	verified, err := app.CheckUserPageForCode(verification.forumUser, verification.code)
+	verification.userProfile, err = app.GetUserProfilePage(verification.forumUser)
+	if err != nil {
+		return err
+	}
+
+	verified, err := app.CheckUserPageForCode(verification.userProfile, verification.code)
 	if err != nil {
 		return err
 	}
@@ -265,14 +271,8 @@ func (app App) WarnUserError(channelid string, errorString string) error {
 }
 
 // CheckUserPageForCode checks if a verification code has been posted by a user.
-func (app App) CheckUserPageForCode(url string, code string) (bool, error) {
-	debug("[verify:CheckUserPageForCode] url '%s' code '%s'", url, code)
-	var errors []error
-
-	page, err := app.GetUserProfilePage(url)
-	if err != nil {
-		errors = append(errors, err)
-	}
+func (app App) CheckUserPageForCode(page UserProfile, code string) (bool, error) {
+	debug("[verify:CheckUserPageForCode] user '%s' code '%s'", page.UserName, code)
 
 	if strings.Contains(page.BioText, code) {
 		debug("[verify:CheckUserPageForCode] code found in bio")
