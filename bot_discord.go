@@ -47,6 +47,25 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	debug("discord ready")
 	app.ready <- true
 
+	found := false
+	roles, err := s.GuildRoles(app.config.GuildID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, role := range roles {
+		if role.ID == app.config.VerifiedRole {
+			found = true
+			break
+		}
+	}
+	if !found {
+		log.Print("verified role ID was not found in guild role list:")
+		for _, role := range roles {
+			log.Printf("name: %s id: %s", role.Name, role.ID)
+		}
+		log.Fatalf("role '%s' not found.", app.config.VerifiedRole)
+	}
+
 	ticker := time.NewTicker(time.Minute * time.Duration(app.config.Heartbeat))
 	for t := range ticker.C {
 		app.onHeartbeat(t)
