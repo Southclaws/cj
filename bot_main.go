@@ -69,7 +69,7 @@ func main() {
 
 	var logFile *os.File
 	if app.config.LogFile != "" {
-		logFile, err := os.OpenFile(app.config.LogFile, os.O_RDWR, os.ModeAppend)
+		logFile, err := os.OpenFile(app.config.LogFile, os.O_APPEND, os.ModeAppend)
 		if err != nil {
 			log.Print(err)
 			logFile, err = os.Create(app.config.LogFile)
