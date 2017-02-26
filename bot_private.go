@@ -36,19 +36,22 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 
 	} else {
 		if message.Content == "verify" {
-			app.UserStartsVerification(message)
+			err = app.UserStartsVerification(message)
 		} else if message.Content == "done" {
-			app.UserConfirmsProfile(message)
+			err = app.UserConfirmsProfile(message)
 		} else if message.Content == "cancel" {
-			app.UserCancelsVerification(message)
+			err = app.UserCancelsVerification(message)
 		} else {
-			app.UserProvidesProfileURL(message)
+			err = app.UserProvidesProfileURL(message)
 		}
 	}
 
 	if err != nil {
 		log.Print(err)
-		app.WarnUserError(message.ChannelID, err.Error())
+		err = app.WarnUserError(message.ChannelID, err.Error())
+		if err != nil {
+			log.Print(err)
+		}
 	}
 
 	return nil
