@@ -194,6 +194,7 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 		return err
 	}
 
+	debug("[verify:UserConfirmsProfile] adding role in '%s' for '%s': '%s'", app.config.GuildID, verification.discordUser.ID, app.config.VerifiedRole)
 	err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, verification.discordUser.ID, app.config.VerifiedRole)
 	if err != nil {
 		return err

@@ -47,10 +47,10 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 	}
 
 	if err != nil {
-		log.Print(err)
+		log.Printf("HandlePrivateMessage caused an error: %s", err)
 		err = app.WarnUserError(message.ChannelID, err.Error())
 		if err != nil {
-			log.Print(err)
+			log.Printf("WarnUserError caused an error: %s", err.Error())
 		}
 	}
 
