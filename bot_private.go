@@ -7,7 +7,7 @@ import "github.com/bwmarrin/discordgo"
 func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 	debug("[private:HandlePrivateMessage] message '%s'", message.Content)
 
-	if app.config.Debug && app.config.DebugUser != "" {
+	if app.config.DebugUser != "" {
 		if message.Author.ID != app.config.DebugUser {
 			debug("[private:HandlePrivateMessage] app.config.Debug true, user ID does not match app.config.DebugUser")
 			return nil

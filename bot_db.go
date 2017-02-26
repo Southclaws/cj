@@ -12,7 +12,7 @@ func (app *App) ConnectDB(dbpath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.LogMode(app.config.Debug)
+	db.LogMode(app.config.DebugLogs)
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&ChatLog{})
 
