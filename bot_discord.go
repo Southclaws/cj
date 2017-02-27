@@ -31,6 +31,7 @@ func (app *App) connect() error {
 
 	app.discordClient.AddHandler(app.onReady)
 	app.discordClient.AddHandler(app.onMessage)
+	app.discordClient.AddHandler(app.onJoin)
 
 	err = app.discordClient.Open()
 	if err != nil {
@@ -46,19 +47,18 @@ func (app *App) connect() error {
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	debug("discord ready")
 
-	found := false
+	found := 0
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, role := range roles {
-		if role.ID == app.config.VerifiedRole {
-			found = true
-			break
+		if role.ID == app.config.VerifiedRole || role.ID == app.config.NormalRole {
+			found++
 		}
 	}
-	if !found {
+	if found != 2 {
 		log.Printf("verified role ID '%s' was not found in guild role list:", app.config.VerifiedRole)
 		for _, role := range roles {
 			log.Printf("name: %s id: %s", role.Name, role.ID)
@@ -66,10 +66,31 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		log.Fatalf("role '%s' not found.", app.config.VerifiedRole)
 	}
 
+	log.Print("Updating users to normal role")
+	member := false
+	users, err := s.GuildMembers(app.config.GuildID, "", 1000)
+	for _, user := range users {
+		member = false
+		for i := range user.Roles {
+			if user.Roles[i] == app.config.NormalRole {
+				member = true
+			}
+		}
+		if !member {
+			log.Printf("GuildMemberRoleAdd '%s' '%s' '%s'", app.config.GuildID, user.User.ID, app.config.NormalRole)
+			err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
+			if err != nil {
+				log.Print(err)
+			}
+		}
+	}
+	log.Print("Done updating users")
+
 	ticker := time.NewTicker(time.Minute * time.Duration(app.config.Heartbeat))
 	for t := range ticker.C {
 		app.onHeartbeat(t)
 	}
+
 	app.ready <- true
 }
 
@@ -139,6 +160,30 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 
 		if primary {
 			app.HandleChannelMessage(*message)
+		}
+	}
+}
+
+func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
+	verified, err := app.IsUserVerified(event.Member.User.ID)
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.NormalRole)
+	if err != nil {
+		log.Print(err)
+	}
+
+	if !verified {
+		ch, err := s.UserChannelCreate(event.Member.User.ID)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		_, err = app.discordClient.ChannelMessageSend(ch.ID, app.locale.GetLangString("en", "AskUserVerify"))
+		if err != nil {
+			log.Print(err)
 		}
 	}
 }

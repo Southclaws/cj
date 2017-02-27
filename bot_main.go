@@ -25,6 +25,7 @@ type Config struct {
 	BotID            string `json:"bot_id"`             // the bot's client ID
 	GuildID          string `json:"guild_id"`           // the discord channel ID
 	VerifiedRole     string `json:"verified_role"`      // ID of the role for verified members
+	NormalRole       string `json:"normal_role"`        // role assigned to all users automatically
 	DebugLogs        bool   `json:"debug_logs"`         // debug logging
 	DebugUser        string `json:"debug_user"`         // when set, only accept commands from this user
 	Admin            string `json:"admin"`              // user who has control over the bot
@@ -89,11 +90,15 @@ func main() {
 	log.Printf("- PrimaryChannel: %v\n", app.config.PrimaryChannel)
 	log.Printf("- Heartbeat: %v\n", app.config.Heartbeat)
 	log.Printf("- BotID: %v\n", app.config.BotID)
+	log.Printf("- GuildID: %s\n", app.config.GuildID)
+	log.Printf("- VerifiedRole: %s\n", app.config.VerifiedRole)
+	log.Printf("- NormalRole: %s\n", app.config.NormalRole)
 	log.Printf("- DebugLogs: %v\n", app.config.DebugLogs)
 	log.Printf("- DebugUser: %v\n", app.config.DebugUser)
 	log.Printf("- Admin: %v\n", app.config.Admin)
 	log.Printf("- LogFlushAt: %v\n", app.config.LogFlushAt)
 	log.Printf("- LogFlushInterval: %v\n", app.config.LogFlushInterval)
+
 	log.Printf("~\n")
 
 	app.ConnectDB(dbLocation)
