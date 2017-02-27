@@ -19,7 +19,11 @@ type Language struct {
 
 // GetLangString returns a text body based on language ID and key.
 func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) string {
-	return fmt.Sprintf(l.Languages[lang].Strings[key], vargs...)
+	str := fmt.Sprintf(l.Languages[lang].Strings[key], vargs...)
+	if str == "" {
+		log.Printf("ERROR: undefined lang key: '%s'", key)
+	}
+	return str
 }
 
 func (app *App) loadLanguages() {
