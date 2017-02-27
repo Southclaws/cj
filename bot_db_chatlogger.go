@@ -41,11 +41,6 @@ func (cl *ChatLogger) RecordChatLog(discordUserID string, discordChannel string,
 		message,
 	}
 
-	log.Print(record)
-	log.Printf("cl %p", cl)
-	log.Printf("ap %p", cl.app)
-	log.Printf("aq %p", cl.app.queue)
-
 	cl.app.queue.Add(record)
 
 	if cl.app.queue.Len() >= cl.app.config.LogFlushAt {
@@ -56,7 +51,6 @@ func (cl *ChatLogger) RecordChatLog(discordUserID string, discordChannel string,
 }
 
 func (cl *ChatLogger) flushTicker() {
-	log.Print(cl.app.config.LogFlushInterval)
 	t := time.NewTicker(time.Minute * time.Duration(cl.app.config.LogFlushInterval))
 	for range t.C {
 		cl.flushChatLogs()
