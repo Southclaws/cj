@@ -45,13 +45,13 @@ func (app *App) connect() error {
 
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	debug("discord ready")
-	app.ready <- true
 
 	found := false
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	for _, role := range roles {
 		if role.ID == app.config.VerifiedRole {
 			found = true
@@ -59,7 +59,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		}
 	}
 	if !found {
-		log.Print("verified role ID was not found in guild role list:")
+		log.Printf("verified role ID '%s' was not found in guild role list:", app.config.VerifiedRole)
 		for _, role := range roles {
 			log.Printf("name: %s id: %s", role.Name, role.ID)
 		}
@@ -70,6 +70,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	for t := range ticker.C {
 		app.onHeartbeat(t)
 	}
+	app.ready <- true
 }
 
 func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
