@@ -58,7 +58,7 @@ func (app App) GetDiscordUserForumUser(forumUserID string) (string, error) {
 	return user.DiscordUserID, nil
 }
 
-// GetForumUserFromDiscordUser returns a discord user, a blank string or an error
+// GetForumUserFromDiscordUser returns a link to user's profile, a blank string or an error
 func (app App) GetForumUserFromDiscordUser(discordUserID string) (string, error) {
 	var user User
 
@@ -68,4 +68,16 @@ func (app App) GetForumUserFromDiscordUser(discordUserID string) (string, error)
 	}
 
 	return user.ForumUserID, nil
+}
+
+// GetForumNameFromDiscordUser returns user's name on SA-MP Forums, a blank string or an error
+func (app App) GetForumNameFromDiscordUser(discordUserID string) (string, error) {
+	var user User
+
+	err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
+	if err != nil {
+		return "", err
+	}
+
+	return user.ForumUserName, nil
 }
