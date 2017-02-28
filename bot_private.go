@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -21,6 +23,9 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 	var err error
 
 	verified, err := app.IsUserVerified(message.Author.ID)
+
+	// Convert incoming commands to lowercase.
+	message.Content = strings.ToLower(message.Content)
 
 	if verified {
 		if message.Content == "kill" {
