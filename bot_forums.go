@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"strconv"
@@ -32,17 +31,8 @@ type VisitorMessage struct {
 func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 	var err error
 	var result UserProfile
-	var req *http.Request
-	var response *http.Response
 
-	if req, err = http.NewRequest("GET", url, nil); err != nil {
-		return result, err
-	}
-	if response, err = app.httpClient.Do(req); err != nil {
-		return result, err
-	}
-
-	root, err := xmlpath.ParseHTML(response.Body)
+	root, err := app.GetHTMLRoot(url)
 	if err != nil {
 		return result, err
 	}
@@ -124,29 +114,39 @@ func (app App) getTotalPosts(root *xmlpath.Node) (string, error) {
 
 // getTotalPosts returns the user total posts
 func (app App) getReputation(forumUserID string) (int, error) {
-	document, ok := app.GetHTMLDocument(fmt.Sprintf("http://forum.sa-mp.com/search.php?do=finduser&u=%s", forumUserID))
-	if !ok {
+	root, err := app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/search.php?do=finduser&u=%s", forumUserID))
+	if err != nil {
 		return 0, fmt.Errorf("cannot get user's posts")
 	}
 
+	path := xmlpath.MustCompile(`//td[@class="alt1"]/div[@class="alt2"]/div/em/a/@href`)
+
 	// Get the first post from the list.
-	href := document.Find(`td[class="alt1"] > div[class="alt2"] > div > em > a`).AttrOr("href", "")
-
-	// If we have a valid post, search in it for user's reputation.
-	if len(href) > 0 {
-		document, ok := app.GetHTMLDocument(fmt.Sprintf("http://forum.sa-mp.com/%s", href))
-		if !ok {
-			return 0, fmt.Errorf("cannot get user's post in a topic")
-		}
-
-		// Get the table for that post.
-		reputation := document.Find(fmt.Sprintf(`table[id="%s"] > tbody > tr[valign="top"] > td[class="alt2"] > div`, strings.Split(href, "#")[1]))
-
-		// Get "div" with index "4" from "td[class="alt2"]" and then get the "div" for reputation.
-		return strconv.Atoi(strings.TrimPrefix(reputation.Eq(4).Find("div").Eq(2).Text(), "Reputation: "))
+	href, ok := path.String(root)
+	if !ok {
+		return 0, fmt.Errorf("cannot get user posts")
 	}
 
-	return 0, fmt.Errorf("cannot find a valid post for %s", forumUserID)
+	// If we have a valid post, search in it for user's reputation.
+	root, err = app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/%s", href))
+	if err != nil {
+		return 0, fmt.Errorf("cannot get user's post in a topic")
+	}
+
+	path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/div[5]/div[3]`, strings.Split(href, "#")[1]))
+
+	// Get the table for that post.
+	reputation, ok := path.String(root)
+	if !ok {
+		return 0, fmt.Errorf("cannot get reputation field from post")
+	}
+
+	result, err := strconv.Atoi(strings.TrimPrefix(reputation, "Reputation: "))
+	if err != nil {
+		return 0, fmt.Errorf("cannot convert reputation to integer")
+	}
+
+	return result, nil
 }
 
 // getUserBio returns the bio text.

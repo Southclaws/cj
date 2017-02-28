@@ -1,31 +1,27 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
-	"github.com/PuerkitoBio/goquery"
+	xmlpath "gopkg.in/xmlpath.v2"
 )
 
-// GetHTMLDocument returns page content as goquery.Document
-func (app App) GetHTMLDocument(url string) (*goquery.Document, bool) {
+// GetHTMLRoot returns page content as goquery.Document
+func (app App) GetHTMLRoot(url string) (*xmlpath.Node, error) {
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Printf("NewRequest error: %s", err.Error())
-		return nil, false
+		return nil, err
 	}
 
 	response, err := app.httpClient.Do(request)
 	if err != nil {
-		log.Printf("httpClient.Do error: %s", err.Error())
-		return nil, false
+		return nil, err
 	}
 
-	document, err := goquery.NewDocumentFromReader(response.Body)
+	root, err := xmlpath.ParseHTML(response.Body)
 	if err != nil {
-		log.Printf("NewDocumentFromReader error: %s", err.Error())
-		return nil, false
+		return nil, err
 	}
 
-	return document, true
+	return root, nil
 }
