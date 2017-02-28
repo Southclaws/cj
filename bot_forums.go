@@ -5,12 +5,17 @@ import (
 	"net/http"
 	"strings"
 
+	"strconv"
+
 	"gopkg.in/xmlpath.v2"
 )
 
 // UserProfile stores data available on a user's profile page
 type UserProfile struct {
 	UserName        string
+	JoinDate        string
+	TotalPosts      string
+	Reputation      int
 	BioText         string
 	VisitorMessages []VisitorMessage
 	Errors          []error
@@ -47,6 +52,21 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 		return result, fmt.Errorf("url did not lead to a valid user page")
 	}
 
+	result.JoinDate, err = app.getJoinDate(root)
+	if err != nil {
+		result.Errors = append(result.Errors, err)
+	}
+
+	result.TotalPosts, err = app.getTotalPosts(root)
+	if err != nil {
+		result.Errors = append(result.Errors, err)
+	}
+
+	result.Reputation, err = app.getReputation(strings.TrimPrefix(url, "http://forum.sa-mp.com/member.php?u="))
+	if err != nil {
+		result.Errors = append(result.Errors, err)
+	}
+
 	result.BioText, err = app.getUserBio(root)
 	if err != nil {
 		result.Errors = append(result.Errors, err)
@@ -72,6 +92,61 @@ func (app App) getUserName(root *xmlpath.Node) (string, error) {
 	}
 
 	return strings.Trim(result, "\n "), nil
+}
+
+// getJoinDate returns the user join date
+func (app App) getJoinDate(root *xmlpath.Node) (string, error) {
+	var result string
+
+	path := xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[3]/ul/li[2]`)
+
+	result, ok := path.String(root)
+	if !ok {
+		return result, fmt.Errorf("user name xmlpath did not return a result")
+	}
+
+	return strings.TrimPrefix(result, "Join Date: "), nil
+}
+
+// getTotalPosts returns the user total posts
+func (app App) getTotalPosts(root *xmlpath.Node) (string, error) {
+	var result string
+
+	path := xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[1]/ul/li[1]`)
+
+	result, ok := path.String(root)
+	if !ok {
+		return result, fmt.Errorf("user name xmlpath did not return a result")
+	}
+
+	return strings.TrimPrefix(result, "Total Posts: "), nil
+}
+
+// getTotalPosts returns the user total posts
+func (app App) getReputation(forumUserID string) (int, error) {
+	document, ok := app.GetHTMLDocument(fmt.Sprintf("http://forum.sa-mp.com/search.php?do=finduser&u=%s", forumUserID))
+	if !ok {
+		return 0, fmt.Errorf("cannot get user's posts")
+	}
+
+	// Get the first post from the list.
+	href := document.Find(`td[class="alt1"] > div[class="alt2"] > div > em > a`).AttrOr("href", "")
+
+	// If we have a valid post, search in it for user's reputation.
+	if len(href) > 0 {
+		document, ok := app.GetHTMLDocument(fmt.Sprintf("http://forum.sa-mp.com/%s", href))
+		if !ok {
+			return 0, fmt.Errorf("cannot get user's post in a topic")
+		}
+
+		// Get the table for that post.
+		reputation := document.Find(fmt.Sprintf(`table[id="%s"] > tbody > tr[valign="top"] > td[class="alt2"] > div`, strings.Split(href, "#")[1]))
+
+		// Get "div" with index "4" from "td[class="alt2"]" and then get the "div" for reputation.
+		return strconv.Atoi(strings.TrimPrefix(reputation.Eq(4).Find("div").Eq(2).Text(), "Reputation: "))
+	}
+
+	return 0, fmt.Errorf("cannot find a valid post for %s", forumUserID)
 }
 
 // getUserBio returns the bio text.
