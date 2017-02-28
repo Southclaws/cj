@@ -17,7 +17,20 @@ func TestApp_StoreVerifiedUser(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"valid", app, args{Verification{discordUser: discordgo.User{ID: "86435690711093248"}, forumUser: "http://forum.sa-mp.com/member.php?u=50199"}}, false},
+		{
+			"valid", app, args{
+				Verification{
+					discordUser: discordgo.User{
+						ID: "86435690711093248",
+					},
+					forumUser: "http://forum.sa-mp.com/member.php?u=50199",
+					userProfile: UserProfile{
+						UserName: "[HLF]Southclaw",
+					},
+				},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -105,6 +118,34 @@ func TestApp_IsUserVerified(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("App.IsUserVerified() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestApp_GetForumNameFromDiscordUser(t *testing.T) {
+	type args struct {
+		discordUserID string
+	}
+	tests := []struct {
+		name    string
+		app     App
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"valid", app, args{"86435690711093248"}, "[HLF]Southclaw", false},
+		{"invalid", app, args{"86435690711099948"}, "", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.app.GetForumNameFromDiscordUser(tt.args.discordUserID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("App.GetForumNameFromDiscordUser() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("App.GetForumNameFromDiscordUser() = %v, want %v", got, tt.want)
 			}
 		})
 	}
