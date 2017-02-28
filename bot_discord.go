@@ -1,12 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"time"
-
-	"net/http"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -103,54 +99,43 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		return
 	}
 
-	message := event.Message
-	administrative := false
-	primary := false
-	private := false
-
-	if message.ChannelID == app.config.AdministrativeChannel {
-		administrative = true
-	} else if message.ChannelID == app.config.PrimaryChannel {
-		primary = true
-	} else {
-		// discordgo has not implemented private channel objects (DM Channels)
-		// so we have to perform the request manually and unmarshal the response
-		// object into a `ChannelDM` object.
-		var err error
-		var req *http.Request
-		var response *http.Response
-		var body []byte
-		if req, err = http.NewRequest("GET", discordgo.EndpointChannel(message.ChannelID), nil); err != nil {
-			log.Print(err)
-		}
-		req.Header.Add("Authorization", "Bot "+app.config.DiscordToken)
-		if response, err = app.httpClient.Do(req); err != nil {
-			log.Print(err)
-		}
-		if body, err = ioutil.ReadAll(response.Body); err != nil {
-			log.Print(err)
-		}
-		channel := ChannelDM{}
-		json.Unmarshal(body, &channel)
-
-		// Now we have one of these:
-		// https://discordapp.com/developers/docs/resources/channel#dm-channel-object
-
-		if channel.Private {
-			private = true
+	if app.config.DebugUser != "" {
+		if event.Message.Author.ID != app.config.DebugUser {
+			debug("[private:HandlePrivateMessage] app.config.DebugUser non-empty, user ID does not match app.config.DebugUser")
+			return
 		}
 	}
 
-	debug("private: %v primary %v", private, primary)
+	message := event.Message
 
-	if private {
+	_, source, errors := app.commandManager.Process(event.Message.Content, event.Message.ChannelID)
+
+	if errors != nil {
+		for _, e := range errors {
+			log.Print(e)
+		}
+	}
+
+	if source == CommandSourcePRIVATE {
 		err := app.HandlePrivateMessage(*message)
 		if err != nil {
 			log.Print(err)
 		}
+	} else if source == CommandSourceADMINISTRATIVE {
+		err := app.HandleAdministrativeMessage(*message)
+		if err != nil {
+			log.Print(err)
+		}
+	} else if source == CommandSourcePRIMARY {
+		err := app.HandleChannelMessage(*message)
+		if err != nil {
+			log.Print(err)
+		}
 	} else {
-		log.Printf("%p", app.chatLogger)
-		app.chatLogger.RecordChatLog(message.Author.ID, message.ChannelID, message.Content)
+		err := app.chatLogger.RecordChatLog(message.Author.ID, message.ChannelID, message.Content)
+		if err != nil {
+			log.Print(err)
+		}
 
 		for i := range message.Mentions {
 			if message.Mentions[i].ID == app.config.BotID {
@@ -159,12 +144,6 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 					log.Print(err)
 				}
 			}
-		}
-
-		if administrative {
-			app.HandleAdministrativeMessage(*message)
-		} else if primary {
-			app.HandleChannelMessage(*message)
 		}
 	}
 }

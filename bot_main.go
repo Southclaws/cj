@@ -36,16 +36,17 @@ type Config struct {
 
 // App stores program state
 type App struct {
-	config        Config
-	discordClient *discordgo.Session
-	httpClient    *http.Client
-	ready         chan bool
-	cache         *gocache.Cache
-	queue         *fifo.Queue
-	locale        Locale
-	chatLogger    *ChatLogger
-	db            *gorm.DB
-	done          chan bool
+	config         Config
+	discordClient  *discordgo.Session
+	httpClient     *http.Client
+	ready          chan bool
+	cache          *gocache.Cache
+	queue          *fifo.Queue
+	locale         Locale
+	chatLogger     *ChatLogger
+	commandManager *CommandManager
+	db             *gorm.DB
+	done           chan bool
 }
 
 func main() {
@@ -106,6 +107,7 @@ func main() {
 	app.ConnectDB(dbLocation)
 	app.StartChatLogger()
 	app.loadLanguages()
+	app.StartCommandManager()
 
 	var count int
 	app.db.Model(&User{}).Count(&count)

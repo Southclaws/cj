@@ -13,13 +13,6 @@ import (
 func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 	debug("[private:HandlePrivateMessage] message '%s'", message.Content)
 
-	if app.config.DebugUser != "" {
-		if message.Author.ID != app.config.DebugUser {
-			debug("[private:HandlePrivateMessage] app.config.Debug true, user ID does not match app.config.DebugUser")
-			return nil
-		}
-	}
-
 	var err error
 
 	verified, err := app.IsUserVerified(message.Author.ID)
@@ -36,9 +29,6 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 		} else if message.Content == "verify" {
 			_, err = app.discordClient.ChannelMessageSend(message.ChannelID, "You are already verified! If you are experiencing problems with the bot or verification, please contact an admin.")
 		}
-
-		// todo: build command system for verified users and Discord admins.
-
 	} else {
 		if message.Content == "verify" {
 			err = app.UserStartsVerification(message)
