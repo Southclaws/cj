@@ -3,8 +3,6 @@ package main
 import (
 	"strings"
 
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -21,18 +19,18 @@ func (app App) HandleChannelMessage(message discordgo.Message) error {
 		case "/whois":
 			// Check if we have some parameter for the command, if not show usage message.
 			if len(command) == 1 {
-				app.discordClient.ChannelMessageSend(message.ChannelID, "Command: **/whois [user(s)]**\nDescription: Get username on SA-MP Forums.\nExample: */whois @Southclaws#1657*")
+				app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString("en", "CommandWhoisUsage"))
 			} else {
 				for _, user := range message.Mentions {
 					verified, _ := app.IsUserVerified(user.ID)
 
 					if verified == false {
-						app.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf("<@%s> is not verified.", user.ID))
+						app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString("en", "CommandWhoisNotVerified", user.ID))
 					} else {
 						username, _ := app.GetForumNameFromDiscordUser(user.ID)
 						link, _ := app.GetForumUserFromDiscordUser(user.ID)
 
-						app.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums.", user.ID, username, link))
+						app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link))
 					}
 				}
 			}

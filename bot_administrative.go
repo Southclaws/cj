@@ -19,7 +19,7 @@ func (app App) HandleAdministrativeMessage(message discordgo.Message) error {
 		case "/say":
 			// Check if we have some parameter for the command, if not show usage message.
 			if len(command) == 1 {
-				app.discordClient.ChannelMessageSend(message.ChannelID, "Command: **/say [text]**\nDescription: Say something as CJ.\nExample: */say Hello!*")
+				app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString("en", "CommandSayUsage"))
 			} else {
 				// Remove the command from message (+ space) and send it to app.config.PrimaryChannel.
 				app.discordClient.ChannelMessageSend(app.config.PrimaryChannel, message.Content[len(command[0]):len(message.Content)])
