@@ -27,7 +27,7 @@ func (app App) HandleChannelMessage(message discordgo.Message) error {
 					verified, _ := app.IsUserVerified(user.ID)
 
 					if verified == false {
-						app.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf("<@%s> is not verified.", user.Username))
+						app.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf("<@%s> is not verified.", user.ID))
 					} else {
 						username, _ := app.GetForumNameFromDiscordUser(user.ID)
 						app.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf("<@%s> is **%s** on SA-MP forums.", user.ID, username))
