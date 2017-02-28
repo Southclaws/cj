@@ -41,6 +41,34 @@ func TestApp_StoreVerifiedUser(t *testing.T) {
 	}
 }
 
+func TestApp_IsUserVerified(t *testing.T) {
+	type args struct {
+		discordUserID string
+	}
+	tests := []struct {
+		name    string
+		app     App
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{"exists", app, args{"86435690711093248"}, true, false},
+		{"not exists", app, args{"12335690711093248"}, false, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.app.IsUserVerified(tt.args.discordUserID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("App.IsUserVerified() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("App.IsUserVerified() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestApp_GetDiscordUserForumUser(t *testing.T) {
 	type args struct {
 		forumUserID string
@@ -90,34 +118,6 @@ func TestApp_GetForumUserFromDiscordUser(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("App.GetForumUserFromDiscordUser() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestApp_IsUserVerified(t *testing.T) {
-	type args struct {
-		discordUserID string
-	}
-	tests := []struct {
-		name    string
-		app     App
-		args    args
-		want    bool
-		wantErr bool
-	}{
-		{"exists", app, args{"86435690711093248"}, true, false},
-		{"not exists", app, args{"12335690711093248"}, false, false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.app.IsUserVerified(tt.args.discordUserID)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("App.IsUserVerified() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("App.IsUserVerified() = %v, want %v", got, tt.want)
 			}
 		})
 	}

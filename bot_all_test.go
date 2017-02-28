@@ -29,6 +29,7 @@ func TestMain(m *testing.M) {
 
 	app.LoadConfig(configLocation)
 	app.ConnectDB(dbLocation)
+	app.loadLanguages()
 
 	log.Print("initialised.")
 

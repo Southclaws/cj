@@ -75,3 +75,5 @@ func (cl *ChatLogger) flushChatLogs() {
 	tx.Commit()
 	return
 }
+
+// TODO: getters in order to run tests
