@@ -1,0 +1,3 @@
+Command: **/whois [user(s)]**
+Description: Get username on SA-MP Forums.
+Example: */whois @Southclaws#1657*

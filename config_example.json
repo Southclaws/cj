@@ -1,6 +1,7 @@
 {
     "discord_token": "discord API token",
-    "primary_channel": "channel",
+    "administrative_channel": "channel_id",
+    "primary_channel": "channel_id",
     "heartbeat": 10,
     "bot_id": "bot discord client id",
     "debug": true,

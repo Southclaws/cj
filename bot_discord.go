@@ -104,10 +104,13 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	}
 
 	message := event.Message
+	administrative := false
 	primary := false
 	private := false
 
-	if message.ChannelID == app.config.PrimaryChannel {
+	if message.ChannelID == app.config.AdministrativeChannel {
+		administrative = true
+	} else if message.ChannelID == app.config.PrimaryChannel {
 		primary = true
 	} else {
 		// discordgo has not implemented private channel objects (DM Channels)
@@ -158,7 +161,9 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 			}
 		}
 
-		if primary {
+		if administrative {
+			app.HandleAdministrativeMessage(*message)
+		} else if primary {
 			app.HandleChannelMessage(*message)
 		}
 	}
