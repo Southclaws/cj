@@ -42,7 +42,7 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 		return result, fmt.Errorf("url did not lead to a valid user page")
 	}
 
-	result.JoinDate, err = app.getJoinDate(root)
+	result.JoinDate, err = app.getJoinDate(root, true)
 	if err != nil {
 		result.Errors = append(result.Errors, err)
 	}
@@ -85,14 +85,24 @@ func (app App) getUserName(root *xmlpath.Node) (string, error) {
 }
 
 // getJoinDate returns the user join date
-func (app App) getJoinDate(root *xmlpath.Node) (string, error) {
+func (app App) getJoinDate(root *xmlpath.Node, visitorMessages bool) (string, error) {
+	var path *xmlpath.Path
 	var result string
 
-	path := xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[3]/ul/li[2]`)
+	if visitorMessages {
+		path = xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[3]/ul/li[2]`)
+	} else {
+		path = xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[2]/ul/li[2]`)
+	}
 
 	result, ok := path.String(root)
 	if !ok {
-		return result, fmt.Errorf("user name xmlpath did not return a result")
+		// If we didn't found anything, search again for his join date but this time don't count "Visitor Messages" fieldset.
+		if visitorMessages {
+			return app.getJoinDate(root, false)
+		}
+
+		return result, fmt.Errorf("join date xmlpath did not return a result")
 	}
 
 	return strings.TrimPrefix(result, "Join Date: "), nil
@@ -106,7 +116,7 @@ func (app App) getTotalPosts(root *xmlpath.Node) (string, error) {
 
 	result, ok := path.String(root)
 	if !ok {
-		return result, fmt.Errorf("user name xmlpath did not return a result")
+		return result, fmt.Errorf("total posts xmlpath did not return a result")
 	}
 
 	return strings.TrimPrefix(result, "Total Posts: "), nil
