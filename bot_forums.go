@@ -52,7 +52,7 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 		result.Errors = append(result.Errors, err)
 	}
 
-	result.Reputation, err = app.getReputation(strings.TrimPrefix(url, "http://forum.sa-mp.com/member.php?u="))
+	result.Reputation, err = app.getReputation(strings.TrimPrefix(url, "http://forum.sa-mp.com/member.php?u="), true)
 	if err != nil {
 		result.Errors = append(result.Errors, err)
 	}
@@ -123,7 +123,7 @@ func (app App) getTotalPosts(root *xmlpath.Node) (string, error) {
 }
 
 // getTotalPosts returns the user total posts
-func (app App) getReputation(forumUserID string) (int, error) {
+func (app App) getReputation(forumUserID string, hasAvatar bool) (int, error) {
 	root, err := app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/search.php?do=finduser&u=%s", forumUserID))
 	if err != nil {
 		return 0, fmt.Errorf("cannot get user's posts")
@@ -143,11 +143,20 @@ func (app App) getReputation(forumUserID string) (int, error) {
 		return 0, fmt.Errorf("cannot get user's post in a topic")
 	}
 
-	path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/div[5]/div[3]`, strings.Split(href, "#")[1]))
+	if hasAvatar {
+		path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/div[5]/div[3]`, strings.Split(href, "#")[1]))
+	} else {
+		path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/div[4]/div[3]`, strings.Split(href, "#")[1]))
+	}
 
 	// Get the table for that post.
 	reputation, ok := path.String(root)
 	if !ok {
+		// If we didn't found anything, search again for his reputation but this time don't count "Avatar" div.
+		if hasAvatar {
+			return app.getReputation(forumUserID, false)
+		}
+
 		return 0, fmt.Errorf("cannot get reputation field from post")
 	}
 
