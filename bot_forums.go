@@ -6,6 +6,7 @@ import (
 
 	"strconv"
 
+	gocache "github.com/patrickmn/go-cache"
 	"gopkg.in/xmlpath.v2"
 )
 
@@ -29,42 +30,54 @@ type VisitorMessage struct {
 // GetUserProfilePage does a HTTP GET on the user's profile page then extracts
 // structured information from it.
 func (app App) GetUserProfilePage(url string) (UserProfile, error) {
-	var err error
 	var result UserProfile
 
-	root, err := app.GetHTMLRoot(url)
-	if err != nil {
-		return result, err
-	}
+	cachedProfile, found := app.cache.Get(url)
+	if found {
+		result = *(cachedProfile.(*UserProfile))
+	} else {
+		root, err := app.GetHTMLRoot(url)
+		if err != nil {
+			return result, err
+		}
 
-	result.UserName, err = app.getUserName(root)
-	if err != nil {
-		return result, fmt.Errorf("url did not lead to a valid user page")
-	}
+		result.UserName, err = app.getUserName(root)
+		if err != nil {
+			return result, fmt.Errorf("url did not lead to a valid user page")
+		}
 
-	result.JoinDate, err = app.getJoinDate(root, true)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
-	}
+		result.JoinDate, err = app.getJoinDate(root, true)
+		if err != nil {
+			result.Errors = append(result.Errors, err)
+		}
 
-	result.TotalPosts, err = app.getTotalPosts(root)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
-	}
+		result.TotalPosts, err = app.getTotalPosts(root)
+		if err != nil {
+			result.Errors = append(result.Errors, err)
+		}
 
-	result.Reputation, err = app.getReputation(strings.TrimPrefix(url, "http://forum.sa-mp.com/member.php?u="), true)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
-	}
+		result.Reputation, err = app.getReputation(strings.TrimPrefix(url, "http://forum.sa-mp.com/member.php?u="), true)
+		if err != nil {
+			result.Errors = append(result.Errors, err)
+		}
 
-	result.BioText, err = app.getUserBio(root)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
-	}
+		result.BioText, err = app.getUserBio(root)
+		if err != nil {
+			result.Errors = append(result.Errors, err)
+		}
 
-	result.VisitorMessages, err = app.getFirstTenUserVisitorMessages(root)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
+		result.VisitorMessages, err = app.getFirstTenUserVisitorMessages(root)
+		if err != nil {
+			result.Errors = append(result.Errors, err)
+		}
+
+		discordID, _ := app.GetDiscordUserForumUser(url)
+		verified, _ := app.IsUserVerified(discordID)
+
+		// Store the user profile in cache if the user is verified.
+		if verified {
+			app.cache.Set(url, &result, gocache.DefaultExpiration)
+		}
 	}
 
 	return result, nil
