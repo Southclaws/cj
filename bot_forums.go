@@ -85,11 +85,11 @@ func (app App) getUserName(root *xmlpath.Node) (string, error) {
 }
 
 // getJoinDate returns the user join date
-func (app App) getJoinDate(root *xmlpath.Node, visitorMessages bool) (string, error) {
+func (app App) getJoinDate(root *xmlpath.Node, hasVisitorMessages bool) (string, error) {
 	var path *xmlpath.Path
 	var result string
 
-	if visitorMessages {
+	if hasVisitorMessages {
 		path = xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[3]/ul/li[2]`)
 	} else {
 		path = xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[2]/ul/li[2]`)
@@ -98,7 +98,7 @@ func (app App) getJoinDate(root *xmlpath.Node, visitorMessages bool) (string, er
 	result, ok := path.String(root)
 	if !ok {
 		// If we didn't found anything, search again for his join date but this time don't count "Visitor Messages" fieldset.
-		if visitorMessages {
+		if hasVisitorMessages {
 			return app.getJoinDate(root, false)
 		}
 
