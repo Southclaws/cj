@@ -106,40 +106,27 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		}
 	}
 
-	message := event.Message
-
 	_, source, errors := app.commandManager.Process(event.Message.Content, event.Message.ChannelID)
-
 	if errors != nil {
 		for _, e := range errors {
 			log.Print(e)
 		}
 	}
 
+	// temporary
 	if source == CommandSourcePRIVATE {
-		err := app.HandlePrivateMessage(*message)
-		if err != nil {
-			log.Print(err)
-		}
-	} else if source == CommandSourceADMINISTRATIVE {
-		err := app.HandleAdministrativeMessage(*message)
-		if err != nil {
-			log.Print(err)
-		}
-	} else if source == CommandSourcePRIMARY {
-		err := app.HandleChannelMessage(*message)
-		if err != nil {
-			log.Print(err)
-		}
-	} else {
-		err := app.chatLogger.RecordChatLog(message.Author.ID, message.ChannelID, message.Content)
+		app.HandlePrivateMessage(*event.Message)
+	}
+
+	if source != CommandSourcePRIVATE && source != CommandSourceADMINISTRATIVE {
+		err := app.chatLogger.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
 		if err != nil {
 			log.Print(err)
 		}
 
-		for i := range message.Mentions {
-			if message.Mentions[i].ID == app.config.BotID {
-				err := app.HandleSummon(*message)
+		for i := range event.Message.Mentions {
+			if event.Message.Mentions[i].ID == app.config.BotID {
+				err := app.HandleSummon(*event.Message)
 				if err != nil {
 					log.Print(err)
 				}

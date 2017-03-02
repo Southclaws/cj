@@ -22,6 +22,14 @@ func LoadCommands() map[string]Command {
 			RequireVerified: false,
 			RequireAdmin:    false,
 		},
+		"say": {
+			Function:        commandSay,
+			Source:          CommandSourcePRIVATE,
+			Description:     "Verify you are the owner of a SA:MP forum account",
+			Usage:           "verify",
+			RequireVerified: false,
+			RequireAdmin:    false,
+		},
 	}
 }
 
@@ -53,7 +61,8 @@ type CommandManager struct {
 
 // Command represents a public, private or administrative command
 type Command struct {
-	Function        func(cmdtext string, channel string) error
+	commandManager  *CommandManager
+	Function        func(cm CommandManager, cmdtext string, channel string) error
 	Source          CommandSource
 	Description     string
 	Usage           string
@@ -76,6 +85,7 @@ func (app *App) StartCommandManager() {
 func (cm CommandManager) Process(cmdtext string, channel string) (exists bool, source CommandSource, errs []error) {
 	commandAndParameters := strings.SplitN(cmdtext, " ", 1)
 	commandObject, exists := cm.Commands[strings.ToLower(commandAndParameters[0])]
+	commandObject.commandManager = &cm
 
 	if !exists {
 		return exists, source, nil
@@ -84,7 +94,17 @@ func (cm CommandManager) Process(cmdtext string, channel string) (exists bool, s
 	source = cm.getCommandSource(cmdtext, channel)
 
 	if source == commandObject.Source {
-		errs = append(errs, commandObject.Function(commandAndParameters[1], channel))
+		switch source {
+		case CommandSourceADMINISTRATIVE:
+			if channel != cm.App.config.AdministrativeChannel {
+				return exists, source, errs
+			}
+		case CommandSourcePRIMARY:
+			if channel != cm.App.config.PrimaryChannel {
+				return exists, source, errs
+			}
+		}
+		errs = append(errs, commandObject.Function(cm, commandAndParameters[1], channel))
 	}
 
 	return exists, source, errs
