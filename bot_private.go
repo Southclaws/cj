@@ -15,31 +15,8 @@ func (app *App) HandlePrivateMessage(message discordgo.Message) error {
 
 	var err error
 
-	verified, err := app.IsUserVerified(message.Author.ID)
-
 	// Convert incoming commands to lowercase.
 	message.Content = strings.ToLower(message.Content)
-
-	if verified {
-		if message.Content == "kill" {
-			if message.Author.ID == app.config.Admin {
-				debug("[private:HandlePrivateMessage] kill signal received from '%s'", message.Author.ID)
-				app.done <- true
-			}
-		} else if message.Content == "verify" {
-			_, err = app.discordClient.ChannelMessageSend(message.ChannelID, "You are already verified! If you are experiencing problems with the bot or verification, please contact an admin.")
-		}
-	} else {
-		if message.Content == "verify" {
-			err = app.UserStartsVerification(message)
-		} else if message.Content == "done" {
-			err = app.UserConfirmsProfile(message)
-		} else if message.Content == "cancel" {
-			err = app.UserCancelsVerification(message)
-		} else {
-			err = app.UserProvidesProfileURL(message)
-		}
-	}
 
 	if err != nil {
 		log.Printf("HandlePrivateMessage caused an error: %s", err)
