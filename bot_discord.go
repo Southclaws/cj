@@ -109,14 +109,15 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	_, source, errors := app.commandManager.Process(*event.Message)
 	if errors != nil {
 		for _, e := range errors {
-			log.Print(e)
+			if e != nil {
+				log.Print(e)
+				e = app.WarnUserError(event.Message.ChannelID, e.Error())
+				if e != nil {
+					log.Print(e)
+				}
+			}
 		}
 	}
-
-	// // temporary
-	// if source == CommandSourcePRIVATE {
-	// 	app.HandlePrivateMessage(*event.Message)
-	// }
 
 	if source != CommandSourcePRIVATE && source != CommandSourceADMINISTRATIVE {
 		err := app.chatLogger.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)

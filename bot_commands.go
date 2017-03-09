@@ -14,7 +14,7 @@ import (
 
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
-func LoadCommands() map[string]Command {
+func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
 		"verify": {
 			Function:        commandVerify,
@@ -27,10 +27,19 @@ func LoadCommands() map[string]Command {
 		},
 		"say": {
 			Function:        commandSay,
-			Source:          CommandSourcePRIVATE,
+			Source:          CommandSourcePRIMARY,
 			Description:     "Verify you are the owner of a SA:MP forum account",
 			Usage:           "say",
 			RequireVerified: false,
+			RequireAdmin:    false,
+			Context:         false,
+		},
+		"whois": {
+			Function:        commandWhois,
+			Source:          CommandSourcePRIMARY,
+			Description:     app.locale.GetLangString("en", "CommandWhoisUsage"),
+			Usage:           "whois",
+			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
 		},
@@ -67,7 +76,7 @@ type CommandManager struct {
 // Command represents a public, private or administrative command
 type Command struct {
 	commandManager  *CommandManager
-	Function        func(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, error)
+	Function        func(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error)
 	Source          CommandSource
 	Description     string
 	Usage           string
@@ -84,7 +93,7 @@ func (app *App) StartCommandManager() {
 		Contexts: gocache.New(5*time.Minute, 30*time.Second),
 	}
 
-	app.commandManager.Commands = LoadCommands()
+	app.commandManager.Commands = LoadCommands(app)
 }
 
 // Process is called on a command string to check whether it's a valid command
@@ -99,8 +108,8 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		contextCommand := contextCommand.(Command)
 		debug("[commands:Process] User is currently in context of command '%s'", contextCommand.Usage)
 		if contextCommand.Source == source {
-			success, errs := cm.ProcessContext(contextCommand, message.Content, message)
-			if success {
+			continueContext, errs := cm.ProcessContext(contextCommand, message.Content, message)
+			if !continueContext {
 				cm.Contexts.Delete(message.Author.ID)
 			}
 			return true, source, errs
@@ -137,12 +146,14 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 
-		if commandObject.Context {
-			debug("[commands:Process] command is contextual, placing user in context")
-			cm.Contexts.Set(message.Author.ID, commandObject, gocache.DefaultExpiration)
-		}
-		success, e := commandObject.Function(cm, commandArgument, message, false)
+		success, enterContext, e := commandObject.Function(cm, commandArgument, message, false)
 		errs = append(errs, e)
+		if enterContext {
+			if commandObject.Context {
+				debug("[commands:Process] command is contextual, placing user in context")
+				cm.Contexts.Set(message.Author.ID, commandObject, gocache.DefaultExpiration)
+			}
+		}
 		if !success {
 			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Usage)
 			errs = append(errs, e)
@@ -154,12 +165,12 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 // ProcessContext re-runs a Command function if the user is currently in a
 // Command's context.
-func (cm CommandManager) ProcessContext(command Command, cmdtext string, message discordgo.Message) (success bool, errs []error) {
-	success, e := command.Function(cm, cmdtext, message, true)
+func (cm CommandManager) ProcessContext(command Command, cmdtext string, message discordgo.Message) (continueContext bool, errs []error) {
+	_, continueContext, e := command.Function(cm, cmdtext, message, true)
 	if e != nil {
 		errs = append(errs, e)
 	}
-	return success, errs
+	return continueContext, errs
 }
 
 func (cm CommandManager) getCommandSource(channel string) CommandSource {
