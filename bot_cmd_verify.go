@@ -6,6 +6,9 @@ import (
 
 func commandVerify(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
 	verified, err := cm.App.IsUserVerified(message.Author.ID)
+	if err != nil {
+		return false, false, err
+	}
 
 	if verified {
 		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, "You are already verified! If you are experiencing problems with the bot or verification, please contact an admin.")

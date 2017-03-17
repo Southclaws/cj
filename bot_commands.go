@@ -50,8 +50,6 @@ func LoadCommands(app *App) map[string]Command {
 type CommandSource int8
 
 const (
-	// CommandSourceNONE represents an invalid command source.
-	CommandSourceNONE CommandSource = iota
 	// CommandSourceADMINISTRATIVE are commands in the administrator channel,
 	// mainly for admin work that may clutter up the primary channel.
 	CommandSourceADMINISTRATIVE CommandSource = iota
@@ -98,6 +96,7 @@ func (app *App) StartCommandManager() {
 
 // Process is called on a command string to check whether it's a valid command
 // and, if so, call the associated function.
+// nolint:gocyclo
 func (cm CommandManager) Process(message discordgo.Message) (exists bool, source CommandSource, errs []error) {
 	debug("[commands:Process] message: '%s'", message.Content)
 
@@ -108,7 +107,8 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		contextCommand := contextCommand.(Command)
 		debug("[commands:Process] User is currently in context of command '%s'", contextCommand.Usage)
 		if contextCommand.Source == source {
-			continueContext, errs := cm.ProcessContext(contextCommand, message.Content, message)
+			var continueContext bool
+			continueContext, errs = cm.ProcessContext(contextCommand, message.Content, message)
 			if !continueContext {
 				cm.Contexts.Delete(message.Author.ID)
 			}
@@ -117,8 +117,6 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	}
 
 	commandAndParameters := strings.SplitN(message.Content, " ", 2)
-	log.Printf("len %d 0: %s", len(commandAndParameters), commandAndParameters[0])
-	log.Printf("len %d 1: %s", len(commandAndParameters), commandAndParameters[1])
 	commandTrigger := strings.ToLower(commandAndParameters[0])
 	commandArgument := ""
 	if len(commandAndParameters) > 1 {

@@ -117,7 +117,7 @@ func main() {
 
 // LoadConfig loads the specified config JSON file and returns the contents as
 // a pointer to a Config object.
-func (app *App) LoadConfig(filename string) error {
+func (app *App) LoadConfig(filename string) {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -133,6 +133,4 @@ func (app *App) LoadConfig(filename string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return nil
 }

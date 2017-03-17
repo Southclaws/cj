@@ -40,6 +40,7 @@ func (app *App) connect() error {
 	return nil
 }
 
+// nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	debug("discord ready")
 
@@ -63,8 +64,11 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	}
 
 	log.Print("Updating users to normal role")
-	member := false
+	var member bool
 	users, err := s.GuildMembers(app.config.GuildID, "", 1000)
+	if err != nil {
+		log.Print(err)
+	}
 	for _, user := range users {
 		member = false
 		for i := range user.Roles {
@@ -90,6 +94,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	app.ready <- true
 }
 
+// nolint:gocyclo
 func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
 	if len(app.ready) > 0 {
 		<-app.ready
@@ -161,5 +166,8 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 }
 
 func (app *App) onHeartbeat(t time.Time) {
-	app.HandleHeartbeatEvent(t)
+	err := app.HandleHeartbeatEvent(t)
+	if err != nil {
+		log.Print(err)
+	}
 }

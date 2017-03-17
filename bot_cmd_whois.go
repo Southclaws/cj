@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -17,17 +19,33 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 
 		verified, err = cm.App.IsUserVerified(user.ID)
 		if err != nil {
-			cm.App.discordClient.ChannelMessageSend(message.ChannelID, err.Error())
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, err.Error())
+			if err != nil {
+				log.Print(err)
+			}
 			continue
 		}
 
-		if verified == false {
-			cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisNotVerified", user.ID))
+		if !verified {
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisNotVerified", user.ID))
+			if err != nil {
+				log.Print(err)
+			}
 		} else {
-			username, _ := cm.App.GetForumNameFromDiscordUser(user.ID)
-			link, _ := cm.App.GetForumUserFromDiscordUser(user.ID)
+			username, err := cm.App.GetForumNameFromDiscordUser(user.ID)
+			if err != nil {
+				log.Print(err)
+			}
 
-			cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link))
+			link, err := cm.App.GetForumUserFromDiscordUser(user.ID)
+			if err != nil {
+				log.Print(err)
+			}
+
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link))
+			if err != nil {
+				log.Print(err)
+			}
 		}
 	}
 
