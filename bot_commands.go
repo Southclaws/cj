@@ -25,16 +25,16 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         true,
 		},
-		"say": {
+		"/say": {
 			Function:        commandSay,
-			Source:          CommandSourcePRIMARY,
+			Source:          CommandSourceADMINISTRATIVE,
 			Description:     "Verify you are the owner of a SA:MP forum account",
 			Usage:           "say",
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		"whois": {
+		"/whois": {
 			Function:        commandWhois,
 			Source:          CommandSourcePRIMARY,
 			Description:     app.locale.GetLangString("en", "CommandWhoisUsage"),
@@ -116,18 +116,20 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		}
 	}
 
-	commandAndParameters := strings.SplitN(message.Content, " ", 1)
-	commandTrigger := commandAndParameters[0]
+	commandAndParameters := strings.SplitN(message.Content, " ", 2)
+	log.Printf("len %d 0: %s", len(commandAndParameters), commandAndParameters[0])
+	log.Printf("len %d 1: %s", len(commandAndParameters), commandAndParameters[1])
+	commandTrigger := strings.ToLower(commandAndParameters[0])
 	commandArgument := ""
 	if len(commandAndParameters) > 1 {
 		commandArgument = commandAndParameters[1]
 	}
 
-	commandObject, exists := cm.Commands[strings.ToLower(commandTrigger)]
+	commandObject, exists := cm.Commands[commandTrigger]
 	commandObject.commandManager = &cm
 
 	if !exists {
-		debug("[commands:Process] command '%s' does not exist", strings.ToLower(commandAndParameters[0]))
+		debug("[commands:Process] command '%s' does not exist", commandTrigger)
 		return exists, source, nil
 	}
 
