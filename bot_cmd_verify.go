@@ -23,6 +23,7 @@ func commandVerify(cm CommandManager, args string, message discordgo.Message, co
 		return true, false, err
 	case "cancel":
 		err = cm.App.UserCancelsVerification(message)
+		return true, false, err
 	default:
 		err = cm.App.UserProvidesProfileURL(message)
 	}
