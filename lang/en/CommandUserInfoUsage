@@ -1,0 +1,3 @@
+Command: **/userinfo [user(s)]**
+Description: Get user information from SA-MP Forums.
+Example: */userinfo @Southclaws#1657*

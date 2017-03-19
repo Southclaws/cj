@@ -22,8 +22,11 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 			app,
 			args{"http://forum.sa-mp.com/member.php?u=121859"},
 			UserProfile{
-				UserName: "vampirmd",
-				BioText:  "Scripting",
+				UserName:   "vampirmd",
+				JoinDate:   "10/03/2011",
+				TotalPosts: 30,
+				Reputation: 0,
+				BioText:    "Scripting",
 				VisitorMessages: []VisitorMessage{
 					{
 						"vampirmd",
@@ -42,8 +45,34 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 			app,
 			args{"http://forum.sa-mp.com/member.php?u=97389"},
 			UserProfile{
-				UserName: "fubar",
-				BioText:  "under a stone in the uk",
+				UserName:   "fubar",
+				JoinDate:   "05/07/2010",
+				TotalPosts: 94,
+				Reputation: 29,
+				BioText:    "under a stone in the uk",
+				VisitorMessages: []VisitorMessage{
+					{
+						UserName: "khaqatar",
+						Message:  "Hey Fubar its my PINGQATAR",
+					},
+					{
+						UserName: "Lookin",
+						Message:  "hey dude!",
+					},
+				},
+			},
+			false,
+		},
+		{
+			"valid no age",
+			app,
+			args{"http://forum.sa-mp.com/member.php?u=97389"},
+			UserProfile{
+				UserName:   "fubar",
+				JoinDate:   "05/07/2010",
+				TotalPosts: 94,
+				Reputation: 29,
+				BioText:    "under a stone in the uk",
 				VisitorMessages: []VisitorMessage{
 					{
 						UserName: "khaqatar",
@@ -62,8 +91,12 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 			app,
 			args{"http://forum.sa-mp.com/member.php?u=135124"},
 			UserProfile{
-				UserName: "Violin",
+				UserName:   "Violin",
+				JoinDate:   "04/08/2011",
+				TotalPosts: 0,
+				Reputation: 0,
 				Errors: []error{
+					fmt.Errorf("cannot get user posts"),
 					fmt.Errorf("user bio xmlpath did not return a result"),
 					fmt.Errorf("visitor messages xmlpath did not return a result"),
 				},
@@ -75,8 +108,12 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 			app,
 			args{"http://forum.sa-mp.com/member.php?u=37911"},
 			UserProfile{
-				UserName: "fuad",
+				UserName:   "fuad",
+				JoinDate:   "22/09/2008",
+				TotalPosts: 0,
+				Reputation: 0,
 				Errors: []error{
+					fmt.Errorf("cannot get user posts"),
 					fmt.Errorf("user bio xmlpath did not return a result"),
 					fmt.Errorf("visitor messages xmlpath did not return a result"),
 				},

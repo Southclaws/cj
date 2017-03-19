@@ -27,7 +27,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		}
 
 		if !verified {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisNotVerified", user.ID))
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "UserNotVerified", user.ID))
 			if err != nil {
 				log.Print(err)
 			}

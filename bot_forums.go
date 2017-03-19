@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
+
+	"strconv"
 
 	"gopkg.in/xmlpath.v2"
 )
@@ -11,6 +12,9 @@ import (
 // UserProfile stores data available on a user's profile page
 type UserProfile struct {
 	UserName        string
+	JoinDate        string
+	TotalPosts      int
+	Reputation      int
 	BioText         string
 	VisitorMessages []VisitorMessage
 	Errors          []error
@@ -25,19 +29,9 @@ type VisitorMessage struct {
 // GetUserProfilePage does a HTTP GET on the user's profile page then extracts
 // structured information from it.
 func (app App) GetUserProfilePage(url string) (UserProfile, error) {
-	var err error
 	var result UserProfile
-	var req *http.Request
-	var response *http.Response
 
-	if req, err = http.NewRequest("GET", url, nil); err != nil {
-		return result, err
-	}
-	if response, err = app.httpClient.Do(req); err != nil {
-		return result, err
-	}
-
-	root, err := xmlpath.ParseHTML(response.Body)
+	root, err := app.GetHTMLRoot(url)
 	if err != nil {
 		return result, err
 	}
@@ -45,6 +39,21 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 	result.UserName, err = app.getUserName(root)
 	if err != nil {
 		return result, fmt.Errorf("url did not lead to a valid user page")
+	}
+
+	result.JoinDate, err = app.getJoinDate(root)
+	if err != nil {
+		result.Errors = append(result.Errors, err)
+	}
+
+	result.TotalPosts, err = app.getTotalPosts(root)
+	if err != nil {
+		result.Errors = append(result.Errors, err)
+	}
+
+	result.Reputation, err = app.getReputation(strings.TrimPrefix(url, "http://forum.sa-mp.com/member.php?u="))
+	if err != nil {
+		result.Errors = append(result.Errors, err)
 	}
 
 	result.BioText, err = app.getUserBio(root)
@@ -72,6 +81,75 @@ func (app App) getUserName(root *xmlpath.Node) (string, error) {
 	}
 
 	return strings.Trim(result, "\n "), nil
+}
+
+// getJoinDate returns the user join date
+func (app App) getJoinDate(root *xmlpath.Node) (string, error) {
+	var path *xmlpath.Path
+	var result string
+
+	path = xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/*/ul/*[contains(.,'Join Date: ')]`)
+
+	result, ok := path.String(root)
+	if !ok {
+		return result, fmt.Errorf("join date xmlpath did not return a result")
+	}
+
+	return strings.TrimPrefix(result, "Join Date: "), nil
+}
+
+// getTotalPosts returns the user total posts
+func (app App) getTotalPosts(root *xmlpath.Node) (int, error) {
+	path := xmlpath.MustCompile(`//*[@id="collapseobj_stats"]/div/fieldset[1]/ul/li[1]`)
+
+	posts, ok := path.String(root)
+	if !ok {
+		return 0, fmt.Errorf("total posts xmlpath did not return a result")
+	}
+
+	result, err := strconv.Atoi(strings.TrimPrefix(posts, "Total Posts: "))
+	if err != nil {
+		return 0, fmt.Errorf("cannot convert posts to integer")
+	}
+
+	return result, nil
+}
+
+// getTotalPosts returns the user total posts
+func (app App) getReputation(forumUserID string) (int, error) {
+	root, err := app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/search.php?do=finduser&u=%s", forumUserID))
+	if err != nil {
+		return 0, fmt.Errorf("cannot get user's posts")
+	}
+
+	path := xmlpath.MustCompile(`//td[@class="alt1"]/div[@class="alt2"]/div/em/a/@href`)
+
+	// Get the first post from the list.
+	href, ok := path.String(root)
+	if !ok {
+		return 0, fmt.Errorf("cannot get user posts")
+	}
+
+	// If we have a valid post, search in it for user's reputation.
+	root, err = app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/%s", href))
+	if err != nil {
+		return 0, fmt.Errorf("cannot get user's post in a topic")
+	}
+
+	path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/*/*[contains(text(),'Reputation: ')]`, strings.Split(href, "#")[1]))
+
+	// Get the table for that post.
+	reputation, ok := path.String(root)
+	if !ok {
+		return 0, fmt.Errorf("cannot get reputation field from post")
+	}
+
+	result, err := strconv.Atoi(strings.TrimPrefix(reputation, "Reputation: "))
+	if err != nil {
+		return 0, fmt.Errorf("cannot convert reputation to integer")
+	}
+
+	return result, nil
 }
 
 // getUserBio returns the bio text.
