@@ -35,7 +35,10 @@ func TestMain(m *testing.M) {
 
 	ret := m.Run()
 
-	app.db.Close()
+	err := app.db.Close()
+	if err != nil {
+		panic(err)
+	}
 	log.Printf("removing test database %s", dbLocation)
 	if err := os.Remove(dbLocation); err != nil {
 		panic(err)

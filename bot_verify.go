@@ -21,7 +21,7 @@ Verification process:
     or just the user ID
 - < Bot generates a unique token and provides it to the user, asks user to post
     it on their user Bio or Visitor Messages section and reply to the bot with
-    either "done" or "cancel", any other string repeates the previous message
+    either "done" or "cancel", any other string repeats the previous message
 - > User posts the unique onto their Bio or Visitor Messages section and writes
     "done" back to the bot
 - < Bot checks the Bio and Visitor Messages sections of the user profile page
@@ -81,10 +81,8 @@ func (app App) UserStartsVerification(message discordgo.Message) error {
 	// no trace of their Verification in the cache.
 	if found {
 		verification = result.(Verification)
-		if err = app.WarnUserVerificationState(message.ChannelID, verification); err != nil {
-			return err
-		}
-		return nil
+		err = app.WarnUserVerificationState(message.ChannelID, verification)
+		return err
 	}
 
 	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString("en", "UserStartsVerification"))
@@ -134,7 +132,8 @@ func (app App) UserProvidesProfileURL(message discordgo.Message) error {
 			profileURL = "http://" + message.Content
 		}
 	} else {
-		value, err := strconv.Atoi(message.Content)
+		var value int
+		value, err = strconv.Atoi(message.Content)
 		if err != nil {
 			err = app.WarnUserBadInput(message.ChannelID, verification)
 			return err

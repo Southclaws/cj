@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// ChatLogger is reponsible for logging chat messages
+// ChatLogger is responsible for logging chat messages
 type ChatLogger struct {
 	app *App
 }

@@ -23,11 +23,8 @@ func (app App) StoreVerifiedUser(verification Verification) error {
 		VerificationCode: verification.code,
 		ForumUserName:    verification.userProfile.UserName,
 	}).Error
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
 
 // IsUserVerified returns a discord user, a blank string or an error
