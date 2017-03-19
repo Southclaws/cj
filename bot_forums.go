@@ -108,8 +108,10 @@ func (app App) getFirstTenUserVisitorMessages(root *xmlpath.Node) ([]VisitorMess
 
 	for messageBlock.Next() {
 		user, ok = userPath.String(messageBlock.Node())
+		if !ok {
+			continue
+		}
 		text, ok = textPath.String(messageBlock.Node())
-
 		if !ok {
 			continue
 		}

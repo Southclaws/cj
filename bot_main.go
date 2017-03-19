@@ -18,7 +18,6 @@ var debug = dbg.Debug("main")
 
 // Config stores configuration variables
 type Config struct {
-	LogFile               string `json:"log_file"`               // log file
 	DiscordToken          string `json:"discord_token"`          // discord API token
 	AdministrativeChannel string `json:"administrative_channel"` // administrative channel where someone can speak as bot
 	PrimaryChannel        string `json:"primary_channel"`        // main channel the bot hangs out in
@@ -36,16 +35,17 @@ type Config struct {
 
 // App stores program state
 type App struct {
-	config        Config
-	discordClient *discordgo.Session
-	httpClient    *http.Client
-	ready         chan bool
-	cache         *gocache.Cache
-	queue         *fifo.Queue
-	locale        Locale
-	chatLogger    *ChatLogger
-	db            *gorm.DB
-	done          chan bool
+	config         Config
+	discordClient  *discordgo.Session
+	httpClient     *http.Client
+	ready          chan bool
+	cache          *gocache.Cache
+	queue          *fifo.Queue
+	locale         Locale
+	chatLogger     *ChatLogger
+	commandManager *CommandManager
+	db             *gorm.DB
+	done           chan bool
 }
 
 func main() {
@@ -71,22 +71,7 @@ func main() {
 
 	app.LoadConfig(configLocation)
 
-	var logFile *os.File
-	if app.config.LogFile != "" {
-		logFile, err := os.OpenFile(app.config.LogFile, os.O_APPEND, os.ModeAppend)
-		if err != nil {
-			log.Print(err)
-			logFile, err = os.Create(app.config.LogFile)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		defer logFile.Close()
-		log.SetOutput(logFile)
-	}
-
 	log.Printf("Config:\n")
-	log.Printf("- LogFile: %s\n", app.config.LogFile)
 	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))
 	log.Printf("- AdministrativeChannel: %v\n", app.config.AdministrativeChannel)
 	log.Printf("- PrimaryChannel: %v\n", app.config.PrimaryChannel)
@@ -106,6 +91,7 @@ func main() {
 	app.ConnectDB(dbLocation)
 	app.StartChatLogger()
 	app.loadLanguages()
+	app.StartCommandManager()
 
 	var count int
 	app.db.Model(&User{}).Count(&count)
@@ -113,9 +99,6 @@ func main() {
 
 	if app.config.DebugLogs {
 		dbg.Enable("main")
-		if app.config.LogFile != "" {
-			dbg.SetWriter(logFile)
-		}
 		debug("Debug mode enabled")
 	}
 
@@ -134,7 +117,7 @@ func main() {
 
 // LoadConfig loads the specified config JSON file and returns the contents as
 // a pointer to a Config object.
-func (app *App) LoadConfig(filename string) error {
+func (app *App) LoadConfig(filename string) {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -150,6 +133,4 @@ func (app *App) LoadConfig(filename string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return nil
 }

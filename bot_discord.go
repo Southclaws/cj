@@ -1,12 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"time"
-
-	"net/http"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -44,6 +40,7 @@ func (app *App) connect() error {
 	return nil
 }
 
+// nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	debug("discord ready")
 
@@ -67,8 +64,11 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	}
 
 	log.Print("Updating users to normal role")
-	member := false
+	var member bool
 	users, err := s.GuildMembers(app.config.GuildID, "", 1000)
+	if err != nil {
+		log.Print(err)
+	}
 	for _, user := range users {
 		member = false
 		for i := range user.Roles {
@@ -94,6 +94,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	app.ready <- true
 }
 
+// nolint:gocyclo
 func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
 	if len(app.ready) > 0 {
 		<-app.ready
@@ -103,68 +104,39 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		return
 	}
 
-	message := event.Message
-	administrative := false
-	primary := false
-	private := false
-
-	if message.ChannelID == app.config.AdministrativeChannel {
-		administrative = true
-	} else if message.ChannelID == app.config.PrimaryChannel {
-		primary = true
-	} else {
-		// discordgo has not implemented private channel objects (DM Channels)
-		// so we have to perform the request manually and unmarshal the response
-		// object into a `ChannelDM` object.
-		var err error
-		var req *http.Request
-		var response *http.Response
-		var body []byte
-		if req, err = http.NewRequest("GET", discordgo.EndpointChannel(message.ChannelID), nil); err != nil {
-			log.Print(err)
-		}
-		req.Header.Add("Authorization", "Bot "+app.config.DiscordToken)
-		if response, err = app.httpClient.Do(req); err != nil {
-			log.Print(err)
-		}
-		if body, err = ioutil.ReadAll(response.Body); err != nil {
-			log.Print(err)
-		}
-		channel := ChannelDM{}
-		json.Unmarshal(body, &channel)
-
-		// Now we have one of these:
-		// https://discordapp.com/developers/docs/resources/channel#dm-channel-object
-
-		if channel.Private {
-			private = true
+	if app.config.DebugUser != "" {
+		if event.Message.Author.ID != app.config.DebugUser {
+			debug("[private:HandlePrivateMessage] app.config.DebugUser non-empty, user ID does not match app.config.DebugUser")
+			return
 		}
 	}
 
-	debug("private: %v primary %v", private, primary)
+	_, source, errors := app.commandManager.Process(*event.Message)
+	if errors != nil {
+		for _, e := range errors {
+			if e != nil {
+				log.Print(e)
+				e = app.WarnUserError(event.Message.ChannelID, e.Error())
+				if e != nil {
+					log.Print(e)
+				}
+			}
+		}
+	}
 
-	if private {
-		err := app.HandlePrivateMessage(*message)
+	if source != CommandSourcePRIVATE && source != CommandSourceADMINISTRATIVE {
+		err := app.chatLogger.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
 		if err != nil {
 			log.Print(err)
 		}
-	} else {
-		log.Printf("%p", app.chatLogger)
-		app.chatLogger.RecordChatLog(message.Author.ID, message.ChannelID, message.Content)
 
-		for i := range message.Mentions {
-			if message.Mentions[i].ID == app.config.BotID {
-				err := app.HandleSummon(*message)
+		for i := range event.Message.Mentions {
+			if event.Message.Mentions[i].ID == app.config.BotID {
+				err := app.HandleSummon(*event.Message)
 				if err != nil {
 					log.Print(err)
 				}
 			}
-		}
-
-		if administrative {
-			app.HandleAdministrativeMessage(*message)
-		} else if primary {
-			app.HandleChannelMessage(*message)
 		}
 	}
 }
@@ -194,5 +166,8 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 }
 
 func (app *App) onHeartbeat(t time.Time) {
-	app.HandleHeartbeatEvent(t)
+	err := app.HandleHeartbeatEvent(t)
+	if err != nil {
+		log.Print(err)
+	}
 }
