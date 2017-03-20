@@ -34,6 +34,15 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
+		"/userinfo": {
+			Function:        commandUserInfo,
+			Source:          CommandSourcePRIMARY,
+			Description:     app.locale.GetLangString("en", "CommandUserInfoUsage"),
+			Usage:           "userinfo",
+			RequireVerified: true,
+			RequireAdmin:    false,
+			Context:         false,
+		},
 		"/whois": {
 			Function:        commandWhois,
 			Source:          CommandSourcePRIMARY,
