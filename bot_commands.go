@@ -29,8 +29,9 @@ func LoadCommands(app *App) map[string]Command {
 		"/say": {
 			Function:        commandSay,
 			Source:          CommandSourceADMINISTRATIVE,
-			Description:     "Verify you are the owner of a SA:MP forum account",
-			Usage:           "say",
+			Description:     app.locale.GetLangString("en", "CommandSayDescription"),
+			Usage:           "/say [text]",
+			Example:         "/say Hello!",
 			MinParameters:   -1,
 			RequireVerified: false,
 			RequireAdmin:    false,
@@ -39,8 +40,9 @@ func LoadCommands(app *App) map[string]Command {
 		"/userinfo": {
 			Function:        commandUserInfo,
 			Source:          CommandSourcePRIMARY,
-			Description:     app.locale.GetLangString("en", "CommandUserInfoUsage"),
-			Usage:           "userinfo",
+			Description:     app.locale.GetLangString("en", "CommandUserInfoDescription"),
+			Usage:           "/userinfo [user(s)]",
+			Example:         "/userinfo @Southclaws#1657",
 			MinParameters:   1,
 			MaxParameters:   5,
 			RequireVerified: true,
@@ -50,8 +52,9 @@ func LoadCommands(app *App) map[string]Command {
 		"/whois": {
 			Function:        commandWhois,
 			Source:          CommandSourcePRIMARY,
-			Description:     app.locale.GetLangString("en", "CommandWhoisUsage"),
-			Usage:           "whois",
+			Description:     app.locale.GetLangString("en", "CommandWhoisDescription"),
+			Usage:           "/whois [user(s)]",
+			Example:         "/whois @Southclaws#1657",
 			MinParameters:   1,
 			MaxParameters:   5,
 			RequireVerified: true,
@@ -95,6 +98,7 @@ type Command struct {
 	MaxParameters   int
 	Description     string
 	Usage           string
+	Example         string
 	RequireVerified bool
 	RequireAdmin    bool
 	Context         bool
@@ -168,7 +172,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 		if commandObject.MinParameters > -1 {
 			if commandParametersCount < commandObject.MinParameters {
-				_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Usage)
+				_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
 				if e != nil {
 					errs = append(errs, e)
 				}
