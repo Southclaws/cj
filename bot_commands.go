@@ -21,6 +21,7 @@ func LoadCommands(app *App) map[string]Command {
 			Source:          CommandSourcePRIVATE,
 			Description:     "Verify you are the owner of a SA:MP forum account",
 			Usage:           "verify",
+			MinParameters:   -1,
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         true,
@@ -30,6 +31,8 @@ func LoadCommands(app *App) map[string]Command {
 			Source:          CommandSourceADMINISTRATIVE,
 			Description:     "Verify you are the owner of a SA:MP forum account",
 			Usage:           "say",
+			MinParameters:   1,
+			MaxParameters:   5,
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         false,
@@ -39,6 +42,8 @@ func LoadCommands(app *App) map[string]Command {
 			Source:          CommandSourcePRIMARY,
 			Description:     app.locale.GetLangString("en", "CommandUserInfoUsage"),
 			Usage:           "userinfo",
+			MinParameters:   1,
+			MaxParameters:   5,
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -48,6 +53,8 @@ func LoadCommands(app *App) map[string]Command {
 			Source:          CommandSourcePRIMARY,
 			Description:     app.locale.GetLangString("en", "CommandWhoisUsage"),
 			Usage:           "whois",
+			MinParameters:   1,
+			MaxParameters:   5,
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -85,6 +92,8 @@ type Command struct {
 	commandManager  *CommandManager
 	Function        func(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error)
 	Source          CommandSource
+	MinParameters   int
+	MaxParameters   int
 	Description     string
 	Usage           string
 	RequireVerified bool
@@ -126,10 +135,13 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	}
 
 	commandAndParameters := strings.SplitN(message.Content, " ", 2)
+	commandParametersCount := 0
 	commandTrigger := strings.ToLower(commandAndParameters[0])
 	commandArgument := ""
+
 	if len(commandAndParameters) > 1 {
 		commandArgument = commandAndParameters[1]
+		commandParametersCount = strings.Count(commandArgument, " ") + 1
 	}
 
 	commandObject, exists := cm.Commands[commandTrigger]
@@ -155,6 +167,24 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 
+		if commandObject.MinParameters > -1 {
+			if commandParametersCount < commandObject.MinParameters {
+				_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Usage)
+				if e != nil {
+					errs = append(errs, e)
+				}
+
+				return exists, source, errs
+			} else if commandParametersCount > commandObject.MaxParameters {
+				_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.MaxParameters))
+				if e != nil {
+					errs = append(errs, e)
+				}
+
+				return exists, source, errs
+			}
+		}
+
 		success, enterContext, e := commandObject.Function(cm, commandArgument, message, false)
 		errs = append(errs, e)
 		if enterContext {
@@ -164,7 +194,6 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 		if !success {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Usage)
 			errs = append(errs, e)
 		}
 	}
