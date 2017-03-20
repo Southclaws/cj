@@ -17,47 +17,56 @@ import (
 func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
 		"verify": {
-			Function:        commandVerify,
-			Source:          CommandSourcePRIVATE,
-			Description:     "Verify you are the owner of a SA:MP forum account",
-			Usage:           "verify",
-			MinParameters:   -1,
+			Function:    commandVerify,
+			Source:      CommandSourcePRIVATE,
+			Description: "Verify you are the owner of a SA:MP forum account",
+			Usage:       "verify",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         true,
 		},
 		"/say": {
-			Function:        commandSay,
-			Source:          CommandSourceADMINISTRATIVE,
-			Description:     app.locale.GetLangString("en", "CommandSayDescription"),
-			Usage:           "/say [text]",
-			Example:         "/say Hello!",
-			MinParameters:   1,
-			MaxParameters:   -1,
+			Function:    commandSay,
+			Source:      CommandSourceADMINISTRATIVE,
+			Description: app.locale.GetLangString("en", "CommandSayDescription"),
+			Usage:       "/say [text]",
+			Example:     "/say Hello!",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: -1,
+			},
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         false,
 		},
 		"/userinfo": {
-			Function:        commandUserInfo,
-			Source:          CommandSourcePRIMARY,
-			Description:     app.locale.GetLangString("en", "CommandUserInfoDescription"),
-			Usage:           "/userinfo [user(s)]",
-			Example:         "/userinfo @Southclaws#1657",
-			MinParameters:   1,
-			MaxParameters:   5,
+			Function:    commandUserInfo,
+			Source:      CommandSourcePRIMARY,
+			Description: app.locale.GetLangString("en", "CommandUserInfoDescription"),
+			Usage:       "/userinfo [user(s)]",
+			Example:     "/userinfo @Southclaws#1657",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: 5,
+			},
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
 		},
 		"/whois": {
-			Function:        commandWhois,
-			Source:          CommandSourcePRIMARY,
-			Description:     app.locale.GetLangString("en", "CommandWhoisDescription"),
-			Usage:           "/whois [user(s)]",
-			Example:         "/whois @Southclaws#1657",
-			MinParameters:   1,
-			MaxParameters:   5,
+			Function:    commandWhois,
+			Source:      CommandSourcePRIMARY,
+			Description: app.locale.GetLangString("en", "CommandWhoisDescription"),
+			Usage:       "/whois [user(s)]",
+			Example:     "/whois @Southclaws#1657",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: 5,
+			},
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -90,13 +99,18 @@ type CommandManager struct {
 	Contexts *gocache.Cache
 }
 
+// CommandParametersRange represents minimum value and maximum value number of parameters for a command
+type CommandParametersRange struct {
+	Minimum int
+	Maximum int
+}
+
 // Command represents a public, private or administrative command
 type Command struct {
 	commandManager  *CommandManager
 	Function        func(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error)
 	Source          CommandSource
-	MinParameters   int
-	MaxParameters   int
+	ParametersRange CommandParametersRange
 	Description     string
 	Usage           string
 	Example         string
@@ -171,15 +185,15 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 
-		if commandObject.MinParameters > -1 && commandParametersCount < commandObject.MinParameters {
+		if commandObject.ParametersRange.Minimum > -1 && commandParametersCount < commandObject.ParametersRange.Minimum {
 			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
 			if e != nil {
 				errs = append(errs, e)
 			}
 
 			return exists, source, errs
-		} else if commandObject.MaxParameters > -1 && commandParametersCount > commandObject.MaxParameters {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.MaxParameters))
+		} else if commandObject.ParametersRange.Maximum > -1 && commandParametersCount > commandObject.ParametersRange.Maximum {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.ParametersRange.Maximum))
 			if e != nil {
 				errs = append(errs, e)
 			}
