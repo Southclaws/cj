@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	gocache "github.com/patrickmn/go-cache"
 )
@@ -53,6 +55,7 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
+			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -60,13 +63,14 @@ func LoadCommands(app *App) map[string]Command {
 		"/whois": {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
-			Description: app.locale.GetLangString("en", "CommandWhoisDescription"),
+			Description: app.locale.GetLangString("en", "CommandWhoisDescription", "%s"),
 			Usage:       "/whois [user(s)]",
 			Example:     "/whois @Southclaws#1657",
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
 			},
+			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention", "%s"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -114,6 +118,7 @@ type Command struct {
 	Description     string
 	Usage           string
 	Example         string
+	ErrorMessage    string
 	RequireVerified bool
 	RequireAdmin    bool
 	Context         bool
@@ -210,6 +215,15 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 		if !success {
+			var e error
+
+			// Format it if we have a mention in the error message.
+			if strings.Contains(commandObject.ErrorMessage, "<@%s>") {
+				_, e = cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(commandObject.ErrorMessage, message.Author.ID))
+			} else {
+				_, e = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.ErrorMessage)
+			}
+
 			errs = append(errs, e)
 		}
 	}

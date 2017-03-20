@@ -10,14 +10,12 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 	var profile UserProfile
 	var verified bool
 	var err error
-	var count = 0
+
+	if len(message.Mentions) == 0 {
+		return false, false, nil
+	}
 
 	for _, user := range message.Mentions {
-		if count == 5 {
-			break
-		}
-		count++
-
 		verified, err = cm.App.IsUserVerified(user.ID)
 		if err != nil {
 			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, err.Error())
