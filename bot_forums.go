@@ -107,7 +107,10 @@ func (app App) getTotalPosts(root *xmlpath.Node) (int, error) {
 		return 0, fmt.Errorf("total posts xmlpath did not return a result")
 	}
 
-	result, err := strconv.Atoi(strings.TrimPrefix(posts, "Total Posts: "))
+	posts = strings.TrimPrefix(posts, "Total Posts: ")
+	posts = strings.Replace(posts, ",", "", -1)
+
+	result, err := strconv.Atoi(posts)
 	if err != nil {
 		return 0, fmt.Errorf("cannot convert posts to integer")
 	}
@@ -144,7 +147,10 @@ func (app App) getReputation(forumUserID string) (int, error) {
 		return 0, fmt.Errorf("cannot get reputation field from post")
 	}
 
-	result, err := strconv.Atoi(strings.TrimPrefix(reputation, "Reputation: "))
+	reputation = strings.TrimPrefix(reputation, "Reputation: ")
+	reputation = strings.Replace(reputation, ",", "", -1)
+
+	result, err := strconv.Atoi(reputation)
 	if err != nil {
 		return 0, fmt.Errorf("cannot convert reputation to integer")
 	}
