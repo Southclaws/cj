@@ -190,6 +190,33 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 
+		// Check if the user is an administrator.
+		if commandObject.RequireAdmin == true && cm.App.config.Admin != message.Author.ID {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireAdministrator", message.Author.ID))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
+		}
+
+		// Check if the user is verified.
+		verified, e := cm.App.IsUserVerified(message.Author.ID)
+		if e != nil {
+			errs = append(errs, e)
+			return exists, source, errs
+		}
+
+		if commandObject.RequireVerified == true && verified == false {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireVerification", message.Author.ID))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
+		}
+
+		// Check if we have the required number of parameters.
 		if commandObject.ParametersRange.Minimum > -1 && commandParametersCount < commandObject.ParametersRange.Minimum {
 			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
 			if e != nil {
@@ -206,6 +233,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			return exists, source, errs
 		}
 
+		// Execute the command.
 		success, enterContext, e := commandObject.Function(cm, commandArgument, message, false)
 		errs = append(errs, e)
 		if enterContext {
