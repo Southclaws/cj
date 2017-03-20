@@ -32,7 +32,8 @@ func LoadCommands(app *App) map[string]Command {
 			Description:     app.locale.GetLangString("en", "CommandSayDescription"),
 			Usage:           "/say [text]",
 			Example:         "/say Hello!",
-			MinParameters:   -1,
+			MinParameters:   1,
+			MaxParameters:   -1,
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         false,
@@ -170,22 +171,20 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 
-		if commandObject.MinParameters > -1 {
-			if commandParametersCount < commandObject.MinParameters {
-				_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
-				if e != nil {
-					errs = append(errs, e)
-				}
-
-				return exists, source, errs
-			} else if commandParametersCount > commandObject.MaxParameters {
-				_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.MaxParameters))
-				if e != nil {
-					errs = append(errs, e)
-				}
-
-				return exists, source, errs
+		if commandObject.MinParameters > -1 && commandParametersCount < commandObject.MinParameters {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
+			if e != nil {
+				errs = append(errs, e)
 			}
+
+			return exists, source, errs
+		} else if commandObject.MaxParameters > -1 && commandParametersCount > commandObject.MaxParameters {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.MaxParameters))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
 		}
 
 		success, enterContext, e := commandObject.Function(cm, commandArgument, message, false)
