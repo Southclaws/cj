@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	gocache "github.com/patrickmn/go-cache"
 )
@@ -17,37 +19,58 @@ import (
 func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
 		"verify": {
-			Function:        commandVerify,
-			Source:          CommandSourcePRIVATE,
-			Description:     "Verify you are the owner of a SA:MP forum account",
-			Usage:           "verify",
+			Function:    commandVerify,
+			Source:      CommandSourcePRIVATE,
+			Description: "Verify you are the owner of a SA:MP forum account",
+			Usage:       "verify",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         true,
 		},
 		"/say": {
-			Function:        commandSay,
-			Source:          CommandSourceADMINISTRATIVE,
-			Description:     "Verify you are the owner of a SA:MP forum account",
-			Usage:           "say",
+			Function:    commandSay,
+			Source:      CommandSourceADMINISTRATIVE,
+			Description: app.locale.GetLangString("en", "CommandSayDescription"),
+			Usage:       "/say [text]",
+			Example:     "/say Hello!",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: -1,
+			},
 			RequireVerified: false,
 			RequireAdmin:    false,
 			Context:         false,
 		},
 		"/userinfo": {
-			Function:        commandUserInfo,
-			Source:          CommandSourcePRIMARY,
-			Description:     app.locale.GetLangString("en", "CommandUserInfoUsage"),
-			Usage:           "userinfo",
+			Function:    commandUserInfo,
+			Source:      CommandSourcePRIMARY,
+			Description: app.locale.GetLangString("en", "CommandUserInfoDescription"),
+			Usage:       "/userinfo [user(s)]",
+			Example:     "/userinfo @Southclaws#1657",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: 5,
+			},
+			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
 		},
 		"/whois": {
-			Function:        commandWhois,
-			Source:          CommandSourcePRIMARY,
-			Description:     app.locale.GetLangString("en", "CommandWhoisUsage"),
-			Usage:           "whois",
+			Function:    commandWhois,
+			Source:      CommandSourcePRIMARY,
+			Description: app.locale.GetLangString("en", "CommandWhoisDescription", "%s"),
+			Usage:       "/whois [user(s)]",
+			Example:     "/whois @Southclaws#1657",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: 5,
+			},
+			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention", "%s"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -80,13 +103,22 @@ type CommandManager struct {
 	Contexts *gocache.Cache
 }
 
+// CommandParametersRange represents minimum value and maximum value number of parameters for a command
+type CommandParametersRange struct {
+	Minimum int
+	Maximum int
+}
+
 // Command represents a public, private or administrative command
 type Command struct {
 	commandManager  *CommandManager
 	Function        func(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error)
 	Source          CommandSource
+	ParametersRange CommandParametersRange
 	Description     string
 	Usage           string
+	Example         string
+	ErrorMessage    string
 	RequireVerified bool
 	RequireAdmin    bool
 	Context         bool
@@ -126,10 +158,13 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	}
 
 	commandAndParameters := strings.SplitN(message.Content, " ", 2)
+	commandParametersCount := 0
 	commandTrigger := strings.ToLower(commandAndParameters[0])
 	commandArgument := ""
+
 	if len(commandAndParameters) > 1 {
 		commandArgument = commandAndParameters[1]
+		commandParametersCount = strings.Count(commandArgument, " ") + 1
 	}
 
 	commandObject, exists := cm.Commands[commandTrigger]
@@ -155,6 +190,50 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 
+		// Check if the user is an administrator.
+		if commandObject.RequireAdmin == true && cm.App.config.Admin != message.Author.ID {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireAdministrator", message.Author.ID))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
+		}
+
+		// Check if the user is verified.
+		verified, e := cm.App.IsUserVerified(message.Author.ID)
+		if e != nil {
+			errs = append(errs, e)
+			return exists, source, errs
+		}
+
+		if commandObject.RequireVerified == true && verified == false {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireVerification", message.Author.ID))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
+		}
+
+		// Check if we have the required number of parameters.
+		if commandObject.ParametersRange.Minimum > -1 && commandParametersCount < commandObject.ParametersRange.Minimum {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
+		} else if commandObject.ParametersRange.Maximum > -1 && commandParametersCount > commandObject.ParametersRange.Maximum {
+			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.ParametersRange.Maximum))
+			if e != nil {
+				errs = append(errs, e)
+			}
+
+			return exists, source, errs
+		}
+
+		// Execute the command.
 		success, enterContext, e := commandObject.Function(cm, commandArgument, message, false)
 		errs = append(errs, e)
 		if enterContext {
@@ -164,7 +243,15 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 		if !success {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Usage)
+			var e error
+
+			// Format it if we have a mention in the error message.
+			if strings.Contains(commandObject.ErrorMessage, "<@%s>") {
+				_, e = cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(commandObject.ErrorMessage, message.Author.ID))
+			} else {
+				_, e = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.ErrorMessage)
+			}
+
 			errs = append(errs, e)
 		}
 	}
