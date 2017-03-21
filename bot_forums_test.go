@@ -121,6 +121,39 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 			false,
 		},
 		{
+			"valid total posts/low",
+			app,
+			args{"http://forum.sa-mp.com/member.php?u=267158"},
+			UserProfile{
+				UserName:   "aditya922",
+				JoinDate:   "24/09/2015",
+				TotalPosts: 0,
+				Reputation: 0,
+				Errors: []error{
+					fmt.Errorf("cannot get user posts"),
+					fmt.Errorf("user bio xmlpath did not return a result"),
+					fmt.Errorf("visitor messages xmlpath did not return a result"),
+				},
+			},
+			false,
+		},
+		{
+			"valid total posts/high",
+			app,
+			args{"http://forum.sa-mp.com/member.php?u=29025"},
+			UserProfile{
+				UserName:   "[NoV]LaZ",
+				JoinDate:   "31/05/2008",
+				TotalPosts: 1475,
+				Reputation: 87,
+				Errors: []error{
+					fmt.Errorf("user bio xmlpath did not return a result"),
+					fmt.Errorf("visitor messages xmlpath did not return a result"),
+				},
+			},
+			false,
+		},
+		{
 			"invalid nonexistent",
 			app,
 			args{"http://forum.sa-mp.com/member.php?u=917125"},
