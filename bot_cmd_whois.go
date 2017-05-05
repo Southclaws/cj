@@ -27,19 +27,13 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		count++
 
 		if user.ID == cm.App.config.BotID {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisCJ"))
-			if err != nil {
-				log.Print(err)
-			}
+			result += cm.App.locale.GetLangString("en", "CommandWhoisCJ") + " "
 			continue
 		}
 
 		verified, err = cm.App.IsUserVerified(user.ID)
 		if err != nil {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, err.Error())
-			if err != nil {
-				log.Print(err)
-			}
+			result = err.Error() + " "
 			continue
 		}
 
