@@ -14,6 +14,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 		link          string
 		cachedProfile interface{}
 		found         bool
+		result        string
 	)
 
 	if len(message.Mentions) == 0 {
@@ -23,18 +24,12 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 	for _, user := range message.Mentions {
 		verified, err = cm.App.IsUserVerified(user.ID)
 		if err != nil {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, err.Error())
-			if err != nil {
-				log.Print(err)
-			}
+			result += err.Error() + " "
 			continue
 		}
 
 		if !verified {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "UserNotVerified", user.ID))
-			if err != nil {
-				log.Print(err)
-			}
+			result += cm.App.locale.GetLangString("en", "UserNotVerified", user.ID) + " "
 		} else {
 			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
@@ -51,11 +46,13 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 				}
 			}
 
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUserInfoProfile", profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation))
-			if err != nil {
-				log.Print(err)
-			}
+			result += cm.App.locale.GetLangString("en", "CommandUserInfoProfile", profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation) + " "
 		}
+	}
+
+	_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, result)
+	if err != nil {
+		log.Print(err)
 	}
 
 	return true, false, err

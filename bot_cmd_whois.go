@@ -33,7 +33,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 
 		verified, err = cm.App.IsUserVerified(user.ID)
 		if err != nil {
-			result = err.Error() + " "
+			result += err.Error() + " "
 			continue
 		}
 
