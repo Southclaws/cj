@@ -7,9 +7,14 @@ import (
 )
 
 func commandUserInfo(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
-	var profile UserProfile
-	var verified bool
-	var err error
+	var (
+		profile       UserProfile
+		verified      bool
+		err           error
+		link          string
+		cachedProfile interface{}
+		found         bool
+	)
 
 	if len(message.Mentions) == 0 {
 		return false, false, nil
@@ -31,12 +36,12 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 				log.Print(err)
 			}
 		} else {
-			link, err := cm.App.GetForumUserFromDiscordUser(user.ID)
+			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
 				log.Print(err)
 			}
 
-			cachedProfile, found := cm.App.cache.Get(link)
+			cachedProfile, found = cm.App.cache.Get(link)
 			if found {
 				profile = *(cachedProfile.(*UserProfile))
 			} else {

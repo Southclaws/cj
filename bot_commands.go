@@ -141,6 +141,8 @@ func (app *App) StartCommandManager() {
 func (cm CommandManager) Process(message discordgo.Message) (exists bool, source CommandSource, errs []error) {
 	debug("[commands:Process] message: '%s'", message.Content)
 
+	var err error
+
 	source = cm.getCommandSource(message.ChannelID)
 
 	contextCommand, found := cm.Contexts.Get(message.Author.ID)
@@ -191,26 +193,26 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		}
 
 		// Check if the user is an administrator.
-		if commandObject.RequireAdmin == true && cm.App.config.Admin != message.Author.ID {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireAdministrator", message.Author.ID))
-			if e != nil {
-				errs = append(errs, e)
+		if commandObject.RequireAdmin && cm.App.config.Admin != message.Author.ID {
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireAdministrator", message.Author.ID))
+			if err != nil {
+				errs = append(errs, err)
 			}
 
 			return exists, source, errs
 		}
 
 		// Check if the user is verified.
-		verified, e := cm.App.IsUserVerified(message.Author.ID)
-		if e != nil {
-			errs = append(errs, e)
+		verified, err := cm.App.IsUserVerified(message.Author.ID)
+		if err != nil {
+			errs = append(errs, err)
 			return exists, source, errs
 		}
 
-		if commandObject.RequireVerified == true && verified == false {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireVerification", message.Author.ID))
-			if e != nil {
-				errs = append(errs, e)
+		if commandObject.RequireVerified && !verified {
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireVerification", message.Author.ID))
+			if err != nil {
+				errs = append(errs, err)
 			}
 
 			return exists, source, errs
@@ -218,24 +220,29 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 		// Check if we have the required number of parameters.
 		if commandObject.ParametersRange.Minimum > -1 && commandParametersCount < commandObject.ParametersRange.Minimum {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
-			if e != nil {
-				errs = append(errs, e)
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
+			if err != nil {
+				errs = append(errs, err)
 			}
 
 			return exists, source, errs
 		} else if commandObject.ParametersRange.Maximum > -1 && commandParametersCount > commandObject.ParametersRange.Maximum {
-			_, e := cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.ParametersRange.Maximum))
-			if e != nil {
-				errs = append(errs, e)
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.ParametersRange.Maximum))
+			if err != nil {
+				errs = append(errs, err)
 			}
 
 			return exists, source, errs
 		}
 
+		var (
+			success      bool
+			enterContext bool
+		)
+
 		// Execute the command.
-		success, enterContext, e := commandObject.Function(cm, commandArgument, message, false)
-		errs = append(errs, e)
+		success, enterContext, err = commandObject.Function(cm, commandArgument, message, false)
+		errs = append(errs, err)
 		if enterContext {
 			if commandObject.Context {
 				debug("[commands:Process] command is contextual, placing user in context")
@@ -243,16 +250,14 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 		if !success {
-			var e error
-
 			// Format it if we have a mention in the error message.
 			if strings.Contains(commandObject.ErrorMessage, "<@%s>") {
-				_, e = cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(commandObject.ErrorMessage, message.Author.ID))
+				_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(commandObject.ErrorMessage, message.Author.ID))
 			} else {
-				_, e = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.ErrorMessage)
+				_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.ErrorMessage)
 			}
 
-			errs = append(errs, e)
+			errs = append(errs, err)
 		}
 	}
 
@@ -262,9 +267,9 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 // ProcessContext re-runs a Command function if the user is currently in a
 // Command's context.
 func (cm CommandManager) ProcessContext(command Command, cmdtext string, message discordgo.Message) (continueContext bool, errs []error) {
-	_, continueContext, e := command.Function(cm, cmdtext, message, true)
-	if e != nil {
-		errs = append(errs, e)
+	_, continueContext, err := command.Function(cm, cmdtext, message, true)
+	if err != nil {
+		errs = append(errs, err)
 	}
 	return continueContext, errs
 }
