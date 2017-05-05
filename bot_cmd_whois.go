@@ -7,14 +7,25 @@ import (
 )
 
 func commandWhois(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
-	var verified bool
-	var err error
+	var (
+		verified bool
+		err      error
+		count    = 0
+		username string
+		link     string
+		result   string
+	)
 
 	if len(message.Mentions) == 0 {
 		return false, false, nil
 	}
 
 	for _, user := range message.Mentions {
+		if count == 5 {
+			break
+		}
+		count++
+
 		if user.ID == cm.App.config.BotID {
 			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisCJ"))
 			if err != nil {
@@ -33,27 +44,26 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		}
 
 		if !verified {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "UserNotVerified", user.ID))
-			if err != nil {
-				log.Print(err)
-			}
+			result += cm.App.locale.GetLangString("en", "CommandWhoisNotVerified", user.ID) + " "
 		} else {
-			username, err := cm.App.GetForumNameFromDiscordUser(user.ID)
+			username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
 			if err != nil {
 				log.Print(err)
 			}
 
-			link, err := cm.App.GetForumUserFromDiscordUser(user.ID)
+			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
 				log.Print(err)
 			}
 
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link))
-			if err != nil {
-				log.Print(err)
-			}
+			result += cm.App.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link) + " "
 		}
 	}
 
-	return true, false, err
+	_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, result)
+	if err != nil {
+		log.Print(err)
+	}
+
+	return true, false, nil
 }
