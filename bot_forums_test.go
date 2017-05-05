@@ -144,7 +144,7 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 			UserProfile{
 				UserName:   "[NoV]LaZ",
 				JoinDate:   "31/05/2008",
-				TotalPosts: 1475,
+				TotalPosts: 1474,
 				Reputation: 87,
 				Errors: []error{
 					fmt.Errorf("user bio xmlpath did not return a result"),
