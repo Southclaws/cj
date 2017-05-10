@@ -17,7 +17,7 @@ func (app *App) ConnectDB(dbpath string) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&ChatLog{})
 
-	err = app.db.Create(&ChatLog{
+	err = db.Create(&ChatLog{
 		time.Now().Unix(),
 		"0",
 		"0",
