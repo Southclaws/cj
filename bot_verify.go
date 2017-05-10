@@ -271,7 +271,7 @@ func (app App) WarnUserBadInput(channelid string, verification Verification) err
 // instructions for what to do next.
 func (app App) WarnUserError(channelid string, errorString string) error {
 	debug("[verify:WarnUserError] channel '%s' error '%s'", channelid, errorString)
-	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString("WarnUserError", errorString))
+	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString("en", "WarnUserError", errorString))
 	return err
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -15,6 +16,16 @@ func (app *App) ConnectDB(dbpath string) {
 	db.LogMode(app.config.DebugLogs)
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&ChatLog{})
+
+	err = app.db.Create(&ChatLog{
+		time.Now().Unix(),
+		"0",
+		"0",
+		"__cjdatabaseinit__",
+	}).Error
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	app.db = db
 	log.Printf("Connected to database '%s'", dbpath)
