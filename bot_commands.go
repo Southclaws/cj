@@ -63,14 +63,14 @@ func LoadCommands(app *App) map[string]Command {
 		"/whois": {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
-			Description: app.locale.GetLangString("en", "CommandWhoisDescription", "%s"),
+			Description: app.locale.GetLangString("en", "CommandWhoisDescription"),
 			Usage:       "/whois [user(s)]",
 			Example:     "/whois @Southclaws#1657",
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention", "%s"),
+			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
