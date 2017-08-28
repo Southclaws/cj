@@ -1,6 +1,6 @@
 # SA:MP Forum Discord Bot
 
-[![Travis](https://img.shields.io/travis/Southclaws/cj.svg)](https://travis-ci.org/Southclaws/cj)
+[![Travis](https://img.shields.io/travis/Southclaws/cj.svg)](https://travis-ci.org/Southclaws/cj)[![Coverage](http://gocover.io/_badge/github.com/Southclaws/cj)](http://gocover.io/github.com/Southclaws/cj)
 
 CJ verifies SA:MP forum accounts and performs other tasks if you ask nicely.
 
