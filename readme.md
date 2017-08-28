@@ -1,6 +1,6 @@
 # SA:MP Forum Discord Bot
 
-[![CircleCI](https://circleci.com/gh/Southclaws/jeff.svg?style=svg)](https://circleci.com/gh/Southclaws/jeff)
+[![Travis](https://img.shields.io/travis/Southclaws/announce-backend.svg)](https://travis-ci.org/Southclaws/announce-backend)
 
 CJ verifies SA:MP forum accounts and performs other tasks if you ask nicely.
 
