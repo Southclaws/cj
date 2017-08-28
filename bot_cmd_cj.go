@@ -2,6 +2,7 @@ package main
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -213,6 +214,7 @@ var quotes = []string{
 }
 
 func commandCJQuote(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
+	rand.Seed(time.Now().UnixNano())
 	quote := quotes[rand.Intn(len(quotes))]
 	_, err := cm.App.discordClient.ChannelMessageSend(cm.App.config.PrimaryChannel, quote)
 	return true, false, err
