@@ -28,6 +28,7 @@ func (app *App) connect() error {
 	app.discordClient.AddHandler(app.onReady)
 	app.discordClient.AddHandler(app.onMessage)
 	app.discordClient.AddHandler(app.onJoin)
+	app.discordClient.AddHandler(app.onLeave)
 
 	err = app.discordClient.Open()
 	if err != nil {
@@ -162,6 +163,18 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 		if err != nil {
 			log.Print(err)
 		}
+	}
+}
+
+func (app *App) onLeave(s *discordgo.Session, event *discordgo.GuildMemberRemove) {
+	verified, err := app.IsUserVerified(event.Member.User.ID)
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
+	if err != nil {
+		log.Print(err)
 	}
 }
 
