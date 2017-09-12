@@ -28,7 +28,6 @@ func (app *App) connect() error {
 	app.discordClient.AddHandler(app.onReady)
 	app.discordClient.AddHandler(app.onMessage)
 	app.discordClient.AddHandler(app.onJoin)
-	app.discordClient.AddHandler(app.onLeave)
 
 	err = app.discordClient.Open()
 	if err != nil {
@@ -153,26 +152,18 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 		log.Print(err)
 	}
 
-	if !verified {
+	if verified {
+		err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
+		if err != nil {
+			log.Print(err)
+		}
+	} else {
 		ch, err := s.UserChannelCreate(event.Member.User.ID)
 		if err != nil {
 			log.Print(err)
 			return
 		}
 		_, err = app.discordClient.ChannelMessageSend(ch.ID, app.locale.GetLangString("en", "AskUserVerify"))
-		if err != nil {
-			log.Print(err)
-		}
-	}
-}
-
-func (app *App) onLeave(s *discordgo.Session, event *discordgo.GuildMemberRemove) {
-	verified, err := app.IsUserVerified(event.Member.User.ID)
-	if err != nil {
-		log.Print(err)
-	}
-	if verified {
-		err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
 		if err != nil {
 			log.Print(err)
 		}
