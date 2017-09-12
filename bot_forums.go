@@ -33,7 +33,7 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 
 	root, err := app.GetHTMLRoot(url)
 	if err != nil {
-		return result, err
+		return result, errors.Wrap(err, "failed to get HTML root for user page")
 	}
 
 	result.UserName, err = app.getUserName(root)

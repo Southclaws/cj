@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/pkg/errors"
 )
 
 // User is a recorded and verified SA:MP forum user.
@@ -33,7 +34,7 @@ func (app App) IsUserVerified(discordUserID string) (bool, error) {
 	result := app.db.Model(&User{}).Where(&User{DiscordUserID: discordUserID}).Count(&count)
 
 	if result.Error != nil {
-		return false, result.Error
+		return false, errors.Wrap(result.Error, "failed to check user existence by discord ID")
 	}
 
 	if count == 0 {
@@ -49,7 +50,7 @@ func (app App) GetDiscordUserForumUser(forumUserID string) (string, error) {
 
 	err := app.db.First(&user, &User{ForumUserID: forumUserID}).Error
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "failed to query user by forum ID")
 	}
 
 	return user.DiscordUserID, nil
@@ -61,7 +62,7 @@ func (app App) GetForumUserFromDiscordUser(discordUserID string) (string, error)
 
 	err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "failed to query forum ID by discord ID")
 	}
 
 	return user.ForumUserID, nil
@@ -73,7 +74,7 @@ func (app App) GetForumNameFromDiscordUser(discordUserID string) (string, error)
 
 	err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "failed to query forum name by discord ID")
 	}
 
 	return user.ForumUserName, nil

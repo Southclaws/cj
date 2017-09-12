@@ -70,6 +70,7 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
+			ErrorMessage:    app.locale.GetLangString("en", "CommandErrorNoMention"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -263,14 +264,23 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 			}
 		}
 		if !success {
-			// Format it if we have a mention in the error message.
-			if strings.Contains(commandObject.ErrorMessage, "<@%s>") {
-				_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(commandObject.ErrorMessage, message.Author.ID))
-			} else {
-				_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.ErrorMessage)
-			}
+			if commandObject.ErrorMessage != "" {
+				// Format it if we have a mention in the error message.
+				if strings.Contains(commandObject.ErrorMessage, "<@%s>") {
+					_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(commandObject.ErrorMessage, message.Author.ID))
+				} else {
+					_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.ErrorMessage)
+				}
 
-			errs = append(errs, err)
+				errs = append(errs, err)
+			} else {
+				_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
+				if err != nil {
+					errs = append(errs, err)
+				}
+
+				return exists, source, errs
+			}
 		}
 	}
 
