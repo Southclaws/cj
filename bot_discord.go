@@ -171,10 +171,11 @@ func (app *App) onLeave(s *discordgo.Session, event *discordgo.GuildMemberRemove
 	if err != nil {
 		log.Print(err)
 	}
-
-	err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
-	if err != nil {
-		log.Print(err)
+	if verified {
+		err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
+		if err != nil {
+			log.Print(err)
+		}
 	}
 }
 
