@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApp_GetUserProfilePage(t *testing.T) {
@@ -96,9 +97,9 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 				TotalPosts: 0,
 				Reputation: 0,
 				Errors: []error{
-					fmt.Errorf("cannot get user posts"),
-					fmt.Errorf("user bio xmlpath did not return a result"),
-					fmt.Errorf("visitor messages xmlpath did not return a result"),
+					errors.New("cannot get user posts"),
+					errors.New("user bio xmlpath did not return a result"),
+					errors.New("visitor messages xmlpath did not return a result"),
 				},
 			},
 			false,
@@ -113,9 +114,9 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 				TotalPosts: 0,
 				Reputation: 0,
 				Errors: []error{
-					fmt.Errorf("cannot get user posts"),
-					fmt.Errorf("user bio xmlpath did not return a result"),
-					fmt.Errorf("visitor messages xmlpath did not return a result"),
+					errors.New("cannot get user posts"),
+					errors.New("user bio xmlpath did not return a result"),
+					errors.New("visitor messages xmlpath did not return a result"),
 				},
 			},
 			false,
@@ -130,9 +131,9 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 				TotalPosts: 0,
 				Reputation: 0,
 				Errors: []error{
-					fmt.Errorf("cannot get user posts"),
-					fmt.Errorf("user bio xmlpath did not return a result"),
-					fmt.Errorf("visitor messages xmlpath did not return a result"),
+					errors.New("cannot get user posts"),
+					errors.New("user bio xmlpath did not return a result"),
+					errors.New("visitor messages xmlpath did not return a result"),
 				},
 			},
 			false,
@@ -147,8 +148,8 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 				TotalPosts: 1474,
 				Reputation: 87,
 				Errors: []error{
-					fmt.Errorf("user bio xmlpath did not return a result"),
-					fmt.Errorf("visitor messages xmlpath did not return a result"),
+					errors.New("user bio xmlpath did not return a result"),
+					errors.New("visitor messages xmlpath did not return a result"),
 				},
 			},
 			false,
@@ -164,12 +165,15 @@ func TestApp_GetUserProfilePage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.app.GetUserProfilePage(tt.args.url)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("App.GetUserProfilePage() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("App.GetUserProfilePage() = %v, want %v", got, tt.want)
+			assert.Equal(t, tt.wantErr, err != nil)
+			assert.Equal(t, tt.want.BioText, got.BioText)
+			assert.Equal(t, tt.want.JoinDate, got.JoinDate)
+			assert.Equal(t, tt.want.Reputation, got.Reputation)
+			assert.Equal(t, tt.want.TotalPosts, got.TotalPosts)
+			assert.Equal(t, tt.want.UserName, got.UserName)
+			assert.Equal(t, tt.want.VisitorMessages, got.VisitorMessages)
+			for i := range tt.want.Errors {
+				assert.Equal(t, tt.want.Errors[i], errors.Cause(got.Errors[i]))
 			}
 		})
 	}

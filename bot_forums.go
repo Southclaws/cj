@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
-	"strconv"
-
+	"github.com/pkg/errors"
 	"gopkg.in/xmlpath.v2"
 )
 
@@ -38,7 +38,7 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 
 	result.UserName, err = app.getUserName(root)
 	if err != nil {
-		return result, fmt.Errorf("url did not lead to a valid user page")
+		return result, errors.New("url did not lead to a valid user page")
 	}
 
 	result.JoinDate, err = app.getJoinDate(root)
@@ -77,7 +77,7 @@ func (app App) getUserName(root *xmlpath.Node) (string, error) {
 
 	result, ok := path.String(root)
 	if !ok {
-		return result, fmt.Errorf("user name xmlpath did not return a result")
+		return result, errors.New("user name xmlpath did not return a result")
 	}
 
 	return strings.Trim(result, "\n "), nil
@@ -92,7 +92,7 @@ func (app App) getJoinDate(root *xmlpath.Node) (string, error) {
 
 	result, ok := path.String(root)
 	if !ok {
-		return result, fmt.Errorf("join date xmlpath did not return a result")
+		return result, errors.New("join date xmlpath did not return a result")
 	}
 
 	return strings.TrimPrefix(result, "Join Date: "), nil
@@ -104,7 +104,7 @@ func (app App) getTotalPosts(root *xmlpath.Node) (int, error) {
 
 	posts, ok := path.String(root)
 	if !ok {
-		return 0, fmt.Errorf("total posts xmlpath did not return a result")
+		return 0, errors.New("total posts xmlpath did not return a result")
 	}
 
 	posts = strings.TrimPrefix(posts, "Total Posts: ")
@@ -112,7 +112,7 @@ func (app App) getTotalPosts(root *xmlpath.Node) (int, error) {
 
 	result, err := strconv.Atoi(posts)
 	if err != nil {
-		return 0, fmt.Errorf("cannot convert posts to integer")
+		return 0, errors.New("cannot convert posts to integer")
 	}
 
 	return result, nil
@@ -122,7 +122,7 @@ func (app App) getTotalPosts(root *xmlpath.Node) (int, error) {
 func (app App) getReputation(forumUserID string) (int, error) {
 	root, err := app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/search.php?do=finduser&u=%s", forumUserID))
 	if err != nil {
-		return 0, fmt.Errorf("cannot get user's posts")
+		return 0, errors.Wrap(err, "cannot get user's posts")
 	}
 
 	path := xmlpath.MustCompile(`//td[@class="alt1"]/div[@class="alt2"]/div/em/a/@href`)
@@ -130,13 +130,13 @@ func (app App) getReputation(forumUserID string) (int, error) {
 	// Get the first post from the list.
 	href, ok := path.String(root)
 	if !ok {
-		return 0, fmt.Errorf("cannot get user posts")
+		return 0, errors.New("cannot get user posts")
 	}
 
 	// If we have a valid post, search in it for user's reputation.
 	root, err = app.GetHTMLRoot(fmt.Sprintf("http://forum.sa-mp.com/%s", href))
 	if err != nil {
-		return 0, fmt.Errorf("cannot get user's post in a topic")
+		return 0, errors.Wrap(err, "cannot get user's post in a topic")
 	}
 
 	path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/*/*[contains(text(),'Reputation: ')]`, strings.Split(href, "#")[1]))
@@ -144,7 +144,7 @@ func (app App) getReputation(forumUserID string) (int, error) {
 	// Get the table for that post.
 	reputation, ok := path.String(root)
 	if !ok {
-		return 0, fmt.Errorf("cannot get reputation field from post")
+		return 0, errors.New("cannot get reputation field from post")
 	}
 
 	reputation = strings.TrimPrefix(reputation, "Reputation: ")
@@ -152,7 +152,7 @@ func (app App) getReputation(forumUserID string) (int, error) {
 
 	result, err := strconv.Atoi(reputation)
 	if err != nil {
-		return 0, fmt.Errorf("cannot convert reputation to integer")
+		return 0, errors.Wrap(err, "cannot convert reputation to integer")
 	}
 
 	return result, nil
@@ -166,7 +166,7 @@ func (app App) getUserBio(root *xmlpath.Node) (string, error) {
 
 	result, ok := path.String(root)
 	if !ok {
-		return result, fmt.Errorf("user bio xmlpath did not return a result")
+		return result, errors.New("user bio xmlpath did not return a result")
 	}
 
 	return result, nil
@@ -181,7 +181,7 @@ func (app App) getFirstTenUserVisitorMessages(root *xmlpath.Node) ([]VisitorMess
 	textPath := xmlpath.MustCompile(`.//div[2]/div[2]`)
 
 	if !mainPath.Exists(root) {
-		return result, fmt.Errorf("visitor messages xmlpath did not return a result")
+		return result, errors.New("visitor messages xmlpath did not return a result")
 	}
 
 	var ok bool
