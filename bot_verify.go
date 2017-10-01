@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"github.com/bwmarrin/discordgo"
 	gocache "github.com/patrickmn/go-cache"
 )
@@ -63,7 +65,9 @@ type Verification struct {
 // SetVerificationState updates the state of a Verification and ensures it's
 // cache entry is updated.
 func (app App) SetVerificationState(v *Verification, state VerificationState) {
-	debug("[verify:SetVerificationState] user %v state %v", v.discordUser, state)
+	logger.Debug("set user verification state",
+		zap.String("user", v.discordUser.Username),
+		zap.Any("state", state))
 	v.verifyState = state
 	app.cache.Set(v.discordUser.ID, *v, gocache.DefaultExpiration)
 }
@@ -71,7 +75,8 @@ func (app App) SetVerificationState(v *Verification, state VerificationState) {
 // UserStartsVerification is called when the user sends the string "verify" to
 // the bot.
 func (app App) UserStartsVerification(message discordgo.Message) error {
-	debug("[verify:UserStartsVerification] user '%s' message '%s'", message.Author.Username, message.Content)
+	logger.Debug("user started verification",
+		zap.String("username", message.Author.Username))
 	var verification Verification
 	var err error
 
@@ -99,7 +104,9 @@ func (app App) UserStartsVerification(message discordgo.Message) error {
 // UserProvidesProfileURL is called when the user responds with a profile URL or
 // profile ID.
 func (app App) UserProvidesProfileURL(message discordgo.Message) error {
-	debug("[verify:UserProvidesProfileURL] user '%s' message '%s'", message.Author.Username, message.Content)
+	logger.Debug("user provided profile info",
+		zap.String("user", message.Author.Username),
+		zap.String("info", message.Content))
 	var verification Verification
 	var err error
 
@@ -155,7 +162,8 @@ func (app App) UserProvidesProfileURL(message discordgo.Message) error {
 
 // UserConfirmsProfile is called when the user responds with 'done'
 func (app App) UserConfirmsProfile(message discordgo.Message) error {
-	debug("[verify:UserConfirmsProfile] user '%s' message '%s'", message.Author.Username, message.Content)
+	logger.Debug("user confirmed profile ownership",
+		zap.String("user", message.Author.Username))
 	var verification Verification
 	var err error
 
@@ -183,7 +191,7 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 	}
 
 	if !verified {
-		debug("[verify:UserConfirmsProfile] user '%s' not confirmed", message.Author.Username)
+		logger.Debug("user not confirmed", zap.String("user", message.Author.Username))
 		_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Failure"))
 		return err
 	}
@@ -193,20 +201,19 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 		return err
 	}
 
-	debug("[verify:UserConfirmsProfile] adding role in '%s' for '%s': '%s'", app.config.GuildID, verification.discordUser.ID, app.config.VerifiedRole)
 	err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, verification.discordUser.ID, app.config.VerifiedRole)
 	if err != nil {
 		return err
 	}
 
-	debug("[verify:UserConfirmsProfile] user '%s' confirmed", message.Author.Username)
+	logger.Debug("user confirmed", zap.String("user", message.Author.Username))
 	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Success", verification.forumUser))
 	return err
 }
 
 // UserCancelsVerification is called when the user responds with 'cancel'
 func (app App) UserCancelsVerification(message discordgo.Message) error {
-	debug("[verify:UserCancelsVerification] user '%s' message '%s'", message.Author.Username, message.Content)
+	logger.Debug("user cancelled verification", zap.String("user", message.Author.Username))
 	var verification Verification
 	var err error
 
@@ -228,7 +235,6 @@ func (app App) UserCancelsVerification(message discordgo.Message) error {
 // to be used when the user's reply does not match the expected reply according
 // to the state of the Verification associated with the user.
 func (app App) WarnUserVerificationState(channelid string, verification Verification) error {
-	debug("[verify:WarnUserVerificationState] user '%s' state '%v'", verification.discordUser.Username, verification.verifyState)
 	var stateMessage string
 	switch verification.verifyState {
 	case VerificationStateNone:
@@ -245,7 +251,6 @@ func (app App) WarnUserVerificationState(channelid string, verification Verifica
 // WarnUserNoVerification is simply a message informing the user their
 // Verification does not exist and they need to start the process with 'verify'.
 func (app App) WarnUserNoVerification(channelid string) error {
-	debug("[verify:WarnUserNoVerification] channelid %v", channelid)
 	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString("en", "WarnUserNoVerification"))
 	return err
 }
@@ -253,7 +258,6 @@ func (app App) WarnUserNoVerification(channelid string) error {
 // WarnUserBadInput lets the user know their input was not recognised for the
 // current verification state.
 func (app App) WarnUserBadInput(channelid string, verification Verification) error {
-	debug("[verify:WarnUserBadInput] user '%s' state '%s'", verification.discordUser.Username, verification.verifyState)
 	var stateMessage string
 	switch verification.verifyState {
 	case VerificationStateNone:
@@ -270,31 +274,15 @@ func (app App) WarnUserBadInput(channelid string, verification Verification) err
 // WarnUserError informs the user of an error and provides them with
 // instructions for what to do next.
 func (app App) WarnUserError(channelid string, errorString string) error {
-	debug("[verify:WarnUserError] channel '%s' error '%s'", channelid, errorString)
 	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString("en", "WarnUserError", errorString))
 	return err
 }
 
 // CheckUserPageForCode checks if a verification code has been posted by a user.
 func (app App) CheckUserPageForCode(page UserProfile, code string) (bool, error) {
-	debug("[verify:CheckUserPageForCode] user '%s' code '%s'", page.UserName, code)
-
 	if strings.Contains(page.BioText, code) {
-		debug("[verify:CheckUserPageForCode] code found in bio")
 		return true, nil
 	}
-	/*debug("[verify:CheckUserPageForCode] code not found in bio, search vm")
-	visitorMessages, err := app.GetFirstTenUserVisitorMessages(page)
-	if err != nil {
-		errors = append(errors, err)
-	}
-
-	for _, m := range visitorMessages {
-		if strings.Contains(m, code) {
-			return true, nil
-		}
-	}
-	debug("[verify:CheckUserPageForCode] code not found in vm")*/
 	return false, nil
 }
 

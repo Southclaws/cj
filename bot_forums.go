@@ -38,7 +38,7 @@ func (app App) GetUserProfilePage(url string) (UserProfile, error) {
 
 	result.UserName, err = app.getUserName(root)
 	if err != nil {
-		return result, errors.New("url did not lead to a valid user page")
+		return result, errors.Wrap(err, "url did not lead to a valid user page")
 	}
 
 	result.JoinDate, err = app.getJoinDate(root)

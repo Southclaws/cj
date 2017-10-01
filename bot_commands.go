@@ -153,8 +153,6 @@ func (app *App) StartCommandManager() {
 // and, if so, call the associated function.
 // nolint:gocyclo
 func (cm CommandManager) Process(message discordgo.Message) (exists bool, source CommandSource, errs []error) {
-	debug("[commands:Process] message: '%s'", message.Content)
-
 	var err error
 
 	source = cm.getCommandSource(message.ChannelID)
@@ -162,7 +160,6 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	contextCommand, found := cm.Contexts.Get(message.Author.ID)
 	if found {
 		contextCommand := contextCommand.(Command)
-		debug("[commands:Process] User is currently in context of command '%s'", contextCommand.Usage)
 		if contextCommand.Source == source {
 			var continueContext bool
 			continueContext, errs = cm.ProcessContext(contextCommand, message.Content, message)
@@ -187,14 +184,10 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	commandObject.commandManager = &cm
 
 	if !exists {
-		debug("[commands:Process] command '%s' does not exist", commandTrigger)
 		return exists, source, nil
 	}
 
-	debug("[commands:Process] command exists, source: %v required: %v", source, commandObject.Source)
-
 	if source == commandObject.Source {
-		debug("[commands:Process] command source matches required source")
 		switch source {
 		case CommandSourceADMINISTRATIVE:
 			if message.ChannelID != cm.App.config.AdministrativeChannel {
@@ -259,7 +252,6 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		errs = append(errs, err)
 		if enterContext {
 			if commandObject.Context {
-				debug("[commands:Process] command is contextual, placing user in context")
 				cm.Contexts.Set(message.Author.ID, commandObject, gocache.DefaultExpiration)
 			}
 		}

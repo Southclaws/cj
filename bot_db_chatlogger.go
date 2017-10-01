@@ -20,9 +20,7 @@ type ChatLog struct {
 
 // StartChatLogger creates a new chat logger for the app
 func (app *App) StartChatLogger() {
-	var cl ChatLogger
-
-	cl = ChatLogger{app: app}
+	cl := ChatLogger{app: app}
 
 	app.chatLogger = &cl
 
@@ -32,9 +30,7 @@ func (app *App) StartChatLogger() {
 // RecordChatLog records a chat message from a user in a channel
 func (cl *ChatLogger) RecordChatLog(discordUserID string, discordChannel string, message string) error {
 	log.Printf("[chatlogger:RecordChatLog] %s #%s: '%s'", discordUserID, discordChannel, message)
-	var record ChatLog
-
-	record = ChatLog{
+	record := ChatLog{
 		time.Now().Unix(),
 		discordUserID,
 		discordChannel,

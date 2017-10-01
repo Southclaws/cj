@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -23,7 +25,6 @@ func (app *App) connect() error {
 		log.Print("discord client creation error")
 		log.Fatal(err)
 	}
-	debug("connected to Discord")
 
 	app.discordClient.AddHandler(app.onReady)
 	app.discordClient.AddHandler(app.onMessage)
@@ -35,15 +36,11 @@ func (app *App) connect() error {
 		log.Fatal(err)
 	}
 
-	debug("awaiting Discord ready state...")
-
 	return nil
 }
 
 // nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
-	debug("discord ready")
-
 	found := 0
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
@@ -56,14 +53,13 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		}
 	}
 	if found != 2 {
-		log.Printf("verified role ID '%s' was not found in guild role list:", app.config.VerifiedRole)
 		for _, role := range roles {
 			log.Printf("name: %s id: %s", role.Name, role.ID)
 		}
-		log.Fatalf("role '%s' not found.", app.config.VerifiedRole)
+		logger.Fatal("role not found.",
+			zap.String("role", app.config.VerifiedRole))
 	}
 
-	log.Print("Updating users to normal role")
 	var member bool
 	users, err := s.GuildMembers(app.config.GuildID, "", 1000)
 	if err != nil {
@@ -77,14 +73,12 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 			}
 		}
 		if !member {
-			log.Printf("GuildMemberRoleAdd '%s' '%s' '%s'", app.config.GuildID, user.User.ID, app.config.NormalRole)
 			err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
 			if err != nil {
 				log.Print(err)
 			}
 		}
 	}
-	log.Print("Done updating users")
 
 	ticker := time.NewTicker(time.Minute * time.Duration(app.config.Heartbeat))
 	for t := range ticker.C {
@@ -106,7 +100,6 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 
 	if app.config.DebugUser != "" {
 		if event.Message.Author.ID != app.config.DebugUser {
-			debug("[private:HandlePrivateMessage] app.config.DebugUser non-empty, user ID does not match app.config.DebugUser")
 			return
 		}
 	}

@@ -7,14 +7,35 @@ import (
 	"os"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/foize/go.fifo"
 	"github.com/jinzhu/gorm"
 	gocache "github.com/patrickmn/go-cache"
-	dbg "github.com/tj/go-debug"
 )
 
-var debug = dbg.Debug("main")
+var logger *zap.Logger
+
+func initLogger(debug bool) {
+	config := zap.NewDevelopmentConfig()
+	config.DisableCaller = true
+
+	if debug {
+		dyn := zap.NewAtomicLevel()
+		dyn.SetLevel(zap.DebugLevel)
+		config.Level = dyn
+	}
+
+	_logger, err := config.Build()
+	if err != nil {
+		panic(err)
+	}
+	logger = _logger.With(
+		zap.String("@version", os.Getenv("GIT_HASH")),
+		zap.Namespace("@fields"),
+	)
+}
 
 // Config stores configuration variables
 type Config struct {
@@ -49,8 +70,6 @@ type App struct {
 }
 
 func main() {
-	log.Print("Initialising SA:MP Forum Discord bot by Southclaws")
-
 	var err error
 	app := App{
 		config:     Config{},
@@ -70,23 +89,9 @@ func main() {
 	}
 
 	app.LoadConfig(configLocation)
-
-	log.Printf("Config:\n")
-	log.Printf("- DiscordToken: (%d chars)\n", len(app.config.DiscordToken))
-	log.Printf("- AdministrativeChannel: %v\n", app.config.AdministrativeChannel)
-	log.Printf("- PrimaryChannel: %v\n", app.config.PrimaryChannel)
-	log.Printf("- Heartbeat: %v\n", app.config.Heartbeat)
-	log.Printf("- BotID: %v\n", app.config.BotID)
-	log.Printf("- GuildID: %s\n", app.config.GuildID)
-	log.Printf("- VerifiedRole: %s\n", app.config.VerifiedRole)
-	log.Printf("- NormalRole: %s\n", app.config.NormalRole)
-	log.Printf("- DebugLogs: %v\n", app.config.DebugLogs)
-	log.Printf("- DebugUser: %v\n", app.config.DebugUser)
-	log.Printf("- Admin: %v\n", app.config.Admin)
-	log.Printf("- LogFlushAt: %v\n", app.config.LogFlushAt)
-	log.Printf("- LogFlushInterval: %v\n", app.config.LogFlushInterval)
-
-	log.Printf("~\n")
+	initLogger(app.config.DebugLogs)
+	logger.Debug("started with debug logging enabled",
+		zap.Any("config", app.config))
 
 	app.ConnectDB(dbLocation)
 	app.StartChatLogger()
@@ -96,11 +101,6 @@ func main() {
 	var count int
 	app.db.Model(&User{}).Count(&count)
 	log.Printf("Verified users: %d", count)
-
-	if app.config.DebugLogs {
-		dbg.Enable("main")
-		debug("Debug mode enabled")
-	}
 
 	err = app.connect()
 	if err != nil {

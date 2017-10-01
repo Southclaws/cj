@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // User is a recorded and verified SA:MP forum user.
@@ -17,7 +18,12 @@ type User struct {
 
 // StoreVerifiedUser is for when a user finishes their verification.
 func (app App) StoreVerifiedUser(verification Verification) error {
-	debug("[users:StoreVerifiedUser] storing '%s' '%s' '%s' '%s'", verification.discordUser.ID, verification.forumUser, verification.code, verification.userProfile.UserName)
+	logger.Debug("storing verified user",
+		zap.String("discord_id", verification.discordUser.ID),
+		zap.String("forum_user", verification.forumUser),
+		zap.String("code", verification.code),
+		zap.String("forum_name", verification.userProfile.UserName))
+
 	err := app.db.Create(&User{
 		DiscordUserID:    verification.discordUser.ID,
 		ForumUserID:      verification.forumUser,
