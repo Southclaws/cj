@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"go.uber.org/zap"
@@ -22,8 +21,7 @@ func (app *App) connect() error {
 
 	app.discordClient, err = discordgo.New("Bot " + app.config.DiscordToken)
 	if err != nil {
-		log.Print("discord client creation error")
-		log.Fatal(err)
+		panic(err)
 	}
 
 	app.discordClient.AddHandler(app.onReady)
@@ -32,8 +30,7 @@ func (app *App) connect() error {
 
 	err = app.discordClient.Open()
 	if err != nil {
-		log.Println("discord client connection error")
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return nil
@@ -44,7 +41,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	found := 0
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	for _, role := range roles {
@@ -53,9 +50,6 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		}
 	}
 	if found != 2 {
-		for _, role := range roles {
-			log.Printf("name: %s id: %s", role.Name, role.ID)
-		}
 		logger.Fatal("role not found.",
 			zap.String("role", app.config.VerifiedRole))
 	}
@@ -63,7 +57,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	var member bool
 	users, err := s.GuildMembers(app.config.GuildID, "", 1000)
 	if err != nil {
-		log.Print(err)
+		panic(err)
 	}
 	for _, user := range users {
 		member = false
@@ -75,7 +69,7 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		if !member {
 			err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
 			if err != nil {
-				log.Print(err)
+				panic(err)
 			}
 		}
 	}
@@ -106,12 +100,11 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 
 	_, source, errors := app.commandManager.Process(*event.Message)
 	if errors != nil {
-		for _, e := range errors {
-			if e != nil {
-				log.Print(e)
-				e = app.WarnUserError(event.Message.ChannelID, e.Error())
-				if e != nil {
-					log.Print(e)
+		for _, err := range errors {
+			if err != nil {
+				err = app.WarnUserError(event.Message.ChannelID, err.Error())
+				if err != nil {
+					logger.Warn("failed to warn user of error", zap.Error(err))
 				}
 			}
 		}
@@ -120,14 +113,14 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	if source != CommandSourcePRIVATE && source != CommandSourceADMINISTRATIVE {
 		err := app.chatLogger.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
 		if err != nil {
-			log.Print(err)
+			logger.Warn("failed to record chat log", zap.Error(err))
 		}
 
 		for i := range event.Message.Mentions {
 			if event.Message.Mentions[i].ID == app.config.BotID {
 				err := app.HandleSummon(*event.Message)
 				if err != nil {
-					log.Print(err)
+					logger.Warn("failed to handle summon", zap.Error(err))
 				}
 			}
 		}
@@ -137,28 +130,28 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 	verified, err := app.IsUserVerified(event.Member.User.ID)
 	if err != nil {
-		log.Print(err)
+		logger.Warn("failed to check if user verified", zap.Error(err))
 	}
 
 	err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.NormalRole)
 	if err != nil {
-		log.Print(err)
+		logger.Warn("failed to add normal role to member", zap.Error(err))
 	}
 
 	if verified {
 		err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
 		if err != nil {
-			log.Print(err)
+			logger.Warn("failed to add verified role to member", zap.Error(err))
 		}
 	} else {
 		ch, err := s.UserChannelCreate(event.Member.User.ID)
 		if err != nil {
-			log.Print(err)
+			logger.Warn("failed to create user channel", zap.Error(err))
 			return
 		}
 		_, err = app.discordClient.ChannelMessageSend(ch.ID, app.locale.GetLangString("en", "AskUserVerify"))
 		if err != nil {
-			log.Print(err)
+			logger.Warn("failed to send message", zap.Error(err))
 		}
 	}
 }
@@ -166,6 +159,6 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 func (app *App) onHeartbeat(t time.Time) {
 	err := app.HandleHeartbeatEvent(t)
 	if err != nil {
-		log.Print(err)
+		logger.Warn("failed to handle heartbeat", zap.Error(err))
 	}
 }

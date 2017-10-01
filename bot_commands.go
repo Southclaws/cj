@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 
 	"fmt"
 
@@ -303,19 +304,19 @@ func (cm CommandManager) getCommandSource(channel string) CommandSource {
 		var response *http.Response
 		var body []byte
 		if req, err = http.NewRequest("GET", discordgo.EndpointChannel(channel), nil); err != nil {
-			log.Print(err)
+			logger.Warn("failed to get discord API", zap.Error(err))
 		}
 		req.Header.Add("Authorization", "Bot "+cm.App.config.DiscordToken)
 		if response, err = cm.App.httpClient.Do(req); err != nil {
-			log.Print(err)
+			logger.Warn("failed to authorise against discord API", zap.Error(err))
 		}
 		if body, err = ioutil.ReadAll(response.Body); err != nil {
-			log.Print(err)
+			logger.Warn("failed to read response", zap.Error(err))
 		}
 		channel := ChannelDM{}
 		err = json.Unmarshal(body, &channel)
 		if err != nil {
-			log.Print(err)
+			logger.Warn("failed to unmarshal response", zap.Error(err))
 		}
 
 		// Now we have one of these:

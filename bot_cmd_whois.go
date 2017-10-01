@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -42,12 +40,12 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		} else {
 			username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
 			if err != nil {
-				log.Print(err)
+				return false, false, err
 			}
 
 			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
-				log.Print(err)
+				return false, false, err
 			}
 
 			result += cm.App.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link) + " "
@@ -56,7 +54,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 
 	_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, result)
 	if err != nil {
-		log.Print(err)
+		return false, false, err
 	}
 
 	return true, false, nil

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 )
 
@@ -29,7 +28,6 @@ func (app *App) StartChatLogger() {
 
 // RecordChatLog records a chat message from a user in a channel
 func (cl *ChatLogger) RecordChatLog(discordUserID string, discordChannel string, message string) error {
-	log.Printf("[chatlogger:RecordChatLog] %s #%s: '%s'", discordUserID, discordChannel, message)
 	record := ChatLog{
 		time.Now().Unix(),
 		discordUserID,
@@ -51,7 +49,7 @@ func (cl *ChatLogger) flushTicker() {
 	for range t.C {
 		cl.flushChatLogs()
 	}
-	log.Printf("ERROR: flushTicker ended unexpectedly")
+	logger.Warn("flushTicker ended unexpectedly")
 	<-cl.app.done
 }
 

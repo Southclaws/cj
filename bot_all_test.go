@@ -10,8 +10,6 @@ import (
 var app App
 
 func TestMain(m *testing.M) {
-	log.Print("initialising...")
-
 	app = App{
 		config:     Config{},
 		httpClient: &http.Client{},
@@ -31,15 +29,13 @@ func TestMain(m *testing.M) {
 	app.ConnectDB(dbLocation)
 	app.loadLanguages()
 
-	log.Print("initialised.")
-
 	ret := m.Run()
 
 	err := app.db.Close()
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("removing test database %s", dbLocation)
+
 	if err := os.Remove(dbLocation); err != nil {
 		panic(err)
 	}

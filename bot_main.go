@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -100,11 +99,10 @@ func main() {
 
 	var count int
 	app.db.Model(&User{}).Count(&count)
-	log.Printf("Verified users: %d", count)
 
 	err = app.connect()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	app.done = make(chan bool)
@@ -112,7 +110,9 @@ func main() {
 
 	err1 := app.discordClient.Close()
 	err2 := app.db.Close()
-	log.Printf("Closed database, shutting down %v %v", err1, err2)
+	logger.Fatal("shutting down",
+		zap.Error(err1),
+		zap.Error(err2))
 }
 
 // LoadConfig loads the specified config JSON file and returns the contents as
@@ -120,17 +120,17 @@ func main() {
 func (app *App) LoadConfig(filename string) {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	app.config = Config{}
 	err = json.NewDecoder(file).Decode(&app.config)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	err = file.Close()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }

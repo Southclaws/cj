@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 func commandUserInfo(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
@@ -33,7 +32,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 		} else {
 			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
-				log.Print(err)
+				return errors.Wrap(err, "failed to get forum user from discord user")
 			}
 
 			cachedProfile, found = cm.App.cache.Get(link)
@@ -42,7 +41,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 			} else {
 				profile, err = cm.App.GetUserProfilePage(link)
 				if err != nil {
-					log.Print(err)
+					return errors.Wrap(err, "failed to get user profile page")
 				}
 			}
 
@@ -52,7 +51,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 
 	_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, result)
 	if err != nil {
-		log.Print(err)
+		return errors.Wrap(err, "failed to send channel message")
 	}
 
 	return true, false, err

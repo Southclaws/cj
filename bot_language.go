@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"path/filepath"
+
+	"go.uber.org/zap"
 )
 
 // Locale stores map from language ID to Language object
@@ -21,7 +22,7 @@ type Language struct {
 func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) string {
 	str := fmt.Sprintf(l.Languages[lang].Strings[key], vargs...)
 	if str == "" {
-		log.Printf("ERROR: undefined lang key: '%s'", key)
+		logger.Warn("undefined lang key", zap.String("key", key))
 	}
 	return str
 }
@@ -29,7 +30,7 @@ func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) str
 func (app *App) loadLanguages() {
 	files, err := ioutil.ReadDir("lang")
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	var key string
@@ -47,7 +48,7 @@ func (app *App) loadLanguages() {
 func loadLanguageFromDir(dir string) Language {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	var language Language
@@ -73,7 +74,7 @@ func loadLanguageFromDir(dir string) Language {
 func loadLanguageStringFromFile(file string) string {
 	contents, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return string(contents)
