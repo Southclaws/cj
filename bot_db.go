@@ -11,7 +11,6 @@ func (app *App) ConnectDB(dbpath string) {
 	if err != nil {
 		logger.Fatal("failed to open sqlite database", zap.Error(err))
 	}
-	db.LogMode(app.config.DebugLogs)
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&ChatLog{})
 
