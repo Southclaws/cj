@@ -32,7 +32,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 		} else {
 			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
-				return errors.Wrap(err, "failed to get forum user from discord user")
+				return false, false, errors.Wrap(err, "failed to get forum user from discord user")
 			}
 
 			cachedProfile, found = cm.App.cache.Get(link)
@@ -41,7 +41,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 			} else {
 				profile, err = cm.App.GetUserProfilePage(link)
 				if err != nil {
-					return errors.Wrap(err, "failed to get user profile page")
+					return false, false, errors.Wrap(err, "failed to get user profile page")
 				}
 			}
 
@@ -51,7 +51,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 
 	_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, result)
 	if err != nil {
-		return errors.Wrap(err, "failed to send channel message")
+		return false, false, errors.Wrap(err, "failed to send channel message")
 	}
 
 	return true, false, err
