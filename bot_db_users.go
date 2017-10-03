@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -17,47 +16,45 @@ type User struct {
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
-func (app App) StoreVerifiedUser(verification Verification) error {
+func (app App) StoreVerifiedUser(verification Verification) (err error) {
 	logger.Debug("storing verified user",
 		zap.String("discord_id", verification.discordUser.ID),
 		zap.String("forum_user", verification.forumUser),
 		zap.String("code", verification.code),
 		zap.String("forum_name", verification.userProfile.UserName))
 
-	err := app.db.Create(&User{
-		DiscordUserID:    verification.discordUser.ID,
-		ForumUserID:      verification.forumUser,
-		VerificationCode: verification.code,
-		ForumUserName:    verification.userProfile.UserName,
-	}).Error
+	// err := app.db.Insert(&User{
+	// 	DiscordUserID:    verification.discordUser.ID,
+	// 	ForumUserID:      verification.forumUser,
+	// 	VerificationCode: verification.code,
+	// 	ForumUserName:    verification.userProfile.UserName,
+	// }).Error
 
-	return err
+	return
 }
 
 // IsUserVerified returns a discord user, a blank string or an error
-func (app App) IsUserVerified(discordUserID string) (bool, error) {
-	var count int
-	result := app.db.Model(&User{}).Where(&User{DiscordUserID: discordUserID}).Count(&count)
+func (app App) IsUserVerified(discordUserID string) (verified bool, err error) {
+	// var count int
+	// result := app.db.Model(&User{}).Where(&User{DiscordUserID: discordUserID}).Count(&count)
 
-	if result.Error != nil {
-		return false, errors.Wrap(result.Error, "failed to check user existence by discord ID")
-	}
+	// if result.Error != nil {
+	// 	err = errors.Wrap(result.Error, "failed to check user existence by discord ID")
+	// } else if count == 0 {
+	// 	verified = false
+	// }
 
-	if count == 0 {
-		return false, nil
-	}
-
-	return true, nil
+	return
 }
 
 // GetDiscordUserForumUser returns a discord user, a blank string or an error
 func (app App) GetDiscordUserForumUser(forumUserID string) (string, error) {
 	var user User
 
-	err := app.db.First(&user, &User{ForumUserID: forumUserID}).Error
-	if err != nil {
-		return "", errors.Wrap(err, "failed to query user by forum ID")
-	}
+	// err := app.db.First(&user, &User{ForumUserID: forumUserID}).Error
+	// if err != nil {
+	// 	return "", errors.Wrap(err, "failed to query user by forum ID")
+	// }
 
 	return user.DiscordUserID, nil
 }
@@ -66,10 +63,10 @@ func (app App) GetDiscordUserForumUser(forumUserID string) (string, error) {
 func (app App) GetForumUserFromDiscordUser(discordUserID string) (string, error) {
 	var user User
 
-	err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
-	if err != nil {
-		return "", errors.Wrap(err, "failed to query forum ID by discord ID")
-	}
+	// err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
+	// if err != nil {
+	// 	return "", errors.Wrap(err, "failed to query forum ID by discord ID")
+	// }
 
 	return user.ForumUserID, nil
 }
@@ -78,10 +75,10 @@ func (app App) GetForumUserFromDiscordUser(discordUserID string) (string, error)
 func (app App) GetForumNameFromDiscordUser(discordUserID string) (string, error) {
 	var user User
 
-	err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
-	if err != nil {
-		return "", errors.Wrap(err, "failed to query forum name by discord ID")
-	}
+	// err := app.db.First(&user, &User{DiscordUserID: discordUserID}).Error
+	// if err != nil {
+	// 	return "", errors.Wrap(err, "failed to query forum name by discord ID")
+	// }
 
 	return user.ForumUserName, nil
 }

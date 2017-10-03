@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	"go.uber.org/zap"
+	mgo "gopkg.in/mgo.v2"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/foize/go.fifo"
-	"github.com/jinzhu/gorm"
 	gocache "github.com/patrickmn/go-cache"
+	"go.uber.org/zap"
 )
 
 var logger *zap.Logger
@@ -38,6 +38,12 @@ func initLogger(debug bool) {
 
 // Config stores configuration variables
 type Config struct {
+	MongoHost             string `json:"mongodb_host"`
+	MongoPort             string `json:"mongodb_port"`
+	MongoName             string `json:"mongodb_name"`
+	MongoUser             string `json:"mongodb_user"`
+	MongoPass             string `json:"mongodb_pass"`
+	MongoCollection       string `json:"mongodb_collection"`
 	DiscordToken          string `json:"discord_token"`          // discord API token
 	AdministrativeChannel string `json:"administrative_channel"` // administrative channel where someone can speak as bot
 	PrimaryChannel        string `json:"primary_channel"`        // main channel the bot hangs out in
@@ -56,6 +62,8 @@ type Config struct {
 // App stores program state
 type App struct {
 	config         Config
+	mongo          *mgo.Session
+	cln            *mgo.Collection
 	discordClient  *discordgo.Session
 	httpClient     *http.Client
 	ready          chan bool
@@ -64,7 +72,6 @@ type App struct {
 	locale         Locale
 	chatLogger     *ChatLogger
 	commandManager *CommandManager
-	db             *gorm.DB
 	done           chan bool
 }
 
@@ -82,23 +89,15 @@ func main() {
 		configLocation = "config.json"
 	}
 
-	dbLocation := os.Getenv("DB_FILE")
-	if dbLocation == "" {
-		dbLocation = "users.db"
-	}
-
-	app.LoadConfig(configLocation)
+	app.config = LoadConfig(configLocation)
 	initLogger(app.config.DebugLogs)
 	logger.Debug("started with debug logging enabled",
 		zap.Any("config", app.config))
 
-	app.ConnectDB(dbLocation)
+	app.ConnectDB()
 	app.StartChatLogger()
 	app.loadLanguages()
 	app.StartCommandManager()
-
-	var count int
-	app.db.Model(&User{}).Count(&count)
 
 	err = app.connect()
 	if err != nil {
@@ -108,23 +107,21 @@ func main() {
 	app.done = make(chan bool)
 	<-app.done
 
-	err1 := app.discordClient.Close()
-	err2 := app.db.Close()
+	app.mongo.Close()
+	err = app.discordClient.Close()
 	logger.Fatal("shutting down",
-		zap.Error(err1),
-		zap.Error(err2))
+		zap.Error(err))
 }
 
 // LoadConfig loads the specified config JSON file and returns the contents as
 // a pointer to a Config object.
-func (app *App) LoadConfig(filename string) {
+func LoadConfig(filename string) (config Config) {
 	file, err := os.Open(filename)
 	if err != nil {
 		panic(err)
 	}
 
-	app.config = Config{}
-	err = json.NewDecoder(file).Decode(&app.config)
+	err = json.NewDecoder(file).Decode(&config)
 	if err != nil {
 		panic(err)
 	}
@@ -133,4 +130,6 @@ func (app *App) LoadConfig(filename string) {
 	if err != nil {
 		panic(err)
 	}
+
+	return
 }

@@ -58,15 +58,15 @@ func (cl *ChatLogger) flushChatLogs() {
 		return
 	}
 
-	tx := cl.app.db.Begin()
-	for {
-		message := cl.app.queue.Next()
-		if message == nil {
-			break
-		}
-		tx.Create(message.(ChatLog))
-	}
-	tx.Commit()
+	// tx := cl.app.db.Begin()
+	// for {
+	// 	message := cl.app.queue.Next()
+	// 	if message == nil {
+	// 		break
+	// 	}
+	// 	tx.Create(message.(ChatLog))
+	// }
+	// tx.Commit()
 	return
 }
 

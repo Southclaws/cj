@@ -24,16 +24,11 @@ func TestMain(m *testing.M) {
 		dbLocation = "users_test.db"
 	}
 
-	app.LoadConfig(configLocation)
-	app.ConnectDB(dbLocation)
+	app.config = LoadConfig(configLocation)
+	app.ConnectDB()
 	app.loadLanguages()
 
 	ret := m.Run()
-
-	err := app.db.Close()
-	if err != nil {
-		panic(err)
-	}
 
 	if err := os.Remove(dbLocation); err != nil {
 		panic(err)
