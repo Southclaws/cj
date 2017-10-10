@@ -16,12 +16,14 @@ type ChannelDM struct {
 	LastMessageID string         `json:"last_message_id"`
 }
 
-func (app *App) connect() error {
+// ConnectDiscord sets up the Discord API and event listeners
+func (app *App) ConnectDiscord() {
 	var err error
 
 	app.discordClient, err = discordgo.New("Bot " + app.config.DiscordToken)
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to connect to Discord API",
+			zap.Error(err))
 	}
 
 	app.discordClient.AddHandler(app.onReady)
@@ -30,10 +32,9 @@ func (app *App) connect() error {
 
 	err = app.discordClient.Open()
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to start Discord client",
+			zap.Error(err))
 	}
-
-	return nil
 }
 
 // nolint:gocyclo
@@ -41,7 +42,8 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	found := 0
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to get guild roles",
+			zap.Error(err))
 	}
 
 	for _, role := range roles {
@@ -57,7 +59,8 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	var member bool
 	users, err := s.GuildMembers(app.config.GuildID, "", 1000)
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to get guild members",
+			zap.Error(err))
 	}
 	for _, user := range users {
 		member = false
@@ -69,7 +72,8 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		if !member {
 			err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
 			if err != nil {
-				panic(err)
+				logger.Fatal("failed to add role to guild member",
+					zap.Error(err))
 			}
 		}
 	}

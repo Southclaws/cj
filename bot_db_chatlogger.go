@@ -50,7 +50,6 @@ func (cl *ChatLogger) flushTicker() {
 		cl.flushChatLogs()
 	}
 	logger.Warn("flushTicker ended unexpectedly")
-	<-cl.app.done
 }
 
 func (cl *ChatLogger) flushChatLogs() {

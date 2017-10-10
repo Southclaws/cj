@@ -1,30 +1,34 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
 	"os"
-	"time"
+	"strconv"
 
-	"github.com/bwmarrin/discordgo"
-	"github.com/foize/go.fifo"
-	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
-	"gopkg.in/mgo.v2"
+	"go.uber.org/zap/zapcore"
 )
 
 var logger *zap.Logger
 
-func initLogger(debug bool) {
-	config := zap.NewDevelopmentConfig()
-	config.DisableCaller = true
+func init() {
+	var config zap.Config
+	debug := os.Getenv("DEBUG")
 
-	if debug {
-		dyn := zap.NewAtomicLevel()
-		dyn.SetLevel(zap.DebugLevel)
-		config.Level = dyn
+	if os.Getenv("TESTING") != "" {
+		config = zap.NewDevelopmentConfig()
+		config.DisableCaller = true
+	} else {
+		config = zap.NewProductionConfig()
+		config.EncoderConfig.MessageKey = "@message"
+		config.EncoderConfig.TimeKey = "@timestamp"
+		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+		if debug != "0" && debug != "" {
+			dyn := zap.NewAtomicLevel()
+			dyn.SetLevel(zap.DebugLevel)
+			config.Level = dyn
+		}
 	}
-
 	_logger, err := config.Build()
 	if err != nil {
 		panic(err)
@@ -51,84 +55,57 @@ type Config struct {
 	GuildID               string `json:"guild_id"`               // the discord channel ID
 	VerifiedRole          string `json:"verified_role"`          // ID of the role for verified members
 	NormalRole            string `json:"normal_role"`            // role assigned to all users automatically
-	DebugLogs             bool   `json:"debug_logs"`             // debug logging
 	DebugUser             string `json:"debug_user"`             // when set, only accept commands from this user
 	Admin                 string `json:"admin"`                  // user who has control over the bot
 	LogFlushAt            int    `json:"log_flush_at"`           // size chat log can reach before being flushed to db
 	LogFlushInterval      int    `json:"log_flush_interval"`     // interval between automatic chat log flushes
 }
 
-// App stores program state
-type App struct {
-	config         Config
-	mongo          *mgo.Session
-	cln            *mgo.Collection
-	discordClient  *discordgo.Session
-	httpClient     *http.Client
-	ready          chan bool
-	cache          *cache.Cache
-	queue          *fifo.Queue
-	locale         Locale
-	chatLogger     *ChatLogger
-	commandManager *CommandManager
-	done           chan bool
-}
-
 func main() {
-	var err error
-	app := App{
-		config:     Config{},
-		httpClient: &http.Client{},
-		cache:      cache.New(5*time.Minute, 30*time.Second),
-		queue:      fifo.NewQueue(),
+	config := Config{
+		MongoHost:             configStrFromEnv("MONGO_HOST"),
+		MongoPort:             configStrFromEnv("MONGO_PORT"),
+		MongoName:             configStrFromEnv("MONGO_NAME"),
+		MongoUser:             configStrFromEnv("MONGO_USER"),
+		MongoPass:             configStrFromEnv("MONGO_PASS"),
+		MongoCollection:       configStrFromEnv("MONGO_COLLECTION"),
+		DiscordToken:          configStrFromEnv("DISCORD_TOKEN"),
+		AdministrativeChannel: configStrFromEnv("ADMINISTRATIVE_CHANNEL"),
+		PrimaryChannel:        configStrFromEnv("PRIMARY_CHANNEL"),
+		Heartbeat:             configIntFromEnv("HEARTBEAT"),
+		BotID:                 configStrFromEnv("BOT_ID"),
+		GuildID:               configStrFromEnv("GUILD_ID"),
+		VerifiedRole:          configStrFromEnv("VERIFIED_ROLE"),
+		NormalRole:            configStrFromEnv("NORMAL_ROLE"),
+		DebugUser:             configStrFromEnv("DEBUG_USER"),
+		Admin:                 configStrFromEnv("ADMIN"),
+		LogFlushAt:            configIntFromEnv("LOG_FLUSH_AT"),
+		LogFlushInterval:      configIntFromEnv("LOG_FLUSH_INTERVAL"),
 	}
 
-	configLocation := os.Getenv("CONFIG_FILE")
-	if configLocation == "" {
-		configLocation = "config.json"
-	}
-
-	app.config = LoadConfig(configLocation)
-	initLogger(app.config.DebugLogs)
-	logger.Debug("started with debug logging enabled",
-		zap.Any("config", app.config))
-
-	app.ConnectDB()
-	app.StartChatLogger()
-	app.loadLanguages()
-	app.StartCommandManager()
-
-	err = app.connect()
-	if err != nil {
-		panic(err)
-	}
-
-	app.done = make(chan bool)
-	<-app.done
-
-	app.mongo.Close()
-	err = app.discordClient.Close()
-	logger.Fatal("shutting down",
-		zap.Error(err))
+	Start(config)
 }
 
-// LoadConfig loads the specified config JSON file and returns the contents as
-// a pointer to a Config object.
-func LoadConfig(filename string) (config Config) {
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
+func configStrFromEnv(name string) (value string) {
+	value = os.Getenv(name)
+	if value == "" {
+		logger.Fatal("environment variable not set",
+			zap.String("name", name))
 	}
+	return
+}
 
-	err = json.NewDecoder(file).Decode(&config)
-	if err != nil {
-		panic(err)
+func configIntFromEnv(name string) (value int) {
+	valueStr := os.Getenv(name)
+	if valueStr == "" {
+		logger.Fatal("environment variable not set",
+			zap.String("name", name))
 	}
-
-	err = file.Close()
+	value, err := strconv.Atoi(valueStr)
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to convert environment variable to int",
+			zap.Error(err),
+			zap.String("name", name))
 	}
-
 	return
 }

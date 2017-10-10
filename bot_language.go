@@ -27,7 +27,8 @@ func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) str
 	return str
 }
 
-func (app *App) loadLanguages() {
+// LoadLanguages reads language definition files form ./lang
+func (app *App) LoadLanguages() {
 	files, err := ioutil.ReadDir("lang")
 	if err != nil {
 		panic(err)

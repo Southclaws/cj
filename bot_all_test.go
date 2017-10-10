@@ -24,9 +24,8 @@ func TestMain(m *testing.M) {
 		dbLocation = "users_test.db"
 	}
 
-	app.config = LoadConfig(configLocation)
 	app.ConnectDB()
-	app.loadLanguages()
+	app.LoadLanguages()
 
 	ret := m.Run()
 
