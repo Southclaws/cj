@@ -6,12 +6,11 @@ import (
 	"os"
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/foize/go.fifo"
-	gocache "github.com/patrickmn/go-cache"
+	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
+	"gopkg.in/mgo.v2"
 )
 
 var logger *zap.Logger
@@ -67,7 +66,7 @@ type App struct {
 	discordClient  *discordgo.Session
 	httpClient     *http.Client
 	ready          chan bool
-	cache          *gocache.Cache
+	cache          *cache.Cache
 	queue          *fifo.Queue
 	locale         Locale
 	chatLogger     *ChatLogger
@@ -80,7 +79,7 @@ func main() {
 	app := App{
 		config:     Config{},
 		httpClient: &http.Client{},
-		cache:      gocache.New(5*time.Minute, 30*time.Second),
+		cache:      cache.New(5*time.Minute, 30*time.Second),
 		queue:      fifo.NewQueue(),
 	}
 

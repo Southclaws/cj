@@ -1,18 +1,15 @@
 package main
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"go.uber.org/zap"
 )
 
 // User is a recorded and verified SA:MP forum user.
 type User struct {
-	gorm.Model
-	DiscordUserID    string `gorm:"primary_key;index;not null;unique"`
-	ForumUserID      string `gorm:"not null;unique"`
-	VerificationCode string `gorm:"not null"`
-	ForumUserName    string `gorm:"not null"`
+	DiscordUserID    string `json:"discord_user_id"`
+	ForumUserID      string `json:"forum_user_id"`
+	VerificationCode string `json:"verification_code"`
+	ForumUserName    string `json:"forum_user_name"`
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bwmarrin/discordgo"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 func TestApp_StoreVerifiedUser(t *testing.T) {
