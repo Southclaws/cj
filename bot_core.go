@@ -5,12 +5,10 @@ import (
 	"os"
 	"time"
 
-	mgo "gopkg.in/mgo.v2"
-
 	"github.com/bwmarrin/discordgo"
-	"github.com/foize/go.fifo"
 	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
+	"gopkg.in/mgo.v2"
 )
 
 // App stores program state
@@ -23,9 +21,7 @@ type App struct {
 	httpClient     *http.Client
 	ready          chan bool
 	cache          *cache.Cache
-	queue          *fifo.Queue
 	locale         Locale
-	chatLogger     *ChatLogger
 	commandManager *CommandManager
 }
 
@@ -35,7 +31,6 @@ func Start(config Config) {
 		config:     Config{},
 		httpClient: &http.Client{},
 		cache:      cache.New(5*time.Minute, 30*time.Second),
-		queue:      fifo.NewQueue(),
 	}
 
 	configLocation := os.Getenv("CONFIG_FILE")
@@ -47,7 +42,6 @@ func Start(config Config) {
 		zap.Any("config", app.config))
 
 	app.ConnectDB()
-	app.StartChatLogger()
 	app.LoadLanguages()
 	app.StartCommandManager()
 	app.ConnectDiscord()

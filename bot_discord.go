@@ -113,7 +113,7 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	}
 
 	if source != CommandSourcePRIVATE && source != CommandSourceADMINISTRATIVE {
-		err := app.chatLogger.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
+		err := app.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
 		if err != nil {
 			logger.Warn("failed to record chat log", zap.Error(err))
 		}
