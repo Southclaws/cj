@@ -103,13 +103,11 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	}
 
 	_, source, errors := app.commandManager.Process(*event.Message)
-	if errors != nil {
-		for _, err := range errors {
+	for _, err := range errors {
+		if err != nil {
+			err = app.WarnUserError(event.Message.ChannelID, err.Error())
 			if err != nil {
-				err = app.WarnUserError(event.Message.ChannelID, err.Error())
-				if err != nil {
-					logger.Warn("failed to warn user of error", zap.Error(err))
-				}
+				logger.Warn("failed to warn user of error", zap.Error(err))
 			}
 		}
 	}
