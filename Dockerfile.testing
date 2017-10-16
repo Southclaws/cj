@@ -1,0 +1,8 @@
+FROM golang AS compile
+ADD . /go/src/github.com/Southclaws/cj
+RUN apt-get update -y && apt-get install --no-install-recommends -y -q build-essential ca-certificates
+RUN go get github.com/golang/dep/cmd/dep
+WORKDIR /go/src/github.com/Southclaws/cj
+RUN dep ensure
+
+ENTRYPOINT [ "make", "test" ]

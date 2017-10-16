@@ -1,0 +1,4 @@
+FROM scratch
+COPY cj /bin/cj
+
+ENTRYPOINT ["cj"]
