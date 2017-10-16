@@ -1,4 +1,5 @@
 FROM scratch
 COPY cj /bin/cj
+COPY lang /bin/lang
 
 ENTRYPOINT ["cj"]

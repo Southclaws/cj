@@ -60,7 +60,8 @@ run:
 		--network host \
 		-e BIND=localhost:8080 \
 		-e MONGO_USER=cj \
-		-e MONGO_HOST=localhost \
+		-e MONGO_HOST=southcla.ws \
+		-e MONGO_PASS=91d4a19eb9a90b9cb289d13d828fc25084ea1f2r \
 		-e MONGO_PORT=27017 \
 		-e MONGO_NAME=cj \
 		-e MONGO_COLLECTION=servers \
