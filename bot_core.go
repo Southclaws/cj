@@ -17,7 +17,8 @@ import (
 type App struct {
 	config         Config
 	mongo          *mgo.Session
-	cln            *mgo.Collection
+	accounts       *mgo.Collection
+	chat           *mgo.Collection
 	discordClient  *discordgo.Session
 	httpClient     *http.Client
 	ready          chan bool

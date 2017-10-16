@@ -46,7 +46,6 @@ type Config struct {
 	MongoName             string `json:"mongodb_name"`
 	MongoUser             string `json:"mongodb_user"`
 	MongoPass             string `json:"mongodb_pass"`
-	MongoCollection       string `json:"mongodb_collection"`
 	DiscordToken          string `json:"discord_token"`          // discord API token
 	AdministrativeChannel string `json:"administrative_channel"` // administrative channel where someone can speak as bot
 	PrimaryChannel        string `json:"primary_channel"`        // main channel the bot hangs out in
@@ -62,13 +61,12 @@ type Config struct {
 }
 
 func main() {
-	config := Config{
+	Start(Config{
 		MongoHost:             configStrFromEnv("MONGO_HOST"),
 		MongoPort:             configStrFromEnv("MONGO_PORT"),
 		MongoName:             configStrFromEnv("MONGO_NAME"),
 		MongoUser:             configStrFromEnv("MONGO_USER"),
 		MongoPass:             configStrFromEnv("MONGO_PASS"),
-		MongoCollection:       configStrFromEnv("MONGO_COLLECTION"),
 		DiscordToken:          configStrFromEnv("DISCORD_TOKEN"),
 		AdministrativeChannel: configStrFromEnv("ADMINISTRATIVE_CHANNEL"),
 		PrimaryChannel:        configStrFromEnv("PRIMARY_CHANNEL"),
@@ -81,9 +79,7 @@ func main() {
 		Admin:                 configStrFromEnv("ADMIN"),
 		LogFlushAt:            configIntFromEnv("LOG_FLUSH_AT"),
 		LogFlushInterval:      configIntFromEnv("LOG_FLUSH_INTERVAL"),
-	}
-
-	Start(config)
+	})
 }
 
 func configStrFromEnv(name string) (value string) {
