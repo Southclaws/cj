@@ -14,6 +14,8 @@ func (app *App) ConnectDB() {
 	app.mongo, err = mgo.Dial(fmt.Sprintf("%s:%s", app.config.MongoHost, app.config.MongoPort))
 	if err != nil {
 		logger.Fatal("failed to connect to mongodb",
+			zap.String("host", app.config.MongoHost),
+			zap.String("port", app.config.MongoPort),
 			zap.Error(err))
 	}
 	logger.Info("connected to mongodb server")

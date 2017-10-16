@@ -26,3 +26,9 @@ log.txt
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
+
+# auth stuff for testing
+*.private
+
+# binary
+cj

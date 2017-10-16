@@ -28,7 +28,7 @@ type App struct {
 // Start starts the app with the specified config and blocks until fatal error
 func Start(config Config) {
 	app := App{
-		config:     Config{},
+		config:     config,
 		httpClient: &http.Client{},
 		cache:      cache.New(5*time.Minute, 30*time.Second),
 	}

@@ -56,8 +56,6 @@ type Config struct {
 	NormalRole            string `json:"normal_role"`            // role assigned to all users automatically
 	DebugUser             string `json:"debug_user"`             // when set, only accept commands from this user
 	Admin                 string `json:"admin"`                  // user who has control over the bot
-	LogFlushAt            int    `json:"log_flush_at"`           // size chat log can reach before being flushed to db
-	LogFlushInterval      int    `json:"log_flush_interval"`     // interval between automatic chat log flushes
 }
 
 func main() {
@@ -66,7 +64,7 @@ func main() {
 		MongoPort:             configStrFromEnv("MONGO_PORT"),
 		MongoName:             configStrFromEnv("MONGO_NAME"),
 		MongoUser:             configStrFromEnv("MONGO_USER"),
-		MongoPass:             configStrFromEnv("MONGO_PASS"),
+		MongoPass:             os.Getenv("MONGO_PASS"),
 		DiscordToken:          configStrFromEnv("DISCORD_TOKEN"),
 		AdministrativeChannel: configStrFromEnv("ADMINISTRATIVE_CHANNEL"),
 		PrimaryChannel:        configStrFromEnv("PRIMARY_CHANNEL"),
@@ -77,8 +75,6 @@ func main() {
 		NormalRole:            configStrFromEnv("NORMAL_ROLE"),
 		DebugUser:             configStrFromEnv("DEBUG_USER"),
 		Admin:                 configStrFromEnv("ADMIN"),
-		LogFlushAt:            configIntFromEnv("LOG_FLUSH_AT"),
-		LogFlushInterval:      configIntFromEnv("LOG_FLUSH_INTERVAL"),
 	})
 }
 
