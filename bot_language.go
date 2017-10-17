@@ -27,9 +27,14 @@ func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) str
 	return str
 }
 
-// LoadLanguages reads language definition files form ./lang
+// LoadLanguages reads language definition files from app.config.LanguageData
 func (app *App) LoadLanguages() {
-	files, err := ioutil.ReadDir("lang")
+	langDir, err := filepath.Abs(app.config.LanguageData)
+	if err != nil {
+		panic(err)
+	}
+
+	files, err := ioutil.ReadDir(langDir)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +45,7 @@ func (app *App) LoadLanguages() {
 	for _, f := range files {
 		if f.IsDir() {
 			key = f.Name()
-			la := loadLanguageFromDir(filepath.Join("lang", key))
+			la := loadLanguageFromDir(filepath.Join(langDir, key))
 			app.locale.Languages[key] = la
 		}
 	}

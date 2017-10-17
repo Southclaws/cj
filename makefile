@@ -29,6 +29,7 @@ local: fast
 	NORMAL_ROLE="285459500029444096" \
 	DEBUG_USER="86435690711093248" \
 	ADMIN="86435690711093248" \
+	LANGUAGE_DATA="./lang" \
 	./cj
 
 version:
@@ -60,8 +61,7 @@ run:
 		--network host \
 		-e BIND=localhost:8080 \
 		-e MONGO_USER=cj \
-		-e MONGO_HOST=southcla.ws \
-		-e MONGO_PASS=91d4a19eb9a90b9cb289d13d828fc25084ea1f2r \
+		-e MONGO_HOST=localhost \
 		-e MONGO_PORT=27017 \
 		-e MONGO_NAME=cj \
 		-e MONGO_COLLECTION=servers \
@@ -75,6 +75,8 @@ run:
 		-e NORMAL_ROLE="285459500029444096" \
 		-e DEBUG_USER="86435690711093248" \
 		-e ADMIN="86435690711093248" \
+		-e LANGUAGE_DATA="/cjlang" \
+		-e DEBUG=1 \
 		southclaws/cj:$(VERSION)
 
 enter:

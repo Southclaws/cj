@@ -41,21 +41,22 @@ func init() {
 
 // Config stores configuration variables
 type Config struct {
-	MongoHost             string `json:"mongodb_host"`
-	MongoPort             string `json:"mongodb_port"`
-	MongoName             string `json:"mongodb_name"`
-	MongoUser             string `json:"mongodb_user"`
-	MongoPass             string `json:"mongodb_pass"`
-	DiscordToken          string `json:"discord_token"`          // discord API token
-	AdministrativeChannel string `json:"administrative_channel"` // administrative channel where someone can speak as bot
-	PrimaryChannel        string `json:"primary_channel"`        // main channel the bot hangs out in
-	Heartbeat             int    `json:"heartbeat"`              // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
-	BotID                 string `json:"bot_id"`                 // the bot's client ID
-	GuildID               string `json:"guild_id"`               // the discord channel ID
-	VerifiedRole          string `json:"verified_role"`          // ID of the role for verified members
-	NormalRole            string `json:"normal_role"`            // role assigned to all users automatically
-	DebugUser             string `json:"debug_user"`             // when set, only accept commands from this user
-	Admin                 string `json:"admin"`                  // user who has control over the bot
+	MongoHost             string
+	MongoPort             string
+	MongoName             string
+	MongoUser             string
+	MongoPass             string
+	DiscordToken          string // discord API token
+	AdministrativeChannel string // administrative channel where someone can speak as bot
+	PrimaryChannel        string // main channel the bot hangs out in
+	Heartbeat             int    // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
+	BotID                 string // the bot's client ID
+	GuildID               string // the discord channel ID
+	VerifiedRole          string // ID of the role for verified members
+	NormalRole            string // role assigned to all users automatically
+	DebugUser             string // when set, only accept commands from this user
+	Admin                 string // user who has control over the bot
+	LanguageData          string // `lang` data directory location, defaults to `./lang`
 }
 
 func main() {
@@ -75,6 +76,7 @@ func main() {
 		NormalRole:            configStrFromEnv("NORMAL_ROLE"),
 		DebugUser:             configStrFromEnv("DEBUG_USER"),
 		Admin:                 configStrFromEnv("ADMIN"),
+		LanguageData:          configStrFromEnv("LANGUAGE_DATA"),
 	})
 }
 
