@@ -74,7 +74,7 @@ func main() {
 		GuildID:               configStrFromEnv("GUILD_ID"),
 		VerifiedRole:          configStrFromEnv("VERIFIED_ROLE"),
 		NormalRole:            configStrFromEnv("NORMAL_ROLE"),
-		DebugUser:             configStrFromEnv("DEBUG_USER"),
+		DebugUser:             os.Getenv("DEBUG_USER"),
 		Admin:                 configStrFromEnv("ADMIN"),
 		LanguageData:          configStrFromEnv("LANGUAGE_DATA"),
 	})
