@@ -19,12 +19,14 @@ type Language struct {
 }
 
 // GetLangString returns a text body based on language ID and key.
-func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) string {
-	str := fmt.Sprintf(l.Languages[lang].Strings[key], vargs...)
-	if str == "" {
+func (l Locale) GetLangString(lang string, key string, vargs ...interface{}) (str string) {
+	fmat, ok := l.Languages[lang].Strings[key]
+	if !ok {
 		logger.Warn("undefined lang key", zap.String("key", key))
+	} else {
+		str = fmt.Sprintf(fmat, vargs...)
 	}
-	return str
+	return
 }
 
 // LoadLanguages reads language definition files from app.config.LanguageData

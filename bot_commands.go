@@ -79,7 +79,7 @@ func LoadCommands(app *App) map[string]Command {
 		"cj": {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
-			Description: app.locale.GetLangString("en", "CommandCJDescription", "%s"),
+			Description: "",
 			Usage:       "cj",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
