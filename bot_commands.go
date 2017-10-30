@@ -252,6 +252,13 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		enterContext bool
 	)
 
+	err := cm.app.discordClient.ChannelTyping(event.ChannelID)
+	if err != nil {
+		logger.Warn("failed to get channel info",
+			zap.Error(err))
+		return
+	}
+
 	// Execute the command.
 	success, enterContext, err = commandObject.Function(cm, commandArgument, message, false)
 	errs = append(errs, err)

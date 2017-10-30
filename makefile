@@ -29,6 +29,7 @@ local: fast
 	NORMAL_ROLE="285459500029444096" \
 	ADMIN="86435690711093248" \
 	LANGUAGE_DATA="./lang" \
+	NO_INIT_SYNC="1" \
 	./cj
 
 version:

@@ -61,45 +61,48 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 		logger.Fatal("failed to get guild members",
 			zap.Error(err))
 	}
-	for _, user := range users {
-		member := false
-		verified := false
 
-		for i := range user.Roles {
-			if user.Roles[i] == app.config.NormalRole {
-				member = true
-			}
+	if !app.config.NoInitSync {
+		for _, user := range users {
+			member := false
+			verified := false
 
-			verified, err = app.IsUserVerified(user.User.ID)
-			if err != nil {
-				logger.Fatal("failed to check user verified state",
-					zap.Error(err),
-					zap.String("user", user.User.ID))
+			for i := range user.Roles {
+				if user.Roles[i] == app.config.NormalRole {
+					member = true
+				}
+
+				verified, err = app.IsUserVerified(user.User.ID)
+				if err != nil {
+					logger.Fatal("failed to check user verified state",
+						zap.Error(err),
+						zap.String("user", user.User.ID))
+				}
 			}
-		}
-		if !member {
-			err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
-			if err != nil {
-				logger.Fatal("failed to add member role",
-					zap.Error(err),
-					zap.String("user", user.User.ID))
+			if !member {
+				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
+				if err != nil {
+					logger.Fatal("failed to add member role",
+						zap.Error(err),
+						zap.String("user", user.User.ID))
+				}
 			}
-		}
-		if verified {
-			logger.Info("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
-			err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
-			if err != nil {
-				logger.Fatal("failed to add verified role",
-					zap.Error(err),
-					zap.String("user", user.User.ID))
-			}
-		} else {
-			logger.Info("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
-			err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
-			if err != nil {
-				logger.Fatal("failed to remove verified role",
-					zap.Error(err),
-					zap.String("user", user.User.ID))
+			if verified {
+				logger.Info("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
+				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
+				if err != nil {
+					logger.Fatal("failed to add verified role",
+						zap.Error(err),
+						zap.String("user", user.User.ID))
+				}
+			} else {
+				logger.Info("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
+				err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
+				if err != nil {
+					logger.Fatal("failed to remove verified role",
+						zap.Error(err),
+						zap.String("user", user.User.ID))
+				}
 			}
 		}
 	}
