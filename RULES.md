@@ -24,3 +24,7 @@ Please follow these simple rules:
 - The advertisement must be solely be based around a SA-MP Server
 - There must be NO unnecessary chat in the channel
 - Do not spam advertisements - only post once a week or risk being banned from advertising
+
+**- Propose A Change -**
+
+To propose a change to this message (rules or otherwise) submit a pull request to this file: https://github.com/Southclaws/cj/blob/master/RULES.md
