@@ -19,11 +19,12 @@ func TestMain(m *testing.M) {
 
 	app = App{
 		config: Config{
-			MongoHost: "localhost",
-			MongoPort: "27017",
-			MongoName: "cj",
-			MongoUser: "root",
-			MongoPass: "",
+			MongoHost:    "localhost",
+			MongoPort:    "27017",
+			MongoName:    "cj",
+			MongoUser:    "root",
+			MongoPass:    "",
+			LanguageData: "./lang",
 		},
 		httpClient: &http.Client{Transport: scraper},
 	}
