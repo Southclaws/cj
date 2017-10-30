@@ -98,8 +98,10 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 
 	if app.config.DebugUser != "" {
 		if event.Message.Author.ID != app.config.DebugUser {
+			logger.Debug("ignoring command from non debug user")
 			return
 		}
+		logger.Debug("accepting command from debug user")
 	}
 
 	_, source, errors := app.commandManager.Process(*event.Message)
