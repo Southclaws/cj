@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -111,6 +110,8 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	for t := range ticker.C {
 		app.onHeartbeat(t)
 	}
+
+	logger.Info("finished initialising discord module")
 
 	app.ready <- true
 }

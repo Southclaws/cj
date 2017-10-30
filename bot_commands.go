@@ -186,26 +186,36 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	commandObject.commandManager = &cm
 
 	if !exists {
+		logger.Debug("ignoring command that does not exist",
+			zap.String("command", commandTrigger))
 		return exists, source, nil
 	}
 
 	if source != commandObject.Source {
+		logger.Debug("ignoring command with incorrect source",
+			zap.String("command", commandTrigger),
+			zap.Any("source", source),
+			zap.Any("wantSource", commandObject.Source))
 		return exists, source, nil
 	}
 
 	switch source {
 	case CommandSourceADMINISTRATIVE:
 		if message.ChannelID != cm.App.config.AdministrativeChannel {
+			logger.Debug("ignoring admin command used in wrong channel", zap.String("command", commandTrigger))
 			return exists, source, errs
 		}
 	case CommandSourcePRIMARY:
 		if message.ChannelID != cm.App.config.PrimaryChannel {
+			logger.Debug("ignoring primary channel command used in wrong channel", zap.String("command", commandTrigger))
 			return exists, source, errs
 		}
 	}
 
 	// Check if the user is an administrator.
 	if commandObject.RequireAdmin && cm.App.config.Admin != message.Author.ID {
+		logger.Debug("ignoring admin command used by non-admin", zap.String("command", commandTrigger))
+
 		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireAdministrator", message.Author.ID))
 		if err != nil {
 			errs = append(errs, err)
@@ -215,23 +225,27 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	}
 
 	// Check if the user is verified.
-	verified, err := cm.App.IsUserVerified(message.Author.ID)
-	if err != nil {
-		errs = append(errs, err)
-		return exists, source, errs
-	}
-
-	if commandObject.RequireVerified && !verified {
-		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireVerification", message.Author.ID))
+	if commandObject.RequireVerified {
+		verified, err := cm.App.IsUserVerified(message.Author.ID)
 		if err != nil {
 			errs = append(errs, err)
+			return exists, source, errs
 		}
+		if !verified {
+			logger.Debug("ignoring command that requires verification from non-verified user", zap.String("command", commandTrigger))
 
-		return exists, source, errs
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandRequireVerification", message.Author.ID))
+			if err != nil {
+				errs = append(errs, err)
+			}
+			return exists, source, errs
+		}
 	}
 
 	// Check if we have the required number of parameters.
 	if commandObject.ParametersRange.Minimum > -1 && commandParametersCount < commandObject.ParametersRange.Minimum {
+		logger.Debug("ignoring ignoring command with incorrect parameter count", zap.String("command", commandTrigger))
+
 		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
 		if err != nil {
 			errs = append(errs, err)
@@ -239,6 +253,8 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 		return exists, source, errs
 	} else if commandObject.ParametersRange.Maximum > -1 && commandParametersCount > commandObject.ParametersRange.Maximum {
+		logger.Debug("ignoring ignoring command with incorrect parameter count", zap.String("command", commandTrigger))
+
 		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString("en", "TooManyParameters", commandObject.ParametersRange.Maximum))
 		if err != nil {
 			errs = append(errs, err)
@@ -301,9 +317,9 @@ func (cm CommandManager) ProcessContext(command Command, cmdtext string, message
 }
 
 func (cm CommandManager) getCommandSource(message discordgo.Message) (CommandSource, error) {
-	if message.Content == cm.App.config.AdministrativeChannel {
+	if message.ChannelID == cm.App.config.AdministrativeChannel {
 		return CommandSourceADMINISTRATIVE, nil
-	} else if message.Content == cm.App.config.PrimaryChannel {
+	} else if message.ChannelID == cm.App.config.PrimaryChannel {
 		return CommandSourcePRIMARY, nil
 	} else {
 		ch, err := cm.App.discordClient.Channel(message.ChannelID)
