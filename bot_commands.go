@@ -252,7 +252,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		enterContext bool
 	)
 
-	err := cm.app.discordClient.ChannelTyping(event.ChannelID)
+	err = cm.App.discordClient.ChannelTyping(message.ChannelID)
 	if err != nil {
 		logger.Warn("failed to get channel info",
 			zap.Error(err))
