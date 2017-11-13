@@ -992,6 +992,7 @@ var quotes = []string{
 	"Two loc'ed out niggas going crazy...",
 	"Move your body, move your body...",
 	"Take your time and let me love you good...",
+	"Your mama look like a ugly (fuck you) loser.",
 }
 
 func commandCJQuote(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
