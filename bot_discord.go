@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"go.uber.org/zap"
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 // ChannelDM is a direct message channel
@@ -38,20 +38,21 @@ func (app *App) ConnectDiscord() {
 
 // nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
-	found := 0
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
 		logger.Fatal("failed to get guild roles",
 			zap.Error(err))
 	}
 
+	found := false
 	for _, role := range roles {
-		if role.ID == app.config.VerifiedRole || role.ID == app.config.NormalRole {
-			found++
+		if role.ID == app.config.VerifiedRole {
+			found = true
+			break
 		}
 	}
-	if found != 2 {
-		logger.Fatal("role not found.",
+	if !found {
+		logger.Fatal("verified role not found.",
 			zap.String("role", app.config.VerifiedRole))
 	}
 
@@ -63,28 +64,11 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 
 	if !app.config.NoInitSync {
 		for _, user := range users {
-			member := false
-			verified := false
-
-			for i := range user.Roles {
-				if user.Roles[i] == app.config.NormalRole {
-					member = true
-				}
-
-				verified, err = app.IsUserVerified(user.User.ID)
-				if err != nil {
-					logger.Fatal("failed to check user verified state",
-						zap.Error(err),
-						zap.String("user", user.User.ID))
-				}
-			}
-			if !member {
-				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.NormalRole)
-				if err != nil {
-					logger.Fatal("failed to add member role",
-						zap.Error(err),
-						zap.String("user", user.User.ID))
-				}
+			verified, err := app.IsUserVerified(user.User.ID)
+			if err != nil {
+				logger.Fatal("failed to check user verified state",
+					zap.Error(err),
+					zap.String("user", user.User.ID))
 			}
 			if verified {
 				logger.Info("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
@@ -165,11 +149,6 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 	verified, err := app.IsUserVerified(event.Member.User.ID)
 	if err != nil {
 		logger.Warn("failed to check if user verified", zap.Error(err))
-	}
-
-	err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.NormalRole)
-	if err != nil {
-		logger.Warn("failed to add normal role to member", zap.Error(err))
 	}
 
 	if verified {

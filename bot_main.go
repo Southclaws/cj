@@ -53,7 +53,6 @@ type Config struct {
 	BotID                 string // the bot's client ID
 	GuildID               string // the discord channel ID
 	VerifiedRole          string // ID of the role for verified members
-	NormalRole            string // role assigned to all users automatically
 	DebugUser             string // when set, only accept commands from this user
 	Admin                 string // user who has control over the bot
 	LanguageData          string // `lang` data directory location, defaults to `./lang`
@@ -74,7 +73,6 @@ func main() {
 		BotID:                 configStrFromEnv("BOT_ID"),
 		GuildID:               configStrFromEnv("GUILD_ID"),
 		VerifiedRole:          configStrFromEnv("VERIFIED_ROLE"),
-		NormalRole:            configStrFromEnv("NORMAL_ROLE"),
 		DebugUser:             os.Getenv("DEBUG_USER"),
 		Admin:                 configStrFromEnv("ADMIN"),
 		LanguageData:          configStrFromEnv("LANGUAGE_DATA"),
