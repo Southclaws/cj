@@ -21,9 +21,10 @@ The #advertisements channel is for advertisements of SA-MP Servers ONLY. Any ser
 
 Please follow these simple rules:
 
-- The advertisement must be solely be based around a SA-MP Server
-- There must be NO unnecessary chat in the channel
-- Do not spam advertisements - only post once a week or risk being banned from advertising
+- There must be NO chat / discussion in the channel.
+- Advertisements must be solely be based around a SA-MP Server.
+- Your advertisement must ADVERTISE the server, not ask for mappers or developers.
+- Do not spam advertisements - only post once a week or risk being banned from advertising.
 - Do not PM users from the server with advertisements. The #advertisements channel exists for a reason.
 
 **- Propose A Change -**
