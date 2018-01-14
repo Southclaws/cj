@@ -77,6 +77,7 @@ run:
 		-e ADMIN="86435690711093248" \
 		-e LANGUAGE_DATA="/cjlang" \
 		-e DEBUG=1 \
+		-e NO_INIT_SYNC=1 \
 		southclaws/cj:$(VERSION)
 
 enter:

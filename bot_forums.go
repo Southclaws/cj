@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"gopkg.in/xmlpath.v2"
@@ -204,4 +205,30 @@ func (app App) getFirstTenUserVisitorMessages(root *xmlpath.Node) ([]VisitorMess
 	}
 
 	return result, nil
+}
+
+func (app *App) newPostAlert(id string, fn func()) {
+	ticker := time.NewTicker(time.Second * 10)
+	lastPostCount := -1
+
+	go func() {
+		for range ticker.C {
+			fmt.Println("checking profile page")
+			profile, err := app.GetUserProfilePage("http://forum.sa-mp.com/member.php?u=" + id)
+			if err != nil {
+				logger.Error("failed to poll user profile")
+			}
+			fmt.Println(profile)
+
+			if lastPostCount == -1 {
+				lastPostCount = profile.TotalPosts
+				continue
+			}
+
+			if lastPostCount < profile.TotalPosts {
+				fn()
+				lastPostCount = profile.TotalPosts
+			}
+		}
+	}()
 }

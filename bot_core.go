@@ -53,6 +53,10 @@ func Start(config Config) {
 	app.StartCommandManager()
 	app.ConnectDiscord()
 
+	app.newPostAlert("3", func() {
+		app.discordClient.ChannelMessageSend(app.config.PrimaryChannel, "New Kalcor Post: http://forum.sa-mp.com/search.php?do=finduser&u=3")
+	})
+
 	done := make(chan bool)
 	<-done
 }
