@@ -28,7 +28,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 		}
 
 		if !verified {
-			result += cm.App.locale.GetLangString("en", "UserNotVerified", user.ID) + " "
+			result += cm.App.locale.GetLangString(cm.App.config.Language, "UserNotVerified", user.ID) + " "
 		} else {
 			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
@@ -45,7 +45,7 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 				}
 			}
 
-			result += cm.App.locale.GetLangString("en", "CommandUserInfoProfile", profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation) + " "
+			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandUserInfoProfile", profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation) + " "
 		}
 	}
 

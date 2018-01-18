@@ -90,12 +90,12 @@ func (app App) UserStartsVerification(message discordgo.Message) error {
 		return err
 	}
 
-	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString("en", "UserStartsVerification"))
+	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(app.config.Language, "UserStartsVerification"))
 	if err != nil {
 		return err
 	}
 
-	v := Verification{language: "en", discordUser: *message.Author, channelID: message.ChannelID}
+	v := Verification{language: app.config.Language, discordUser: *message.Author, channelID: message.ChannelID}
 	app.SetVerificationState(&v, VerificationStateAwaitProfileURL)
 
 	return nil
@@ -251,7 +251,7 @@ func (app App) WarnUserVerificationState(channelid string, verification Verifica
 // WarnUserNoVerification is simply a message informing the user their
 // Verification does not exist and they need to start the process with 'verify'.
 func (app App) WarnUserNoVerification(channelid string) error {
-	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString("en", "WarnUserNoVerification"))
+	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString(app.config.Language, "WarnUserNoVerification"))
 	return err
 }
 
@@ -274,7 +274,7 @@ func (app App) WarnUserBadInput(channelid string, verification Verification) err
 // WarnUserError informs the user of an error and provides them with
 // instructions for what to do next.
 func (app App) WarnUserError(channelid string, errorString string) error {
-	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString("en", "WarnUserError", errorString))
+	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString(app.config.Language, "WarnUserError", errorString))
 	return err
 }
 

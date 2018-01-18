@@ -25,6 +25,7 @@ func TestMain(m *testing.M) {
 			MongoUser:    "root",
 			MongoPass:    "",
 			LanguageData: "./lang",
+			Language:    "en",
 		},
 		httpClient: &http.Client{Transport: scraper},
 	}

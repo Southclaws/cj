@@ -29,6 +29,7 @@ local: fast
 	NORMAL_ROLE="285459500029444096" \
 	ADMIN="86435690711093248" \
 	LANGUAGE_DATA="./lang" \
+	LANGUAGE="en" \
 	NO_INIT_SYNC="1" \
 	./cj
 
@@ -76,6 +77,7 @@ run:
 		-e DEBUG_USER="86435690711093248" \
 		-e ADMIN="86435690711093248" \
 		-e LANGUAGE_DATA="/cjlang" \
+		-e LANGUAGE="en" \
 		-e DEBUG=1 \
 		-e NO_INIT_SYNC=1 \
 		southclaws/cj:$(VERSION)
