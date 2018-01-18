@@ -29,11 +29,11 @@ type Command struct {
 // all commands and binding them to functions.
 func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
-		"verify": {
+		app.locale.GetLangString(app.config.Language, "CommandVerifyName") {
 			Function:    commandVerify,
 			Source:      CommandSourcePRIVATE,
-			Description: "Verify you are the owner of a SA:MP forum account",
-			Usage:       "verify",
+			Description: app.locale.GetLangString(app.config.Language, "CommandVerifyDescription"),
+			Usage:       app.locale.GetLangString(app.config.Language, "CommandVerifyName"),
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
 				Maximum: -1,
@@ -42,7 +42,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         true,
 		},
-		"/say": {
+		app.locale.GetLangString(app.config.Language, "CommandSayName") {
 			Function:    commandSay,
 			Source:      CommandSourceADMINISTRATIVE,
 			Description: app.locale.GetLangString(app.config.Language, "CommandSayDescription"),
@@ -56,7 +56,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		"/userinfo": {
+		app.locale.GetLangString(app.config.Language, "CommandUserinfoName") {
 			Function:    commandUserInfo,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandUserInfoDescription"),
@@ -71,7 +71,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		"/whois": {
+		app.locale.GetLangString(app.config.Language, "CommandWhoisName") {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandWhoisDescription", "%s"),
@@ -86,10 +86,10 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		"cj": {
+		"cj" {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
-			Description: "",
+			Description: app.locale.GetLangString(app.config.Language, "CommandCjDescription"),
 			Usage:       "cj",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
