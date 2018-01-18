@@ -40,11 +40,6 @@ func Start(config Config) {
 		cache:      cache.New(5*time.Minute, 30*time.Second),
 	}
 
-	configLocation := os.Getenv("CONFIG_FILE")
-	if configLocation == "" {
-		configLocation = "config.json"
-	}
-
 	logger.Debug("started with debug logging enabled",
 		zap.Any("config", app.config))
 
