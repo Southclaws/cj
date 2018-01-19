@@ -28,7 +28,7 @@ log.txt
 .glide/
 
 # auth stuff for testing
-*.private
+*.env
 
 # binary
 cj
