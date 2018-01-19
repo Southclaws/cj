@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -38,11 +37,6 @@ func Start(config Config) {
 		config:     config,
 		httpClient: &http.Client{Transport: scraper},
 		cache:      cache.New(5*time.Minute, 30*time.Second),
-	}
-
-	configLocation := os.Getenv("CONFIG_FILE")
-	if configLocation == "" {
-		configLocation = "config.json"
 	}
 
 	logger.Debug("started with debug logging enabled",

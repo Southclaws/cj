@@ -162,7 +162,7 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 			logger.Warn("failed to create user channel", zap.Error(err))
 			return
 		}
-		_, err = app.discordClient.ChannelMessageSend(ch.ID, app.locale.GetLangString("en", "AskUserVerify"))
+		_, err = app.discordClient.ChannelMessageSend(ch.ID, app.locale.GetLangString(app.config.Language, "AskUserVerify"))
 		if err != nil {
 			logger.Warn("failed to send message", zap.Error(err))
 		}

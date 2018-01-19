@@ -56,6 +56,7 @@ type Config struct {
 	DebugUser             string // when set, only accept commands from this user
 	Admin                 string // user who has control over the bot
 	LanguageData          string // `lang` data directory location, defaults to `./lang`
+	Language              string // The code of the language used in bot
 	NoInitSync            bool   // if set, does not run database role sync on init
 }
 
@@ -76,6 +77,7 @@ func main() {
 		DebugUser:             os.Getenv("DEBUG_USER"),
 		Admin:                 configStrFromEnv("ADMIN"),
 		LanguageData:          configStrFromEnv("LANGUAGE_DATA"),
+		Language:              configStrFromEnv("LANGUAGE"),
 		NoInitSync:            os.Getenv("NO_INIT_SYNC") != "",
 	})
 }

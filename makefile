@@ -28,6 +28,7 @@ local: fast
 	NORMAL_ROLE=$(NORMAL_ROLE) \
 	ADMIN=$(ADMIN) \
 	LANGUAGE_DATA=$(LANGUAGE_DATA) \
+	LANGUAGE=$(LANGUAGE) \
 	NO_INIT_SYNC=$(NO_INIT_SYNC) \
 	./cj
 
@@ -75,6 +76,7 @@ run:
 		-e DEBUG_USER=$(DEBUG_USER) \
 		-e ADMIN=$(ADMIN) \
 		-e LANGUAGE_DATA="/cjlang" \
+		-e LANGUAGE=($LANGUAGE) \
 		-e DEBUG=1 \
 		-e NO_INIT_SYNC=1 \
 		southclaws/cj:$(VERSION)

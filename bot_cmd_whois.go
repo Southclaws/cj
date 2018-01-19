@@ -25,7 +25,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		count++
 
 		if user.ID == cm.App.config.BotID {
-			result += cm.App.locale.GetLangString("en", "CommandWhoisCJ") + " "
+			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandWhoisCJ") + " "
 			continue
 		}
 
@@ -36,7 +36,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		}
 
 		if !verified {
-			result += cm.App.locale.GetLangString("en", "CommandWhoisNotVerified", user.ID) + " "
+			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandWhoisNotVerified", user.ID) + " "
 		} else {
 			username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
 			if err != nil {
@@ -48,7 +48,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 				return false, false, err
 			}
 
-			result += cm.App.locale.GetLangString("en", "CommandWhoisProfile", user.ID, username, link) + " "
+			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandWhoisProfile", user.ID, username, link) + " "
 		}
 	}
 

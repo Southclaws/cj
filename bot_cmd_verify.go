@@ -11,17 +11,17 @@ func commandVerify(cm CommandManager, args string, message discordgo.Message, co
 	}
 
 	if verified {
-		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, "You are already verified! If you are experiencing problems with the bot or verification, please contact an admin.")
+		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyAlreadyVerified"),)
 		return true, false, err
 	}
 
 	switch message.Content {
-	case "verify":
+	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyAlreadyVerify"):
 		err = cm.App.UserStartsVerification(message)
-	case "done":
+	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyDone"):
 		err = cm.App.UserConfirmsProfile(message)
 		return true, false, err
-	case "cancel":
+	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyCancel"):
 		err = cm.App.UserCancelsVerification(message)
 		return true, false, err
 	default:
