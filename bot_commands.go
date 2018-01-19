@@ -46,8 +46,8 @@ func LoadCommands(app *App) map[string]Command {
 			Function:    commandSay,
 			Source:      CommandSourceADMINISTRATIVE,
 			Description: app.locale.GetLangString(app.config.Language, "CommandSayDescription"),
-			Usage:       "/say [text]",
-			Example:     "/say Hello!",
+			Usage:       app.locale.GetLangString(app.config.Language, "CommandSayUsage"),
+			Example:     app.locale.GetLangString(app.config.Language, "CommandSayExample"),
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: -1,
@@ -60,8 +60,8 @@ func LoadCommands(app *App) map[string]Command {
 			Function:    commandUserInfo,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandUserInfoDescription"),
-			Usage:       "/userinfo [user(s)]",
-			Example:     "/userinfo @Southclaws#1657",
+			Usage:       app.locale.GetLangString(app.config.Language, "CommandUserInfoUsage"),
+			Example:     app.locale.GetLangString(app.config.Language, "CommandUserInfoExample"),
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
@@ -75,8 +75,8 @@ func LoadCommands(app *App) map[string]Command {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandWhoisDescription", "%s"),
-			Usage:       "/whois [user(s)]",
-			Example:     "/whois @Southclaws#1657",
+			Usage:       app.locale.GetLangString(app.config.Language, "CommandWhoisUsage", "%s"),
+			Example:     app.locale.GetLangString(app.config.Language, "CommandWhoisExample", "%s"),
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
