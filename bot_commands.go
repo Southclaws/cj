@@ -29,7 +29,7 @@ type Command struct {
 // all commands and binding them to functions.
 func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
-		app.locale.GetLangString(app.config.Language, "CommandVerifyName") {
+		app.locale.GetLangString(app.config.Language, "CommandVerifyName"): {
 			Function:    commandVerify,
 			Source:      CommandSourcePRIVATE,
 			Description: app.locale.GetLangString(app.config.Language, "CommandVerifyDescription"),
@@ -42,7 +42,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         true,
 		},
-		app.locale.GetLangString(app.config.Language, "CommandSayName") {
+		app.locale.GetLangString(app.config.Language, "CommandSayName"): {
 			Function:    commandSay,
 			Source:      CommandSourceADMINISTRATIVE,
 			Description: app.locale.GetLangString(app.config.Language, "CommandSayDescription"),
@@ -56,7 +56,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		app.locale.GetLangString(app.config.Language, "CommandUserinfoName") {
+		app.locale.GetLangString(app.config.Language, "CommandUserinfoName"): {
 			Function:    commandUserInfo,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandUserInfoDescription"),
@@ -71,7 +71,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		app.locale.GetLangString(app.config.Language, "CommandWhoisName") {
+		app.locale.GetLangString(app.config.Language, "CommandWhoisName"): {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandWhoisDescription", "%s"),
@@ -86,7 +86,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		"cj" {
+		"cj": {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
 			Description: app.locale.GetLangString(app.config.Language, "CommandCjDescription"),
