@@ -76,7 +76,7 @@ run:
 		-e DEBUG_USER=$(DEBUG_USER) \
 		-e ADMIN=$(ADMIN) \
 		-e LANGUAGE_DATA="/cjlang" \
-		-e LANGUAGE="en" \
+		-e LANGUAGE=($LANGUAGE) \
 		-e DEBUG=1 \
 		-e NO_INIT_SYNC=1 \
 		southclaws/cj:$(VERSION)
