@@ -16,7 +16,7 @@ func commandVerify(cm CommandManager, args string, message discordgo.Message, co
 	}
 
 	switch message.Content {
-	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyAlreadyVerify"):
+	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerify"):
 		err = cm.App.UserStartsVerification(message)
 	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyDone"):
 		err = cm.App.UserConfirmsProfile(message)
