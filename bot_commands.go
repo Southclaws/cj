@@ -86,6 +86,21 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
+		"setverify": {
+			Function:    commandSetVerify,
+			Source:      CommandSourceADMINISTRATIVE,
+			Description: "",
+			Usage:       "",
+			Example:     "",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: 5,
+			},
+			ErrorMessage:    app.locale.GetLangString(app.config.Language, "CommandErrorNoMention"),
+			RequireVerified: true,
+			RequireAdmin:    false,
+			Context:         false,
+		},
 		"cj": {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
@@ -226,7 +241,8 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 	// Check if the user is verified.
 	if commandObject.RequireVerified {
-		verified, err := cm.App.IsUserVerified(message.Author.ID)
+		verified := false
+		verified, err = cm.App.IsUserVerified(message.Author.ID)
 		if err != nil {
 			errs = append(errs, err)
 			return exists, source, errs
