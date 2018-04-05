@@ -33,6 +33,7 @@ var coolwordsxd = []string{
 	"you're",
 	"mom",
 	"edit",
+	"haram",
 }
 
 var morewords = []string{
@@ -93,11 +94,15 @@ var tags = []string{
 	"HIRING",
 	"Y_INI",
 	"PAWNO",
-	"NGG LEAK",
-	"GODFATHER EDIT",
+	"NGG",
+	"NGRP"
+	"GODFATHER",
+	"GF EDIT",
 	"25.000 LINES",
 	"ABYSS",
-	"RCRPLEAK",
+	"RCRP",
+	"HARAM",
+	"SCRATCH",
 }
 
 func init() {
