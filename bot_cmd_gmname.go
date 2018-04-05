@@ -95,7 +95,7 @@ var tags = []string{
 	"Y_INI",
 	"PAWNO",
 	"NGG",
-	"NGRP"
+	"NGRP",
 	"GODFATHER",
 	"GF EDIT",
 	"25.000 LINES",
