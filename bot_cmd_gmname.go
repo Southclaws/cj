@@ -14,7 +14,6 @@ var coolwordsxd = []string{
 	"mega",
 	"extreme",
 	"extr3m3",
-	"amazing",
 	"elite",
 	"l33t",
 	"pro",
@@ -29,6 +28,9 @@ var coolwordsxd = []string{
 	"fucking",
 	"wow",
 	"amazeballs",
+	"reloaded",
+	"advanced",
+	"you're",
 	"mom",
 	"edit",
 }
@@ -45,8 +47,11 @@ var morewords = []string{
 	"motherfuckers",
 	"scripters",
 	"hackers",
+	"español",
+	"revolution",
 	"krisk",
 	"abyss",
+	"mom",
 	"rcrp-leak",
 }
 
@@ -63,6 +68,7 @@ var gamemodes = []string{
 	"sex",
 	"race",
 	"derby",
+	"minigames",
 }
 
 var tags = []string{
@@ -85,6 +91,11 @@ var tags = []string{
 	"BETA",
 	"BEST",
 	"HIRING",
+	"Y_INI",
+	"PAWNO",
+	"NGG LEAK",
+	"GODFATHER EDIT",
+	"25.000 LINES",
 	"ABYSS",
 	"RCRPLEAK",
 }
