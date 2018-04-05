@@ -49,6 +49,7 @@ run-prod:
 		--detach \
 		--env-file .env \
 		southclaws/cj:$(VERSION)
+	docker network connect mongodb cj
 
 enter:
 	docker run -it --entrypoint=bash southclaws/cj:$(VERSION)
