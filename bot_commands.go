@@ -128,6 +128,19 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
+		"whenrwmp": {
+			Function:    commandMP,
+			Source:      CommandSourcePRIMARY,
+			Description: "scrapes the web for the next BIG samp ripoff",
+			Usage:       "whenrwmp",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
+			RequireVerified: true,
+			RequireAdmin:    false,
+			Context:         false,
+		},
 	}
 }
 
