@@ -392,7 +392,7 @@ func mpname() string {
 	second := seconds[rand.Intn(len(seconds))]
 	mp[0] = []byte(strings.ToUpper(first))[0]
 	mp[1] = []byte(strings.ToUpper(second))[0]
-	return fmt.Sprintf("%s: %s %s Multiplayer", string(mp), first, second)
+	return fmt.Sprintf("%s: %s %s Multiplayer", string(mp), strings.ToTitle(first), strings.ToTitle(second))
 }
 
 func commandMP(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
