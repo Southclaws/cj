@@ -29,7 +29,7 @@ var coolwordsxd = []string{
 	"fucking",
 	"wow",
 	"amazeballs",
-	"mom"
+	"you're",
 }
 
 var morewords = []string{
@@ -46,6 +46,7 @@ var morewords = []string{
 	"hackers",
 	"krisk",
 	"abyss",
+	"mom",
 }
 
 var gamemodes = []string{
@@ -83,7 +84,7 @@ var tags = []string{
 	"BETA",
 	"BEST",
 	"HIRING",
-	"ABYSS"
+	"ABYSS",
 }
 
 func init() {
