@@ -30,7 +30,9 @@ var coolwordsxd = []string{
 	"amazeballs",
 	"reloaded",
 	"advanced",
-	"you're"
+	"you're",
+	"mom",
+	"edit",
 }
 
 var morewords = []string{
@@ -49,7 +51,8 @@ var morewords = []string{
 	"revolution",
 	"krisk",
 	"abyss",
-	"mom"
+	"mom",
+	"rcrp-leak",
 }
 
 var gamemodes = []string{
@@ -65,7 +68,7 @@ var gamemodes = []string{
 	"sex",
 	"race",
 	"derby",
-	"minigames"
+	"minigames",
 }
 
 var tags = []string{
@@ -93,7 +96,8 @@ var tags = []string{
 	"NGG LEAK",
 	"GODFATHER EDIT",
 	"25.000 LINES",
-	"ABYSS"
+	"ABYSS",
+	"RCRPLEAK",
 }
 
 func init() {
