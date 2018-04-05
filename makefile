@@ -47,6 +47,7 @@ run-prod:
 	docker run \
 		--name cj \
 		--detach \
+		--restart always \
 		--env-file .env \
 		southclaws/cj:$(VERSION)
 	docker network connect mongodb cj
