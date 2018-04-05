@@ -28,9 +28,6 @@ test:
 
 
 build:
-	docker build --no-cache -t southclaws/cj:$(VERSION) -f Dockerfile.dev .
-
-build-prod:
 	docker build --no-cache -t southclaws/cj:$(VERSION) .
 
 push: build-prod
