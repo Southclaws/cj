@@ -29,7 +29,8 @@ var coolwordsxd = []string{
 	"wow",
 	"amazeballs",
 	"reloaded",
-	"advanced"
+	"advanced",
+	"you're"
 }
 
 var morewords = []string{
@@ -45,7 +46,10 @@ var morewords = []string{
 	"scripters",
 	"hackers",
 	"español",
-	"revolution"
+	"revolution",
+	"krisk",
+	"abyss",
+	"mom"
 }
 
 var gamemodes = []string{
@@ -88,7 +92,8 @@ var tags = []string{
 	"PAWNO",
 	"NGG LEAK",
 	"GODFATHER EDIT",
-	"25.000 LINES"
+	"25.000 LINES",
+	"ABYSS"
 }
 
 func init() {
