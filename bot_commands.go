@@ -115,6 +115,19 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
+		"gmname": {
+			Function:    commandGmName,
+			Source:      CommandSourcePRIMARY,
+			Description: "generates a professional gamemode name for your next NGG edit",
+			Usage:       "gmname",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
+			RequireVerified: true,
+			RequireAdmin:    false,
+			Context:         false,
+		},
 	}
 }
 
