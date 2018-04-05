@@ -30,6 +30,11 @@ var coolwordsxd = []string{
 	"wow",
 	"amazeballs",
 	"you're",
+	"india",
+	"pakistan",
+	"paki",
+	"punjab",
+	"òêðûòèå",
 }
 
 var morewords = []string{
@@ -47,6 +52,8 @@ var morewords = []string{
 	"krisk",
 	"abyss",
 	"mom",
+	"island",
+	"äðèôòêàðüåðà",
 }
 
 var gamemodes = []string{
@@ -62,6 +69,8 @@ var gamemodes = []string{
 	"sex",
 	"race",
 	"derby",
+	"gay",
+	"äðèôò",
 }
 
 var tags = []string{
@@ -85,6 +94,12 @@ var tags = []string{
 	"BEST",
 	"HIRING",
 	"ABYSS",
+	"HALAL",
+	"OFFICAL",
+	"FIXED",
+	"BR",
+	"MOSQUE MAP",
+	"POLSKA",
 }
 
 func init() {
