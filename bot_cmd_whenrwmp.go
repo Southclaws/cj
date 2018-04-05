@@ -386,13 +386,17 @@ var seconds = []string{
 	"zebra",
 }
 
-func commandMP(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
+func mpname() string {
 	mp := []byte("00-MP")
 	first := firsts[rand.Intn(len(firsts))]
 	second := seconds[rand.Intn(len(seconds))]
 	mp[0] = []byte(strings.ToUpper(first))[0]
 	mp[1] = []byte(strings.ToUpper(second))[0]
+	return fmt.Sprintf("%s-MP: %s %s Multiplayer", string(mp), first, second)
+}
 
-	cm.App.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf("%s-MP: %s %s Multiplayer", string(mp), first, second))
+func commandMP(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
+
+	cm.App.discordClient.ChannelMessageSend(message.ChannelID, mpname())
 	return true, false, nil
 }
