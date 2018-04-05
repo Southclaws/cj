@@ -103,6 +103,7 @@ var tags = []string{
 	"RCRP",
 	"HARAM",
 	"SCRATCH",
+	"SAMPCTL",
 }
 
 func init() {
