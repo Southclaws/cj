@@ -17,8 +17,6 @@ type Command struct {
 	Source          CommandSource
 	ParametersRange CommandParametersRange
 	Description     string
-	Usage           string
-	Example         string
 	ErrorMessage    string
 	RequireVerified bool
 	RequireAdmin    bool
@@ -96,7 +94,6 @@ func LoadCommands(app *App) map[string]Command {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
 			Description: "Talk to CJ",
-			Usage:       "cj",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
 				Maximum: -1,
@@ -109,7 +106,6 @@ func LoadCommands(app *App) map[string]Command {
 			Function:    commandGmName,
 			Source:      CommandSourcePRIMARY,
 			Description: "generates a professional gamemode name for your next NGG edit",
-			Usage:       "gmname",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
 				Maximum: -1,
@@ -122,7 +118,6 @@ func LoadCommands(app *App) map[string]Command {
 			Function:    commandMP,
 			Source:      CommandSourcePRIMARY,
 			Description: "scrapes the web for the next BIG samp ripoff",
-			Usage:       "mpname",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
 				Maximum: -1,
