@@ -30,7 +30,7 @@ test:
 build:
 	docker build --no-cache -t southclaws/cj:$(VERSION) .
 
-push: build-prod
+push:
 	docker push southclaws/cj:$(VERSION)
 	
 run:
