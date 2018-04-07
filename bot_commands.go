@@ -18,7 +18,6 @@ type Command struct {
 	ParametersRange CommandParametersRange
 	Description     string
 	ErrorMessage    string
-	RequireVerified bool
 	RequireAdmin    bool
 	Context         bool
 }
@@ -44,9 +43,9 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-			RequireVerified: false,
-			RequireAdmin:    false,
-			Context:         true,
+
+			RequireAdmin: false,
+			Context:      true,
 		},
 		"/say": {
 			Function:    commandSay,
@@ -56,9 +55,9 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: -1,
 			},
-			RequireVerified: false,
-			RequireAdmin:    false,
-			Context:         false,
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"userinfo": {
 			Function:    commandUserInfo,
@@ -68,10 +67,10 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    "You need to mention someone to use this command.",
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+			ErrorMessage: "You need to mention someone to use this command.",
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"whois": {
 			Function:    commandWhois,
@@ -81,10 +80,10 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    "You need to mention someone to use this command.",
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+			ErrorMessage: "You need to mention someone to use this command.",
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"setverify": {
 			Function:    commandSetVerify,
@@ -94,10 +93,10 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    "You need to mention someone to use this command.",
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+			ErrorMessage: "You need to mention someone to use this command.",
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"cj": {
 			Function:    commandCJQuote,
@@ -107,9 +106,9 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"gmname": {
 			Function:    commandGmName,
@@ -119,9 +118,9 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"mpname": {
 			Function:    commandMP,
@@ -131,9 +130,9 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 		"dynamic": {
 			Function:    commandDynamic,
@@ -143,9 +142,9 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-			RequireVerified: true,
-			RequireAdmin:    false,
-			Context:         false,
+
+			RequireAdmin: false,
+			Context:      false,
 		},
 	}
 }
@@ -153,7 +152,7 @@ func LoadCommands(app *App) map[string]Command {
 func commandCommands(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
 	allCmds := ""
 
-	for trigger, cmd := range app.commandManager.Commands {
+	for trigger, cmd := range cm.App.commandManager.Commands {
 		allCmds += fmt.Sprintf("%s: %s\n", trigger, cmd.Description)
 	}
 
@@ -280,25 +279,6 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		}
 
 		return exists, source, errs
-	}
-
-	// Check if the user is verified.
-	if commandObject.RequireVerified {
-		verified := false
-		verified, err = cm.App.IsUserVerified(message.Author.ID)
-		if err != nil {
-			errs = append(errs, err)
-			return exists, source, errs
-		}
-		if !verified {
-			logger.Debug("ignoring command that requires verification from non-verified user", zap.String("command", commandTrigger))
-
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, "requires verified status")
-			if err != nil {
-				errs = append(errs, err)
-			}
-			return exists, source, errs
-		}
 	}
 
 	// Check if we have the required number of parameters.

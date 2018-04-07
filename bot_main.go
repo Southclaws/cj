@@ -58,8 +58,6 @@ type Config struct {
 	VerifiedRole          string `split_words:"true" required:"true"`  // ID of the role for verified members
 	DebugUser             string `split_words:"true" required:"false"` // when set, only accept commands from this user
 	Admin                 string `split_words:"true" required:"true"`  // user who has control over the bot
-	LanguageData          string `split_words:"true" required:"true"`  // `lang` data directory location, defaults to `./lang`
-	Language              string `split_words:"true" required:"true"`  // The code of the language used in bot
 	NoInitSync            bool   `split_words:"true" required:"false"` // if set, does not run database role sync on init
 }
 

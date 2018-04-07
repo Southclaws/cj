@@ -53,7 +53,6 @@ const (
 
 // Verification holds all the state for a verification process
 type Verification struct {
-	language    string
 	channelID   string
 	discordUser discordgo.User
 	forumUser   string
@@ -109,7 +108,7 @@ Each stage of the verification process will time-out after 5 minutes, if you tak
 		return err
 	}
 
-	v := Verification{language: app.config.Language, discordUser: *message.Author, channelID: message.ChannelID}
+	v := Verification{discordUser: *message.Author, channelID: message.ChannelID}
 	app.SetVerificationState(&v, VerificationStateAwaitProfileURL)
 
 	return nil
