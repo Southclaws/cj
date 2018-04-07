@@ -15,7 +15,6 @@ RUN make static
 FROM scratch
 
 COPY --from=compile /go/src/github.com/Southclaws/cj/cj /bin/cj
-COPY --from=compile /go/src/github.com/Southclaws/cj/lang /cjlang
 COPY --from=compile /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENTRYPOINT ["cj"]
