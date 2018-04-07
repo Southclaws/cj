@@ -26,6 +26,21 @@
   version = "v1.2.0"
 
 [[projects]]
+  name = "github.com/joho/godotenv"
+  packages = [
+    ".",
+    "autoload"
+  ]
+  revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
+  version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
+  version = "v1.3.0"
+
+[[projects]]
   name = "github.com/patrickmn/go-cache"
   packages = ["."]
   revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
@@ -46,7 +61,15 @@
 [[projects]]
   branch = "master"
   name = "github.com/robertkrimen/otto"
-  packages = [".","ast","dbg","file","parser","registry","token"]
+  packages = [
+    ".",
+    "ast",
+    "dbg",
+    "file",
+    "parser",
+    "registry",
+    "token"
+  ]
   revision = "68a29f5e29b18d7367e686c43cf74eba1900f548"
 
 [[projects]]
@@ -69,31 +92,54 @@
 
 [[projects]]
   name = "go.uber.org/zap"
-  packages = [".","buffer","internal/bufferpool","internal/color","internal/exit","zapcore"]
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
   revision = "35aad584952c3e7020db7b839f6b102de6271f89"
   version = "v1.7.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["nacl/secretbox","poly1305","salsa20/salsa"]
+  packages = [
+    "nacl/secretbox",
+    "poly1305",
+    "salsa20/salsa"
+  ]
   revision = "2509b142fb2b797aa7587dad548f113b2c0f20ce"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["html","html/atom"]
+  packages = [
+    "html",
+    "html/atom"
+  ]
   revision = "c73622c77280266305273cb545f54516ced95b93"
 
 [[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
-  packages = [".","bson","internal/json","internal/sasl","internal/scram"]
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
   revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
 
 [[projects]]
   name = "gopkg.in/sourcemap.v1"
-  packages = [".","base64vlq"]
+  packages = [
+    ".",
+    "base64vlq"
+  ]
   revision = "6e83acea0053641eff084973fee085f0c193c61a"
   version = "v1.0.5"
 
@@ -106,6 +152,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "510ae075244d7f56627dc97226379d044e2230a366c85aed8c995a47d561d0e2"
+  inputs-digest = "658c05b55d3fd07b0b14a2c5f98bf6e77e506fdce7ce0be49f2c6f3fea102edc"
   solver-name = "gps-cdcl"
   solver-version = 1

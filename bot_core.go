@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	scraper "github.com/cardigann/go-cloudflare-scraper"
+	"github.com/cardigann/go-cloudflare-scraper"
 	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
 	"gopkg.in/mgo.v2"
@@ -28,14 +28,14 @@ type App struct {
 
 // Start starts the app with the specified config and blocks until fatal error
 func Start(config Config) {
-	scraper, err := scraper.NewTransport(http.DefaultTransport)
+	scrpr, err := scraper.NewTransport(http.DefaultTransport)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	app := App{
 		config:     config,
-		httpClient: &http.Client{Transport: scraper},
+		httpClient: &http.Client{Transport: scrpr},
 		cache:      cache.New(5*time.Minute, 30*time.Second),
 	}
 

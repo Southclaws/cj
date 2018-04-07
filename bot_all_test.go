@@ -12,7 +12,7 @@ import (
 var app App
 
 func TestMain(m *testing.M) {
-	scraper, err := scraper.NewTransport(http.DefaultTransport)
+	scrpr, err := scraper.NewTransport(http.DefaultTransport)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,9 +25,9 @@ func TestMain(m *testing.M) {
 			MongoUser:    "root",
 			MongoPass:    "",
 			LanguageData: "./lang",
-			Language:    "en",
+			Language:     "en",
 		},
-		httpClient: &http.Client{Transport: scraper},
+		httpClient: &http.Client{Transport: scrpr},
 	}
 
 	app.ConnectDB()

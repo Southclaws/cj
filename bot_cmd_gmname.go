@@ -34,6 +34,7 @@ var coolwordsxd = []string{
 	"mom",
 	"edit",
 	"haram",
+	"sa-mp server",
 }
 
 var morewords = []string{
@@ -54,6 +55,7 @@ var morewords = []string{
 	"abyss",
 	"mom",
 	"rcrp-leak",
+	"ginger",
 }
 
 var gamemodes = []string{
@@ -103,6 +105,10 @@ var tags = []string{
 	"RCRP",
 	"HARAM",
 	"SCRATCH",
+	"SAMPCTL",
+	"CUSTOM OBJECTS",
+	"0.3.DL",
+	"ROLLERPLAYERS ONLY",
 }
 
 func init() {

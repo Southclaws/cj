@@ -4,6 +4,9 @@ import (
 	"os"
 	"strconv"
 
+	// loads environment variables from .env
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/kelseyhightower/envconfig"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -41,45 +44,34 @@ func init() {
 
 // Config stores configuration variables
 type Config struct {
-	MongoHost             string
-	MongoPort             string
-	MongoName             string
-	MongoUser             string
-	MongoPass             string
-	DiscordToken          string // discord API token
-	AdministrativeChannel string // administrative channel where someone can speak as bot
-	PrimaryChannel        string // main channel the bot hangs out in
-	Heartbeat             int    // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
-	BotID                 string // the bot's client ID
-	GuildID               string // the discord channel ID
-	VerifiedRole          string // ID of the role for verified members
-	DebugUser             string // when set, only accept commands from this user
-	Admin                 string // user who has control over the bot
-	LanguageData          string // `lang` data directory location, defaults to `./lang`
-	Language              string // The code of the language used in bot
-	NoInitSync            bool   // if set, does not run database role sync on init
+	MongoHost             string `split_words:"true" required:"true"`
+	MongoPort             string `split_words:"true" required:"true"`
+	MongoName             string `split_words:"true" required:"true"`
+	MongoUser             string `split_words:"true" required:"true"`
+	MongoPass             string `split_words:"true" required:"false"`
+	DiscordToken          string `split_words:"true" required:"true"`  // discord API token
+	AdministrativeChannel string `split_words:"true" required:"true"`  // administrative channel where someone can speak as bot
+	PrimaryChannel        string `split_words:"true" required:"true"`  // main channel the bot hangs out in
+	Heartbeat             int    `split_words:"true" required:"true"`  // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
+	BotID                 string `split_words:"true" required:"true"`  // the bot's client ID
+	GuildID               string `split_words:"true" required:"true"`  // the discord channel ID
+	VerifiedRole          string `split_words:"true" required:"true"`  // ID of the role for verified members
+	DebugUser             string `split_words:"true" required:"false"` // when set, only accept commands from this user
+	Admin                 string `split_words:"true" required:"true"`  // user who has control over the bot
+	LanguageData          string `split_words:"true" required:"true"`  // `lang` data directory location, defaults to `./lang`
+	Language              string `split_words:"true" required:"true"`  // The code of the language used in bot
+	NoInitSync            bool   `split_words:"true" required:"false"` // if set, does not run database role sync on init
 }
 
 func main() {
-	Start(Config{
-		MongoHost:             configStrFromEnv("MONGO_HOST"),
-		MongoPort:             configStrFromEnv("MONGO_PORT"),
-		MongoName:             configStrFromEnv("MONGO_NAME"),
-		MongoUser:             configStrFromEnv("MONGO_USER"),
-		MongoPass:             os.Getenv("MONGO_PASS"),
-		DiscordToken:          configStrFromEnv("DISCORD_TOKEN"),
-		AdministrativeChannel: configStrFromEnv("ADMINISTRATIVE_CHANNEL"),
-		PrimaryChannel:        configStrFromEnv("PRIMARY_CHANNEL"),
-		Heartbeat:             configIntFromEnv("HEARTBEAT"),
-		BotID:                 configStrFromEnv("BOT_ID"),
-		GuildID:               configStrFromEnv("GUILD_ID"),
-		VerifiedRole:          configStrFromEnv("VERIFIED_ROLE"),
-		DebugUser:             os.Getenv("DEBUG_USER"),
-		Admin:                 configStrFromEnv("ADMIN"),
-		LanguageData:          configStrFromEnv("LANGUAGE_DATA"),
-		Language:              configStrFromEnv("LANGUAGE"),
-		NoInitSync:            os.Getenv("NO_INIT_SYNC") != "",
-	})
+	config := Config{}
+	err := envconfig.Process("CJ", &config)
+	if err != nil {
+		logger.Fatal("failed to load configuration",
+			zap.Error(err))
+	}
+
+	Start(config)
 }
 
 func configStrFromEnv(name string) (value string) {

@@ -26,16 +26,8 @@
   version = "0.17.0"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/foize/go.fifo"
-
-[[constraint]]
   name = "github.com/patrickmn/go-cache"
   version = "2.0.0"
-
-[[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
 
 [[constraint]]
   name = "github.com/stretchr/testify"

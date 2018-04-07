@@ -1,6 +1,0 @@
-FROM alpine
-COPY cj /bin/cj
-COPY lang /cjlang
-RUN apk update && apk add ca-certificates
-
-ENTRYPOINT ["cj"]
