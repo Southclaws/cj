@@ -27,6 +27,15 @@ type Command struct {
 // all commands and binding them to functions.
 func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
+		"/commands": {
+			Function:    commandCommands,
+			Source:      CommandSourcePRIMARY,
+			Description: "command list",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
+		},
 		"verify": {
 			Function:    commandVerify,
 			Source:      CommandSourcePRIVATE,
@@ -139,6 +148,17 @@ func LoadCommands(app *App) map[string]Command {
 			Context:         false,
 		},
 	}
+}
+
+func commandCommands(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
+	allCmds := ""
+
+	for trigger, cmd := range app.commandManager.Commands {
+		allCmds += fmt.Sprintf("%s: %s\n", trigger, cmd.Description)
+	}
+
+	cm.App.discordClient.ChannelMessageSend(message.ChannelID, allCmds)
+	return true, false, nil
 }
 
 // CommandSource represents the source of a command.
