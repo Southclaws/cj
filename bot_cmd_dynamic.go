@@ -77,6 +77,8 @@ var scripts = []string{
 	"Checkpoints",
 	"Media Dialog",
 	"Vehicle System",
+	"Dildo System",
+	"Hot Coffee",
 }
 
 var features = []string{
