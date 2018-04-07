@@ -31,7 +31,6 @@ func TestMain(m *testing.M) {
 	}
 
 	app.ConnectDB()
-	app.LoadLanguages()
 
 	os.Exit(m.Run())
 }

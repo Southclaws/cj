@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -25,18 +27,18 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		count++
 
 		if user.ID == cm.App.config.BotID {
-			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandWhoisCJ") + " "
+			result += "I am Carl Johnson, co-leader of Grove Street Families."
 			continue
 		}
 
 		verified, err = cm.App.IsUserVerified(user.ID)
 		if err != nil {
-			result += err.Error() + " "
+			result += err.Error()
 			continue
 		}
 
 		if !verified {
-			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandWhoisNotVerified", user.ID) + " "
+			result += fmt.Sprintf("The user <@%s> is not verified.", user.ID)
 		} else {
 			username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
 			if err != nil {
@@ -48,7 +50,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 				return false, false, err
 			}
 
-			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandWhoisProfile", user.ID, username, link) + " "
+			result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums.", user.ID, username, link)
 		}
 	}
 

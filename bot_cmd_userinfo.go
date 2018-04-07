@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 )
@@ -28,11 +30,11 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 		}
 
 		if !verified {
-			result += cm.App.locale.GetLangString(cm.App.config.Language, "UserNotVerified", user.ID) + " "
+			result += fmt.Sprintf("<@%s> is not verified. ", user.ID)
 		} else {
 			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {
-				return false, false, errors.Wrap(err, cm.App.locale.GetLangString(cm.App.config.Language, "CommandUserInfoFailedGetForumUser"))
+				return false, false, errors.Wrap(err, "failed to get forum user from discord user")
 			}
 
 			cachedProfile, found = cm.App.cache.Get(link)
@@ -41,17 +43,19 @@ func commandUserInfo(cm CommandManager, args string, message discordgo.Message, 
 			} else {
 				profile, err = cm.App.GetUserProfilePage(link)
 				if err != nil {
-					return false, false, errors.Wrap(err, cm.App.locale.GetLangString(cm.App.config.Language, "CommandUserInfoFailedGetProfilePage"))
+					return false, false, errors.Wrap(err, "failed to get user profile page")
 				}
 			}
 
-			result += cm.App.locale.GetLangString(cm.App.config.Language, "CommandUserInfoProfile", profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation) + " "
+			result += fmt.Sprintf(
+				"*Username:* %s *Member since:* %s *Total posts:* %d *Reputation:* %d ",
+				profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation)
 		}
 	}
 
 	_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, result)
 	if err != nil {
-		return false, false, errors.Wrap(err, cm.App.locale.GetLangString(cm.App.config.Language, "CommandUserInfoFailedSendMessage"))
+		return false, false, errors.Wrap(err, "failed to send message")
 	}
 
 	return true, false, err

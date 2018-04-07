@@ -162,7 +162,8 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 			logger.Warn("failed to create user channel", zap.Error(err))
 			return
 		}
-		_, err = app.discordClient.ChannelMessageSend(ch.ID, app.locale.GetLangString(app.config.Language, "AskUserVerify"))
+		_, err = app.discordClient.ChannelMessageSend(ch.ID,
+			"Hi! Welcome to the San Andreas Multiplayer unofficial Discord server!\n\nYou can verify your forum account by typing `verify` below, this helps us ensure people aren't impersonating others.")
 		if err != nil {
 			logger.Warn("failed to send message", zap.Error(err))
 		}

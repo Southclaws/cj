@@ -22,7 +22,6 @@ type App struct {
 	httpClient     *http.Client
 	ready          chan bool
 	cache          *cache.Cache
-	locale         Locale
 	commandManager *CommandManager
 }
 
@@ -43,7 +42,6 @@ func Start(config Config) {
 		zap.Any("config", app.config))
 
 	app.ConnectDB()
-	app.LoadLanguages()
 	app.StartCommandManager()
 	app.ConnectDiscord()
 

@@ -90,7 +90,21 @@ func (app App) UserStartsVerification(message discordgo.Message) error {
 		return err
 	}
 
-	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(app.config.Language, "UserStartsVerification"))
+	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
+		`Hi! This process will verify you are the owner of a SA:MP forum account. Please provide your user profile URL or ID.
+
+Examples:
+
+- %s
+- %s
+- %s
+
+Each stage of the verification process will time-out after 5 minutes, if you take longer than that to respond you will need to start again.`,
+		`http://forum.sa-mp.com/member.php?u=50199`,
+		`forum.sa-mp.com/member.php?u=50199`,
+		`50199`,
+	))
+
 	if err != nil {
 		return err
 	}
@@ -125,7 +139,7 @@ func (app App) UserProvidesProfileURL(message discordgo.Message) error {
 
 	matched, err := regexp.MatchString(`^(http:\/\/)?forum\.sa-mp\.com\/member\.php\?u=[0-9]*$`, message.Content)
 	if err != nil {
-		err = app.WarnUserBadInput(message.ChannelID, verification)
+		err = app.WarnUserVerificationState(message.ChannelID, verification)
 		return err
 	}
 
@@ -142,7 +156,7 @@ func (app App) UserProvidesProfileURL(message discordgo.Message) error {
 		var value int
 		value, err = strconv.Atoi(message.Content)
 		if err != nil {
-			err = app.WarnUserBadInput(message.ChannelID, verification)
+			err = app.WarnUserVerificationState(message.ChannelID, verification)
 			return err
 		}
 		profileURL = fmt.Sprintf("http://forum.sa-mp.com/member.php?u=%d", value)
@@ -156,7 +170,15 @@ func (app App) UserProvidesProfileURL(message discordgo.Message) error {
 
 	app.SetVerificationState(&verification, VerificationStateAwaitConfirmation)
 
-	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserProvidesProfileURL", verification.code))
+	_, err = app.discordClient.ChannelMessageSend(message.ChannelID,
+		fmt.Sprintf(`Thanks! Now you just need to paste this 8-digit verification code into your Bio section then reply with 'done'.
+
+**%s**
+
+You can edit this section here: http://forum.sa-mp.com/profile.php?do=editprofile in the 'Additional Information' section at the bottom.
+
+You must ensure your "About Me" section is visible to *Everyone*, you can change this setting here: http://forum.sa-mp.com/profile.php?do=privacy`,
+			verification.code))
 	return err
 }
 
@@ -192,7 +214,7 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 
 	if !verified {
 		logger.Debug("user not confirmed", zap.String("user", message.Author.Username))
-		_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Failure"))
+		_, err = app.discordClient.ChannelMessageSend(message.ChannelID, "Sorry, your verification failed. The code was not found on your profile page.")
 		return err
 	}
 
@@ -207,27 +229,25 @@ func (app App) UserConfirmsProfile(message discordgo.Message) error {
 	}
 
 	logger.Debug("user confirmed", zap.String("user", message.Author.Username))
-	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserConfirmsProfile_Success", verification.forumUser))
+	_, err = app.discordClient.ChannelMessageSend(message.ChannelID,
+		fmt.Sprintf("Congratulations! You have been verified as the owner of the forum account %s. Have a nice day!", verification.forumUser))
 	return err
 }
 
 // UserCancelsVerification is called when the user responds with 'cancel'
 func (app App) UserCancelsVerification(message discordgo.Message) error {
 	logger.Debug("user cancelled verification", zap.String("user", message.Author.Username))
-	var verification Verification
 	var err error
 
-	result, found := app.cache.Get(message.Author.ID)
+	_, found := app.cache.Get(message.Author.ID)
 	if !found {
 		err = app.WarnUserNoVerification(message.ChannelID)
 		return err
 	}
 
-	verification = result.(Verification)
-
 	app.cache.Delete(message.Author.ID)
 
-	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, app.locale.GetLangString(verification.language, "UserCancelsVerification"))
+	_, err = app.discordClient.ChannelMessageSend(message.ChannelID, "You have cancelled your verification. You can start again at any time by sending 'verify'.")
 	return err
 }
 
@@ -238,11 +258,11 @@ func (app App) WarnUserVerificationState(channelid string, verification Verifica
 	var stateMessage string
 	switch verification.verifyState {
 	case VerificationStateNone:
-		stateMessage = app.locale.GetLangString(verification.language, "WarnUserVerificationState_VerificationStateNone")
+		stateMessage = "Your verification is currently in an invalid state, please try again in 5 minutes!"
 	case VerificationStateAwaitProfileURL:
-		stateMessage = app.locale.GetLangString(verification.language, "WarnUserVerificationState_VerificationStateAwaitProfileURL")
+		stateMessage = "Your verification is currently awaiting a profile URL or profile ID."
 	case VerificationStateAwaitConfirmation:
-		stateMessage = app.locale.GetLangString(verification.language, "WarnUserVerificationState_VerificationStateAwaitConfirmation")
+		stateMessage = "Your verification is currently awaiting you to post the verification code on your Profile Bio, once you've done that reply with either 'done' or 'cancel'"
 	}
 	_, err := app.discordClient.ChannelMessageSend(channelid, stateMessage)
 	return err
@@ -251,30 +271,16 @@ func (app App) WarnUserVerificationState(channelid string, verification Verifica
 // WarnUserNoVerification is simply a message informing the user their
 // Verification does not exist and they need to start the process with 'verify'.
 func (app App) WarnUserNoVerification(channelid string) error {
-	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString(app.config.Language, "WarnUserNoVerification"))
-	return err
-}
-
-// WarnUserBadInput lets the user know their input was not recognised for the
-// current verification state.
-func (app App) WarnUserBadInput(channelid string, verification Verification) error {
-	var stateMessage string
-	switch verification.verifyState {
-	case VerificationStateNone:
-		stateMessage = app.locale.GetLangString(verification.language, "WarnUserBadInput_VerificationStateNone")
-	case VerificationStateAwaitProfileURL:
-		stateMessage = app.locale.GetLangString(verification.language, "WarnUserBadInput_VerificationStateAwaitProfileURL")
-	case VerificationStateAwaitConfirmation:
-		stateMessage = app.locale.GetLangString(verification.language, "WarnUserBadInput_VerificationStateAwaitConfirmation")
-	}
-	_, err := app.discordClient.ChannelMessageSend(channelid, stateMessage)
+	_, err := app.discordClient.ChannelMessageSend(channelid, "You need to start your verification by typing 'verify'.")
 	return err
 }
 
 // WarnUserError informs the user of an error and provides them with
 // instructions for what to do next.
 func (app App) WarnUserError(channelid string, errorString string) error {
-	_, err := app.discordClient.ChannelMessageSend(channelid, app.locale.GetLangString(app.config.Language, "WarnUserError", errorString))
+	_, err := app.discordClient.ChannelMessageSend(channelid, fmt.Sprintf(
+		`An error occurred! A description of the error is below: "%s" Please let Southclaws know of this issue and try again in about 5 minutes`,
+		errorString))
 	return err
 }
 

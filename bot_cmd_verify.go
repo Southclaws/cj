@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 )
 
 func commandVerify(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
@@ -11,17 +12,17 @@ func commandVerify(cm CommandManager, args string, message discordgo.Message, co
 	}
 
 	if verified {
-		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyAlreadyVerified"),)
+		err = errors.New("user are already verified")
 		return true, false, err
 	}
 
 	switch message.Content {
-	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerify"):
+	case "verify":
 		err = cm.App.UserStartsVerification(message)
-	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyDone"):
+	case "done":
 		err = cm.App.UserConfirmsProfile(message)
 		return true, false, err
-	case cm.App.locale.GetLangString(cm.App.config.Language, "CommandVerifyCancel"):
+	case "cancel":
 		err = cm.App.UserCancelsVerification(message)
 		return true, false, err
 	default:

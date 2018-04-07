@@ -29,11 +29,10 @@ type Command struct {
 // all commands and binding them to functions.
 func LoadCommands(app *App) map[string]Command {
 	return map[string]Command{
-		app.locale.GetLangString(app.config.Language, "CommandVerifyName"): {
+		"verify": {
 			Function:    commandVerify,
 			Source:      CommandSourcePRIVATE,
-			Description: app.locale.GetLangString(app.config.Language, "CommandVerifyDescription"),
-			Usage:       app.locale.GetLangString(app.config.Language, "CommandVerifyName"),
+			Description: "Verify you are the owner of a SA:MP forum account",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
 				Maximum: -1,
@@ -42,12 +41,10 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         true,
 		},
-		app.locale.GetLangString(app.config.Language, "CommandSayName"): {
+		"/say": {
 			Function:    commandSay,
 			Source:      CommandSourceADMINISTRATIVE,
-			Description: app.locale.GetLangString(app.config.Language, "CommandSayDescription"),
-			Usage:       app.locale.GetLangString(app.config.Language, "CommandSayUsage"),
-			Example:     app.locale.GetLangString(app.config.Language, "CommandSayExample"),
+			Description: "Say something as CJ.",
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: -1,
@@ -56,32 +53,28 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		app.locale.GetLangString(app.config.Language, "CommandUserinfoName"): {
+		"userinfo": {
 			Function:    commandUserInfo,
 			Source:      CommandSourcePRIMARY,
-			Description: app.locale.GetLangString(app.config.Language, "CommandUserInfoDescription"),
-			Usage:       app.locale.GetLangString(app.config.Language, "CommandUserInfoUsage"),
-			Example:     app.locale.GetLangString(app.config.Language, "CommandUserInfoExample"),
+			Description: "Get a user's SA:MP forum info",
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    app.locale.GetLangString(app.config.Language, "CommandErrorNoMention"),
+			ErrorMessage:    "You need to mention someone to use this command.",
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
 		},
-		app.locale.GetLangString(app.config.Language, "CommandWhoisName"): {
+		"whois": {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
-			Description: app.locale.GetLangString(app.config.Language, "CommandWhoisDescription", "%s"),
-			Usage:       app.locale.GetLangString(app.config.Language, "CommandWhoisUsage", "%s"),
-			Example:     app.locale.GetLangString(app.config.Language, "CommandWhoisExample", "%s"),
+			Description: "Display a Discord user's forum account name.",
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    app.locale.GetLangString(app.config.Language, "CommandErrorNoMention"),
+			ErrorMessage:    "You need to mention someone to use this command.",
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -89,14 +82,12 @@ func LoadCommands(app *App) map[string]Command {
 		"setverify": {
 			Function:    commandSetVerify,
 			Source:      CommandSourceADMINISTRATIVE,
-			Description: "",
-			Usage:       "",
-			Example:     "",
+			Description: "Manually verify a user",
 			ParametersRange: CommandParametersRange{
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage:    app.locale.GetLangString(app.config.Language, "CommandErrorNoMention"),
+			ErrorMessage:    "You need to mention someone to use this command.",
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -104,13 +95,12 @@ func LoadCommands(app *App) map[string]Command {
 		"cj": {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
-			Description: app.locale.GetLangString(app.config.Language, "CommandCjDescription"),
+			Description: "Talk to CJ",
 			Usage:       "cj",
 			ParametersRange: CommandParametersRange{
 				Minimum: -1,
 				Maximum: -1,
 			},
-			ErrorMessage:    app.locale.GetLangString(app.config.Language, "CommandErrorNoMention", "%s"),
 			RequireVerified: true,
 			RequireAdmin:    false,
 			Context:         false,
@@ -257,7 +247,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	if commandObject.RequireAdmin && cm.App.config.Admin != message.Author.ID {
 		logger.Debug("ignoring admin command used by non-admin", zap.String("command", commandTrigger))
 
-		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "CommandRequireAdministrator", message.Author.ID))
+		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, "requires administrator rights")
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -276,7 +266,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		if !verified {
 			logger.Debug("ignoring command that requires verification from non-verified user", zap.String("command", commandTrigger))
 
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "CommandRequireVerification", message.Author.ID))
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, "requires verified status")
 			if err != nil {
 				errs = append(errs, err)
 			}
@@ -288,7 +278,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	if commandObject.ParametersRange.Minimum > -1 && commandParametersCount < commandObject.ParametersRange.Minimum {
 		logger.Debug("ignoring ignoring command with incorrect parameter count", zap.String("command", commandTrigger))
 
-		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
+		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Description)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -297,7 +287,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	} else if commandObject.ParametersRange.Maximum > -1 && commandParametersCount > commandObject.ParametersRange.Maximum {
 		logger.Debug("ignoring ignoring command with incorrect parameter count", zap.String("command", commandTrigger))
 
-		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "TooManyParameters", commandObject.ParametersRange.Maximum))
+		_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, "Too many parameters")
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -336,7 +326,7 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 			errs = append(errs, err)
 		} else {
-			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, cm.App.locale.GetLangString(cm.App.config.Language, "CommandUsageTemplate", commandObject.Usage, commandObject.Description, commandObject.Example))
+			_, err = cm.App.discordClient.ChannelMessageSend(message.ChannelID, commandObject.Description)
 			if err != nil {
 				errs = append(errs, err)
 			}
