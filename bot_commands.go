@@ -126,6 +126,18 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin:    false,
 			Context:         false,
 		},
+		"dynamic": {
+			Function:    commandDynamic,
+			Source:      CommandSourcePRIMARY,
+			Description: "inspiration for your next script",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
+			RequireVerified: true,
+			RequireAdmin:    false,
+			Context:         false,
+		},
 	}
 }
 

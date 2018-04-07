@@ -94,6 +94,8 @@ var tags = []string{
 	"BETA",
 	"BEST",
 	"HIRING",
+	"IMPROVED",
+	"BASIC",
 	"Y_INI",
 	"PAWNO",
 	"NGG",
