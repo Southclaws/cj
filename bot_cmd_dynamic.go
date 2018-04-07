@@ -36,9 +36,9 @@ var scripts = []string{
 	"Garbage Collector",
 	"Interiors",
 	"Admin-Vehicle Lock - for all u lazy ppl!!!",
-	"Teleport
+	"Teleport",
 	"Gang",
-	"Guild",s 0.1",
+	"Guild",
 	"animations",
 	"Business. v1.0",
 	"position save system",
