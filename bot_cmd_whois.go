@@ -27,7 +27,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		count++
 
 		if user.ID == cm.App.config.BotID {
-			result += "I am Carl Johnson, co-leader of Grove Street Families."
+			result += "I am Carl Johnson, co-leader of Grove Street Families. "
 			continue
 		}
 
@@ -38,7 +38,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		}
 
 		if !verified {
-			result += fmt.Sprintf("The user <@%s> is not verified.", user.ID)
+			result += fmt.Sprintf("The user <@%s> is not verified. ", user.ID)
 		} else {
 			username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
 			if err != nil {
@@ -50,7 +50,7 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 				return false, false, err
 			}
 
-			result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums.", user.ID, username, link)
+			result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums. ", user.ID, username, link)
 		}
 	}
 
