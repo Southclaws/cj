@@ -56,6 +56,7 @@ var morewords = []string{
 	"mom",
 	"rcrp-leak",
 	"ginger",
+	"parkour",
 }
 
 var gamemodes = []string{
@@ -111,6 +112,8 @@ var tags = []string{
 	"CUSTOM OBJECTS",
 	"0.3.DL",
 	"ROLLERPLAYERS ONLY",
+	"SOUTHCLAWS",
+	"RAKNET",
 }
 
 func init() {
