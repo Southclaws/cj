@@ -114,6 +114,8 @@ var tags = []string{
 	"ROLLERPLAYERS ONLY",
 	"SOUTHCLAWS",
 	"RAKNET",
+	"LAGSHOT",
+	"HALAL",
 }
 
 func init() {
