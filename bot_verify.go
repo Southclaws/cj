@@ -277,9 +277,7 @@ func (app App) WarnUserNoVerification(channelid string) error {
 // WarnUserError informs the user of an error and provides them with
 // instructions for what to do next.
 func (app App) WarnUserError(channelid string, errorString string) error {
-	_, err := app.discordClient.ChannelMessageSend(channelid, fmt.Sprintf(
-		`An error occurred! A description of the error is below: "%s" Please let Southclaws know of this issue and try again in about 5 minutes`,
-		errorString))
+	_, err := app.discordClient.ChannelMessageSend(channelid, fmt.Sprintf(`An error occurred: "%s"`, errorString))
 	return err
 }
 

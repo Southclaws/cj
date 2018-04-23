@@ -91,7 +91,7 @@ func (app App) GetDiscordUserFromForumName(forumName string) (discordUserID stri
 
 	err = app.accounts.Find(bson.M{"forum_user_name": forumName}).One(&user)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to query forum name by discord ID")
+		return "", errors.Wrap(err, "failed to query user by forum name")
 	}
 
 	discordUserID = user.DiscordUserID
