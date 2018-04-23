@@ -81,7 +81,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
-			ErrorMessage: "You need to mention someone to use this command.",
 
 			RequireAdmin: false,
 			Context:      false,
