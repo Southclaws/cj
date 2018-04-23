@@ -36,6 +36,15 @@ func LoadCommands(app *App) map[string]Command {
 				Maximum: -1,
 			},
 		},
+		"/help": {
+			Function:    commandHelp,
+			Source:      CommandSourcePRIMARY,
+			Description: "command list",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
+		},
 		"verify": {
 			Function:    commandVerify,
 			Source:      CommandSourcePRIVATE,
@@ -161,6 +170,11 @@ func commandCommands(cm CommandManager, args string, message discordgo.Message, 
 	}
 
 	cm.App.discordClient.ChannelMessageSend(message.ChannelID, allCmds)
+	return true, false, nil
+}
+
+func commandHelp(cm CommandManager, args string, message discordgo.Message, contextual bool) (bool, bool, error) {
+	cm.App.discordClient.ChannelMessageSend(message.ChannelID, "fuck off")
 	return true, false, nil
 }
 
