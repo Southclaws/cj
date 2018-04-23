@@ -17,40 +17,48 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 	)
 
 	if len(message.Mentions) == 0 {
-		return false, false, nil
-	}
-
-	for _, user := range message.Mentions {
-		if count == 5 {
-			break
-		}
-		count++
-
-		if user.ID == cm.App.config.BotID {
-			result += "I am Carl Johnson, co-leader of Grove Street Families. "
-			continue
-		}
-
-		verified, err = cm.App.IsUserVerified(user.ID)
+		var userID string
+		userID, err = cm.App.GetDiscordUserFromForumName(args)
 		if err != nil {
-			result += err.Error()
-			continue
+			return false, false, err
 		}
 
-		if !verified {
-			result += fmt.Sprintf("The user <@%s> is not verified. ", user.ID)
-		} else {
-			username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
-			if err != nil {
-				return false, false, err
+		result += fmt.Sprintf("**%s** is here as <@%s>", args, userID)
+
+		return true, false, nil
+	} else {
+		for _, user := range message.Mentions {
+			if count == 5 {
+				break
+			}
+			count++
+
+			if user.ID == cm.App.config.BotID {
+				result += "I am Carl Johnson, co-leader of Grove Street Families. "
+				continue
 			}
 
-			link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
+			verified, err = cm.App.IsUserVerified(user.ID)
 			if err != nil {
-				return false, false, err
+				result += err.Error()
+				continue
 			}
 
-			result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums. ", user.ID, username, link)
+			if !verified {
+				result += fmt.Sprintf("The user <@%s> is not verified. ", user.ID)
+			} else {
+				username, err = cm.App.GetForumNameFromDiscordUser(user.ID)
+				if err != nil {
+					return false, false, err
+				}
+
+				link, err = cm.App.GetForumUserFromDiscordUser(user.ID)
+				if err != nil {
+					return false, false, err
+				}
+
+				result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums. ", user.ID, username, link)
+			}
 		}
 	}
 

@@ -84,3 +84,16 @@ func (app App) GetForumNameFromDiscordUser(discordUserID string) (forumUserName 
 	forumUserName = user.ForumUserName
 	return
 }
+
+// GetDiscordUserFromForumName returns user's name on SA-MP Forums, a blank string or an error
+func (app App) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
+	var user User
+
+	err = app.accounts.Find(bson.M{"forum_user_name": forumName}).One(&user)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to query forum name by discord ID")
+	}
+
+	discordUserID = user.DiscordUserID
+	return
+}
