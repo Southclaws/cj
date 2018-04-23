@@ -24,8 +24,6 @@ func commandWhois(cm CommandManager, args string, message discordgo.Message, con
 		}
 
 		result += fmt.Sprintf("**%s** is here as <@%s>", args, userID)
-
-		return true, false, nil
 	} else {
 		for _, user := range message.Mentions {
 			if count == 5 {
