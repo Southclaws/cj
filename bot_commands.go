@@ -110,6 +110,7 @@ func LoadCommands(app *App) map[string]Command {
 
 			RequireAdmin: false,
 			Context:      false,
+			Cooldown:     time.Second * 10,
 		},
 		"gmname": {
 			Function:    commandGmName,
