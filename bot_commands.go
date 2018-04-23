@@ -20,6 +20,7 @@ type Command struct {
 	ErrorMessage    string
 	RequireAdmin    bool
 	Context         bool
+	Cooldown        time.Duration
 }
 
 // LoadCommands is called on initialisation and is responsible for registering
@@ -59,7 +60,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin: false,
 			Context:      false,
 		},
-		"userinfo": {
+		"/userinfo": {
 			Function:    commandUserInfo,
 			Source:      CommandSourcePRIMARY,
 			Description: "Get a user's SA:MP forum info",
@@ -72,7 +73,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin: false,
 			Context:      false,
 		},
-		"whois": {
+		"/whois": {
 			Function:    commandWhois,
 			Source:      CommandSourcePRIMARY,
 			Description: "Display a Discord user's forum account name.",
@@ -85,7 +86,7 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin: false,
 			Context:      false,
 		},
-		"setverify": {
+		"/setverify": {
 			Function:    commandSetVerify,
 			Source:      CommandSourceADMINISTRATIVE,
 			Description: "Manually verify a user",
@@ -121,6 +122,7 @@ func LoadCommands(app *App) map[string]Command {
 
 			RequireAdmin: false,
 			Context:      false,
+			Cooldown:     time.Minute,
 		},
 		"mpname": {
 			Function:    commandMP,
@@ -133,6 +135,7 @@ func LoadCommands(app *App) map[string]Command {
 
 			RequireAdmin: false,
 			Context:      false,
+			Cooldown:     time.Minute,
 		},
 		"dynamic": {
 			Function:    commandDynamic,
@@ -145,6 +148,7 @@ func LoadCommands(app *App) map[string]Command {
 
 			RequireAdmin: false,
 			Context:      false,
+			Cooldown:     time.Minute,
 		},
 	}
 }
@@ -180,9 +184,10 @@ const (
 
 // CommandManager stores command state
 type CommandManager struct {
-	App      *App
-	Commands map[string]Command
-	Contexts *gocache.Cache
+	App       *App
+	Commands  map[string]Command
+	Contexts  *gocache.Cache
+	Cooldowns map[string]time.Time
 }
 
 // CommandParametersRange represents minimum value and maximum value number of parameters for a command
@@ -194,9 +199,10 @@ type CommandParametersRange struct {
 // StartCommandManager creates a command manager for the app
 func (app *App) StartCommandManager() {
 	app.commandManager = &CommandManager{
-		App:      app,
-		Commands: make(map[string]Command),
-		Contexts: gocache.New(5*time.Minute, 30*time.Second),
+		App:       app,
+		Commands:  make(map[string]Command),
+		Contexts:  gocache.New(5*time.Minute, 30*time.Second),
+		Cooldowns: make(map[string]time.Time),
 	}
 
 	app.commandManager.Commands = LoadCommands(app)
@@ -302,6 +308,13 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 		return exists, source, errs
 	}
 
+	// Check if command is on cooldown
+	if when, ok := cm.Cooldowns[commandTrigger]; ok {
+		if time.Since(when) < commandObject.Cooldown {
+			return exists, source, errs
+		}
+	}
+
 	var (
 		success      bool
 		enterContext bool
@@ -340,6 +353,10 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 
 			return exists, source, errs
 		}
+	}
+
+	if commandObject.Cooldown > 0 {
+		cm.Cooldowns[commandTrigger] = time.Now()
 	}
 
 	return exists, source, errs
