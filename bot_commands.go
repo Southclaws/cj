@@ -263,8 +263,6 @@ func (cm CommandManager) Process(message discordgo.Message) (exists bool, source
 	commandObject.commandManager = &cm
 
 	if !exists {
-		logger.Debug("ignoring command that does not exist",
-			zap.String("command", commandTrigger))
 		return exists, source, nil
 	}
 

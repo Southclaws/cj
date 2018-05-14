@@ -213,12 +213,10 @@ func (app *App) newPostAlert(id string, fn func()) {
 
 	go func() {
 		for range ticker.C {
-			fmt.Println("checking profile page")
 			profile, err := app.GetUserProfilePage("http://forum.sa-mp.com/member.php?u=" + id)
 			if err != nil {
 				logger.Error("failed to poll user profile")
 			}
-			fmt.Println(profile)
 
 			if lastPostCount == -1 {
 				lastPostCount = profile.TotalPosts

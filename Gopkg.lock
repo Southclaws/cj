@@ -70,19 +70,19 @@
     "registry",
     "token"
   ]
-  revision = "68a29f5e29b18d7367e686c43cf74eba1900f548"
+  revision = "03d472dc43abece8691e609a23d295ab732abba6"
 
 [[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
-  revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
-  version = "v1.1.4"
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
 
 [[projects]]
   name = "go.uber.org/atomic"
   packages = ["."]
-  revision = "4e336646b2ef9fc6e47be8e21594178f98e5ebcf"
-  version = "v1.2.0"
+  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+  version = "v1.3.2"
 
 [[projects]]
   name = "go.uber.org/multierr"
@@ -100,8 +100,8 @@
     "internal/exit",
     "zapcore"
   ]
-  revision = "35aad584952c3e7020db7b839f6b102de6271f89"
-  version = "v1.7.1"
+  revision = "eeedf312bc6c57391d84767a4cd413f02a917974"
+  version = "v1.8.0"
 
 [[projects]]
   branch = "master"
@@ -111,7 +111,7 @@
     "poly1305",
     "salsa20/salsa"
   ]
-  revision = "2509b142fb2b797aa7587dad548f113b2c0f20ce"
+  revision = "94e3fad7f1b4eed4ec147751ad6b4c4d33f00611"
 
 [[projects]]
   branch = "master"
@@ -120,7 +120,7 @@
     "html",
     "html/atom"
   ]
-  revision = "c73622c77280266305273cb545f54516ced95b93"
+  revision = "2491c5de3490fced2f6cff376127c667efeed857"
 
 [[projects]]
   branch = "v2"
