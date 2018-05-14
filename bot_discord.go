@@ -38,6 +38,8 @@ func (app *App) ConnectDiscord() {
 
 // nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
+	logger.Debug("connected to Discord gateway")
+
 	roles, err := s.GuildRoles(app.config.GuildID)
 	if err != nil {
 		logger.Fatal("failed to get guild roles",
