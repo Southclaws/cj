@@ -116,6 +116,7 @@ var tags = []string{
 	"RAKNET",
 	"LAGSHOT",
 	"HALAL",
+	"STRTOK",
 }
 
 func init() {
