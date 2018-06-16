@@ -114,7 +114,7 @@ func LoadCommands(app *App) map[string]Command {
 			},
 			RequireAdmin: false,
 			Context:      false,
-			Cooldown:     time.Second * 10,
+			Cooldown:     time.Minute * 10,
 		},
 		"gmname": {
 			Function:    commandGmName,
@@ -126,7 +126,7 @@ func LoadCommands(app *App) map[string]Command {
 			},
 			RequireAdmin: false,
 			Context:      false,
-			Cooldown:     time.Minute,
+			Cooldown:     time.Minute * 10,
 		},
 		"mpname": {
 			Function:    commandMP,
@@ -138,7 +138,7 @@ func LoadCommands(app *App) map[string]Command {
 			},
 			RequireAdmin: false,
 			Context:      false,
-			Cooldown:     time.Minute,
+			Cooldown:     time.Minute * 10,
 		},
 		"dynamic": {
 			Function:    commandDynamic,
@@ -150,7 +150,7 @@ func LoadCommands(app *App) map[string]Command {
 			},
 			RequireAdmin: false,
 			Context:      false,
-			Cooldown:     time.Minute,
+			Cooldown:     time.Minute * 10,
 		},
 		"rpname": {
 			Function:    commandRP,
@@ -162,7 +162,7 @@ func LoadCommands(app *App) map[string]Command {
 			},
 			RequireAdmin: false,
 			Context:      false,
-			Cooldown:     time.Minute,
+			Cooldown:     time.Minute * 10,
 		},
 	}
 }
