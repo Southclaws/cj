@@ -53,7 +53,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-
 			RequireAdmin: false,
 			Context:      true,
 		},
@@ -65,7 +64,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: -1,
 			},
-
 			RequireAdmin: false,
 			Context:      false,
 		},
@@ -90,7 +88,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: 1,
 				Maximum: 5,
 			},
-
 			RequireAdmin: false,
 			Context:      false,
 		},
@@ -115,7 +112,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-
 			RequireAdmin: false,
 			Context:      false,
 			Cooldown:     time.Second * 10,
@@ -128,7 +124,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-
 			RequireAdmin: false,
 			Context:      false,
 			Cooldown:     time.Minute,
@@ -141,7 +136,6 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-
 			RequireAdmin: false,
 			Context:      false,
 			Cooldown:     time.Minute,
@@ -154,7 +148,18 @@ func LoadCommands(app *App) map[string]Command {
 				Minimum: -1,
 				Maximum: -1,
 			},
-
+			RequireAdmin: false,
+			Context:      false,
+			Cooldown:     time.Minute,
+		},
+		"rpname": {
+			Function:    commandRP,
+			Source:      CommandSourcePRIMARY,
+			Description: "the next big unique dynamic server",
+			ParametersRange: CommandParametersRange{
+				Minimum: -1,
+				Maximum: -1,
+			},
 			RequireAdmin: false,
 			Context:      false,
 			Cooldown:     time.Minute,
