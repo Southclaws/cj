@@ -164,6 +164,17 @@ func LoadCommands(app *App) map[string]Command {
 			Context:      false,
 			Cooldown:     time.Minute * 10,
 		},
+		"/wiki": {
+			Function:    commandWiki,
+			Source:      CommandSourcePRIMARY,
+			Description: "Returns an article from SA:MP wiki.",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: -1,
+			},
+			RequireAdmin: false,
+			Context:      false,
+		},
 	}
 }
 
