@@ -1,8 +1,0 @@
-language: go
-services: mongodb
-go:
-  - 1.x
-script:
-- make test
-env:
-  - TRAVIS=1
