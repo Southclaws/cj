@@ -104,6 +104,19 @@ func LoadCommands(app *App) map[string]Command {
 			RequireAdmin: false,
 			Context:      false,
 		},
+		"/unverify": {
+			Function:    commandUnVerify,
+			Source:      CommandSourceADMINISTRATIVE,
+			Description: "Manually unverify a user",
+			ParametersRange: CommandParametersRange{
+				Minimum: 1,
+				Maximum: 5,
+			},
+			ErrorMessage: "You need to mention someone to use this command.",
+
+			RequireAdmin: false,
+			Context:      false,
+		},
 		"cj": {
 			Function:    commandCJQuote,
 			Source:      CommandSourcePRIMARY,
