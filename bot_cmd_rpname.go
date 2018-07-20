@@ -36,6 +36,7 @@ var rpfirsts = []string{
 	"godfather",
 	"capital",
 	"SAMP",
+	"grand",
 }
 var rpseconds = []string{
 	"area",
@@ -57,6 +58,7 @@ var rpseconds = []string{
 	"SAMP",
 	"survive",
 	"ginger",
+	"larceny",
 }
 
 func rpname() string {
