@@ -142,11 +142,13 @@ func (app App) getReputation(forumUserID string) (int, error) {
 
 	path = xmlpath.MustCompile(fmt.Sprintf(`//table[@id="%s"]/tbody/tr[@valign="top"]/td[@class="alt2"]/*/*[contains(text(),'Reputation: ')]`, strings.Split(href, "#")[1]))
 
-	// Get the table for that post.
-	reputation, ok := path.String(root)
-	if !ok {
-		return 0, errors.New("cannot get reputation field from post")
+	fields := path.Iter(root)
+	var reputation string
+	for fields.Next() {
+		reputation = fields.Node().String()
 	}
+
+	// Get the table for that post.
 
 	reputation = strings.TrimPrefix(reputation, "Reputation: ")
 	reputation = strings.Replace(reputation, ",", "", -1)
