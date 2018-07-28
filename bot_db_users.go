@@ -88,8 +88,9 @@ func (app App) GetForumNameFromDiscordUser(discordUserID string) (forumUserName 
 // GetDiscordUserFromForumName returns user's name on SA-MP Forums, a blank string or an error
 func (app App) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
 	var user User
+	regex := bson.M{"$regex": bson.RegEx{Pattern: "^" + forumName + "$", Options: "i"}}
 
-	err = app.accounts.Find(bson.M{"forum_user_name": forumName}).One(&user)
+	err = app.accounts.Find(bson.M{"forum_user_name": regex}).One(&user)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to query user by forum name")
 	}
