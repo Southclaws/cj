@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gopkg.in/mgo.v2/bson"
+	"regexp"
 )
 
 // User is a recorded and verified SA:MP forum user.
@@ -88,7 +89,8 @@ func (app App) GetForumNameFromDiscordUser(discordUserID string) (forumUserName 
 // GetDiscordUserFromForumName returns user's name on SA-MP Forums, a blank string or an error
 func (app App) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
 	var user User
-	regex := bson.M{"$regex": bson.RegEx{Pattern: "^" + forumName + "$", Options: "i"}}
+
+	regex := bson.M{"$regex": bson.RegEx{Pattern: "^" + regexp.QuoteMeta(forumName) + "$", Options: "i"}}
 
 	err = app.accounts.Find(bson.M{"forum_user_name": regex}).One(&user)
 	if err != nil {
