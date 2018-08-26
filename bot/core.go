@@ -39,6 +39,17 @@ func Start(config *types.Config) {
 
 	var err error
 
+	app.storage, err = storage.New(storage.Config{
+		MongoHost: config.MongoHost,
+		MongoPort: config.MongoPort,
+		MongoName: config.MongoName,
+		MongoUser: config.MongoUser,
+		MongoPass: config.MongoPass,
+	})
+	if err != nil {
+		logger.Fatal("failed to connect to database", zap.Error(err))
+	}
+
 	app.forum, err = forum.NewForumClient()
 	if err != nil {
 		logger.Fatal("failed to initialise forum client", zap.Error(err))
@@ -61,6 +72,7 @@ func Start(config *types.Config) {
 	}
 
 	app.forum.NewPostAlert("3", func() {
+		//nolint:errcheck
 		app.discordClient.ChannelMessageSend(
 			config.PrimaryChannel,
 			"New Kalcor Post: http://forum.sa-mp.com/search.php?do=finduser&u=3",

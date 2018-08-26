@@ -24,6 +24,7 @@ type Config struct {
 
 // New constructs a new storage API and connects to the database
 func New(config Config) (api *API, err error) {
+	api = new(API)
 	api.mongo, err = mgo.Dial(fmt.Sprintf("%s:%s", config.MongoHost, config.MongoPort))
 	if err != nil {
 		return
