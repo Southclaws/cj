@@ -3,9 +3,10 @@ package storage
 import (
 	"regexp"
 
-	"github.com/Southclaws/cj/types"
 	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2/bson"
+
+	"github.com/Southclaws/cj/types"
 )
 
 // User is a recorded and verified SA:MP forum user.

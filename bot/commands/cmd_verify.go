@@ -78,14 +78,15 @@ func (cm *CommandManager) SetVerificationState(v *types.Verification, state type
 // UserStartsVerification is called when the user sends the string "verify" to
 // the bot.
 func (cm *CommandManager) UserStartsVerification(message discordgo.Message) (err error) {
-	var verification types.Verification
-
 	result, found := cm.Cache.Get(message.Author.ID)
 	// At this point, it should not be found because this is the point where
 	// a user should be starting their verification and thus there should be
 	// no trace of their Verification in the cache.
 	if found {
-		verification = result.(types.Verification)
+		verification, ok := result.(types.Verification)
+		if !ok {
+			return errors.New("failed to cast result to verification")
+		}
 		err = cm.WarnUserVerificationState(message.ChannelID, verification)
 		return
 	}
@@ -127,7 +128,10 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 		return
 	}
 
-	verification = result.(types.Verification)
+	verification, ok := result.(types.Verification)
+	if !ok {
+		return errors.New("failed to cast result to verification")
+	}
 
 	if verification.VerifyState != types.VerificationStateAwaitProfileURL {
 		err = cm.WarnUserVerificationState(message.ChannelID, verification)
@@ -190,7 +194,10 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 		return
 	}
 
-	verification = result.(types.Verification)
+	verification, ok := result.(types.Verification)
+	if !ok {
+		return errors.New("failed to cast result to verification")
+	}
 
 	if verification.VerifyState != types.VerificationStateAwaitConfirmation {
 		err = cm.WarnUserVerificationState(message.ChannelID, verification)
@@ -208,7 +215,7 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 	}
 
 	if !verified {
-		cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"Sorry, your verification failed. The code was not found on your profile page.")
 		return
@@ -224,11 +231,11 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 		return
 	}
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
 		"Congratulations! You have been verified as the owner of the forum account %s. Have a nice day!",
 		verification.ForumUser,
 	))
-	return nil
+	return err
 }
 
 // UserCancelsVerification is called when the user responds with 'cancel'
@@ -260,21 +267,21 @@ func (cm *CommandManager) WarnUserVerificationState(channelid string, verificati
 	case types.VerificationStateAwaitConfirmation:
 		stateMessage = "Your verification is currently awaiting you to post the verification code on your Profile Bio, once you've done that reply with either 'done' or 'cancel'"
 	}
-	cm.Discord.ChannelMessageSend(channelid, stateMessage)
+	_, err = cm.Discord.ChannelMessageSend(channelid, stateMessage)
 	return
 }
 
 // WarnUserNoVerification is simply a message informing the user their
 // Verification does not exist and they need to start the process with 'verify'.
 func (cm *CommandManager) WarnUserNoVerification(channelid string) (err error) {
-	cm.Discord.ChannelMessageSend(channelid, "You need to start your verification by typing 'verify'.")
+	_, err = cm.Discord.ChannelMessageSend(channelid, "You need to start your verification by typing 'verify'.")
 	return
 }
 
 // WarnUserError informs the user of an error and provides them with
 // instructions for what to do next.
 func (cm *CommandManager) WarnUserError(channelid string, errorString string) (err error) {
-	cm.Discord.ChannelMessageSend(channelid, fmt.Sprintf(`An error occurred: "%s"`, errorString))
+	_, err = cm.Discord.ChannelMessageSend(channelid, fmt.Sprintf(`An error occurred: "%s"`, errorString))
 	return
 }
 
@@ -299,7 +306,7 @@ https://elithrar.github.io/article/generating-secure-random-numbers-crypto-rand
 // case the caller should not continue.
 func GenerateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
-	_, err := rand.Read(b)
+	_, err := rand.Read(b) //nolint:gas
 	// Note that err == nil only if we read len(b) bytes.
 	if err != nil {
 		return nil, err

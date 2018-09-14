@@ -77,6 +77,6 @@ func (cm *CommandManager) commandMP(
 	err error,
 ) {
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, mpname())
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, mpname())
 	return
 }

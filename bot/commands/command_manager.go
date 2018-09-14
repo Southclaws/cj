@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Southclaws/cj/forum"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/patrickmn/go-cache"
+	"github.com/pkg/errors"
 
+	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
 )
@@ -94,7 +94,7 @@ func (cm *CommandManager) commandCommands(
 		allCmds += fmt.Sprintf("%s: %s\n", trigger, cmd.Description)
 	}
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, allCmds)
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, allCmds)
 	return
 }
 
@@ -106,7 +106,7 @@ func (cm *CommandManager) commandHelp(
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(message.ChannelID, "fuck off")
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, "fuck off")
 	return
 }
 
@@ -121,7 +121,10 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	storedContext, found := cm.Contexts.Get(message.Author.ID)
 	if found {
-		contextCommand := storedContext.(Command)
+		contextCommand, ok := storedContext.(Command)
+		if !ok {
+			return errors.New("failed to cast stored context to command type")
+		}
 		if contextCommand.Source == source {
 			var continueContext bool
 			continueContext, err = contextCommand.Function(message.Content, message, true)
@@ -180,7 +183,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	enterContext, err = commandObject.Function(commandArgument, message, false)
 	if err != nil {
-		cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
+		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
 		return
 	}
 

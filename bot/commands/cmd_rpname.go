@@ -79,6 +79,6 @@ func (cm *CommandManager) commandRP(
 	err error,
 ) {
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, rpname())
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, rpname())
 	return
 }

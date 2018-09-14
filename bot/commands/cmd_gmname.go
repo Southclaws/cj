@@ -140,7 +140,7 @@ func generateGmName() (result string) {
 	anotherword := morewords[rand.Intn(len(morewords))]
 	switch rand.Intn(3) {
 	case 0:
-		buf.WriteString(string(anotherword))
+		buf.WriteString(anotherword)
 	case 1:
 		buf.WriteString(strings.ToTitle(anotherword))
 	case 2:
@@ -181,6 +181,6 @@ func (cm *CommandManager) commandGmName(
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(message.ChannelID, generateGmName())
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, generateGmName())
 	return
 }

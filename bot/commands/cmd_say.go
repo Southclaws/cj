@@ -12,6 +12,6 @@ func (cm *CommandManager) commandSay(
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, args)
+	_, err = cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, args)
 	return
 }

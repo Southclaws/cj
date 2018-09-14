@@ -193,6 +193,6 @@ func (cm *CommandManager) commandDynamic(
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(message.ChannelID, makeDynamic())
+	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, makeDynamic())
 	return
 }

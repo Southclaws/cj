@@ -18,28 +18,35 @@ func (cm *CommandManager) commandWiki(
 ) {
 
 	if len(args) == 0 {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "USAGE : /wiki [function/callback/article_name]")
+		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, "USAGE : /wiki [function/callback/article_name]")
 		return
 	}
 
 	wikiURL := strings.Replace("http://wiki.sa-mp.com/wiki/"+args, " ", "_", -1)
 
-	response, _ := http.Get(wikiURL)
-	bodyText, _ := ioutil.ReadAll(response.Body)
+	response, err := http.Get(wikiURL)
+	if err != nil {
+		return
+	}
+
+	bodyText, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
 
 	if response.StatusCode != 200 {
-		cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"Could not retrieve SA:MP wiki article:\nGot unexpected response: "+response.Status+".")
 	} else if strings.Contains(string(bodyText), "There is currently no text in this page, you can") {
-		cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n- This article does not exist")
 	} else {
-		cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n"+wikiURL)
 	}
 
-	return false, nil
+	return false, err
 }
