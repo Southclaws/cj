@@ -32,6 +32,8 @@ build:
 
 push:
 	docker push southclaws/cj:$(VERSION)
+	docker tag southclaws/cj:$(VERSION) southclaws/cj:latest
+	docker push southclaws/cj:latest
 	
 run:
 	-docker rm cj
