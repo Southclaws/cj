@@ -21,7 +21,7 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
-	if message.MentionEveryone {
+	if message.MentionEveryone || strings.Contains(message.Content, "everyone") {
 		return
 	}
 
