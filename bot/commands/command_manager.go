@@ -174,14 +174,12 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		}
 	}
 
-	var enterContext bool
-
 	err = cm.Discord.ChannelTyping(message.ChannelID)
 	if err != nil {
 		return
 	}
 
-	enterContext, err = commandObject.Function(commandArgument, message, false)
+	enterContext, err := commandObject.Function(commandArgument, message, false)
 	if err != nil {
 		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
 		return

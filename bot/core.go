@@ -20,7 +20,7 @@ type App struct {
 	discordClient *discordgo.Session
 	storage       *storage.API
 	forum         *forum.ForumClient
-	ready         chan bool
+	ready         chan error
 	extensions    []Extension
 }
 
@@ -35,6 +35,7 @@ type Extension interface {
 func Start(config *types.Config) {
 	app := App{
 		config: config,
+		ready:  make(chan error),
 	}
 
 	var err error
@@ -80,6 +81,7 @@ func Start(config *types.Config) {
 	})
 
 	logger.Debug("started with debug logging enabled",
+		zap.Int("extensions", len(app.extensions)),
 		zap.Any("config", config))
 
 	signals := make(chan os.Signal, 1)
