@@ -82,13 +82,13 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 				return errors.Wrapf(err, "failed to check user verified state for %s", user.User.ID)
 			}
 			if verified {
-				logger.Info("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
+				logger.Debug("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
 				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
 				if err != nil {
 					return errors.Wrapf(err, "failed to add verified role for %s", user.User.ID)
 				}
 			} else {
-				logger.Info("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
+				logger.Debug("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
 				err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
 				if err != nil {
 					return errors.Wrapf(err, "failed to remove verified role for %s", user.User.ID)

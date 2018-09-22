@@ -1,4 +1,4 @@
-VERSION := $(shell cat VERSION)
+VERSION := $(shell git describe --tags --dirty --always)
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 -include .env
 
