@@ -67,33 +67,8 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 			return errors.Errorf("verified role %s not found.", app.config.VerifiedRole)
 		}
 
-		users, err := s.GuildMembers(app.config.GuildID, "", 1000)
-		if err != nil {
-			return errors.Wrap(err, "failed to get guild members")
-		}
-
-		if app.config.NoInitSync {
-			return nil
-		}
-
-		for _, user := range users {
-			verified, err := app.storage.IsUserVerified(user.User.ID)
-			if err != nil {
-				return errors.Wrapf(err, "failed to check user verified state for %s", user.User.ID)
-			}
-			if verified {
-				logger.Debug("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
-				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
-				if err != nil {
-					return errors.Wrapf(err, "failed to add verified role for %s", user.User.ID)
-				}
-			} else {
-				logger.Debug("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
-				err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
-				if err != nil {
-					return errors.Wrapf(err, "failed to remove verified role for %s", user.User.ID)
-				}
-			}
+		if !app.config.NoInitSync {
+			go app.doSync()
 		}
 
 		return nil
@@ -157,5 +132,40 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 		if err != nil {
 			logger.Error("failed to send message", zap.Error(err))
 		}
+	}
+}
+
+func (app *App) doSync() {
+	err := func() (err error) {
+		users, err := app.discordClient.GuildMembers(app.config.GuildID, "", 1000)
+		if err != nil {
+			return errors.Wrap(err, "failed to get guild members")
+		}
+
+		for _, user := range users {
+			verified, err := app.storage.IsUserVerified(user.User.ID)
+			if err != nil {
+				return errors.Wrapf(err, "failed to check user verified state for %s", user.User.ID)
+			}
+
+			if verified {
+				logger.Debug("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
+				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
+				if err != nil {
+					return errors.Wrapf(err, "failed to add verified role for %s", user.User.ID)
+				}
+			} else {
+				logger.Debug("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
+				err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
+				if err != nil {
+					return errors.Wrapf(err, "failed to remove verified role for %s", user.User.ID)
+				}
+			}
+		}
+		return
+	}()
+	if err != nil {
+		logger.Fatal("failed to perform initialisation sync",
+			zap.Error(err))
 	}
 }
