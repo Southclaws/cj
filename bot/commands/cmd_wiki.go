@@ -16,9 +16,12 @@ func (cm *CommandManager) commandWiki(
 	context bool,
 	err error,
 ) {
-
 	if len(args) == 0 {
 		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, "USAGE : /wiki [function/callback/article_name]")
+		return
+	}
+
+	if message.MentionEveryone {
 		return
 	}
 
