@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 
+	"github.com/Southclaws/cj/bot/asterisk"
 	"github.com/Southclaws/cj/bot/commands"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
@@ -63,6 +64,7 @@ func Start(config *types.Config) {
 
 	app.extensions = []Extension{
 		&commands.CommandManager{},
+		&asterisk.Asterisk{},
 	}
 
 	for _, ex := range app.extensions {
