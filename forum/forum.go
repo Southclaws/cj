@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cardigann/go-cloudflare-scraper"
+	"github.com/Southclaws/go-cloudflare-scraper"
 	"github.com/pkg/errors"
 	"gopkg.in/xmlpath.v2"
 )

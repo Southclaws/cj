@@ -55,14 +55,19 @@ func (cm *CommandManager) commandVerify(
 	switch message.Content {
 	case "verify":
 		err = cm.UserStartsVerification(message)
+		context = true
+
 	case "done":
 		err = cm.UserConfirmsProfile(message)
-		return
+		context = false
+
 	case "cancel":
 		err = cm.UserCancelsVerification(message)
-		return
+		context = false
+
 	default:
 		err = cm.UserProvidesProfileURL(message)
+		context = true
 	}
 
 	return

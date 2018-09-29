@@ -12,6 +12,8 @@ import (
 	"github.com/Southclaws/cj/types"
 )
 
+var version = "master"
+
 func main() {
 	config := &types.Config{}
 	err := envconfig.Process("CJ", config)
@@ -19,6 +21,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	config.Version = version
 
 	bot.Start(config)
 }

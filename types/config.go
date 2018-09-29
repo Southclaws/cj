@@ -3,6 +3,7 @@ package types
 // Config stores configuration variables
 //nolint:lll
 type Config struct {
+	Version               string
 	MongoHost             string `split_words:"true" required:"true"`
 	MongoPort             string `split_words:"true" required:"true"`
 	MongoName             string `split_words:"true" required:"true"`

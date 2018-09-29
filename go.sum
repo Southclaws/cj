@@ -1,3 +1,5 @@
+github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d h1:ffVejUAmkVQFCv6qihKynFycn326rbRcboioMVgCIhE=
+github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d/go.mod h1:cWIFYwYx1ZVfEoywlnsOuxR4NIQ3NRe2ub2fbFv4n7A=
 github.com/bwmarrin/discordgo v0.17.0 h1:VUZc9ppGi0j9xKsRBYctJqFEFl8u0FSMzDBObw705cM=
 github.com/bwmarrin/discordgo v0.17.0/go.mod h1:5NIvFv5Z7HddYuXbuQegZ684DleQaCFqChP2iuBivJ8=
 github.com/cardigann/go-cloudflare-scraper v0.0.0-20170630233936-6b7caee8e65b h1:wDrpJaWVxyU3ljEROoIEkdcLDaTgQHgERR+Gd68gv8M=

@@ -97,11 +97,6 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		e := ex.OnMessage(*event.Message)
 		if e != nil {
 			logger.Error("unhandled error from OnMessage", zap.Error(e))
-		} else {
-			logger.Debug("handled command in extension",
-				zap.String("author", event.Message.Author.Username),
-				zap.String("message", event.Message.Content),
-			)
 		}
 	}
 
@@ -109,6 +104,11 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 	if err != nil {
 		logger.Error("failed to record chat log", zap.Error(err))
 	}
+
+	logger.Debug("processed message",
+		zap.String("author", event.Message.Author.Username),
+		zap.String("message", event.Message.Content),
+	)
 }
 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {

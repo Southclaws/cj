@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -81,6 +82,11 @@ func Start(config *types.Config) {
 			"New Kalcor Post: http://forum.sa-mp.com/search.php?do=finduser&u=3",
 		)
 	})
+
+	_, err = app.discordClient.ChannelMessageSend(config.AdministrativeChannel, fmt.Sprintf("Hey, what's cracking now? Version %s", config.Version))
+	if err != nil {
+		logger.Fatal("failed to send initialisation message", zap.Error(err))
+	}
 
 	logger.Debug("started with debug logging enabled",
 		zap.Int("extensions", len(app.extensions)),

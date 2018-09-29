@@ -121,6 +121,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	storedContext, found := cm.Contexts.Get(message.Author.ID)
 	if found {
+		fmt.Println("found context for", message.Author.Username)
 		contextCommand, ok := storedContext.(Command)
 		if !ok {
 			return errors.New("failed to cast stored context to command type")
