@@ -43,7 +43,8 @@ func (cm *CommandManager) commandWiki(
 		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"Could not retrieve SA:MP wiki article:\nGot unexpected response: "+response.Status+".")
-	} else if strings.Contains(string(bodyText), "There is currently no text in this page, you can") {
+	} else if strings.Contains(string(bodyText), "There is currently no text in this page, you can") ||
+		strings.Contains(string(bodyText), "The requested page title was invalid, empty") {
 		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n- This article does not exist")
