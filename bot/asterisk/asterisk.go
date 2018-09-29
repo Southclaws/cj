@@ -96,8 +96,11 @@ func (ast *Asterisk) doCorrection(message discordgo.Message) {
 	// apply the correction
 	words[target] = correction
 
-	// reassembly the sentence and edit original message
-	ast.Discord.ChannelMessageDelete(last.ChannelID, last.ID)                                                          //nolint:errcheck
-	ast.Discord.ChannelMessageDelete(message.ChannelID, message.ID)                                                    //nolint:errcheck
-	ast.Discord.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " ")) //nolint:errcheck
+	// reassemble the sentence and edit original message
+	// nolint:errcheck
+	{
+		ast.Discord.ChannelMessageDelete(last.ChannelID, last.ID)
+		ast.Discord.ChannelMessageDelete(message.ChannelID, message.ID)
+		ast.Discord.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " "))
+	}
 }
