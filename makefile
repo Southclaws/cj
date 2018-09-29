@@ -10,12 +10,12 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 #-
 
 
-fast:
-	go build $(LDFLAGS) -o cj
-
 static:
 	go get
 	CGO_ENABLED=0 GOOS=linux go build -a $(LDFLAGS) -o cj .
+
+fast:
+	go build $(LDFLAGS) -o cj
 
 local: fast
 	./cj
