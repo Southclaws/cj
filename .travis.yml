@@ -1,0 +1,15 @@
+sudo: required
+services:
+  - docker
+language: go
+go:
+  - "1.11"
+deploy:
+  provider: script
+  script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME"
+      --password-stdin
+    - make build
+    - make push
+  on:
+    branch: master
