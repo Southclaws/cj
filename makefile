@@ -4,10 +4,17 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 
 .PHONY: version
 
+
+# -
+# Local Development
+#-
+
+
 fast:
 	go build $(LDFLAGS) -o cj
 
 static:
+	go get
 	CGO_ENABLED=0 GOOS=linux go build -a $(LDFLAGS) -o cj .
 
 local: fast
@@ -18,14 +25,10 @@ version:
 	git push
 	git push origin $(VERSION)
 
-test:
-	go test -v -race
-
 
 # -
 # Docker
 #-
-
 
 build:
 	docker build --no-cache -t southclaws/cj:$(VERSION) .
@@ -43,27 +46,10 @@ run:
 		--env-file .env \
 		southclaws/cj:$(VERSION)
 
-run-prod:
-	-docker stop cj
-	-docker rm cj
-	docker run \
-		--name cj \
-		--detach \
-		--restart always \
-		--env-file .env \
-		southclaws/cj:$(VERSION)
-	docker network connect mongodb cj
 
-enter:
-	docker run -it --entrypoint=bash southclaws/cj:$(VERSION)
-
-enter-mount:
-	docker run -v $(shell pwd)/testspace:/samp -it --entrypoint=bash southclaws/cj:$(VERSION)
-
-# Test stuff
-
-test-container: build-test
-	docker run --network host southclaws/cj:$(VERSION)
+# -
+# Testing Database
+# -
 
 mongodb:
 	-docker stop mongodb
