@@ -73,6 +73,7 @@ var gamemodes = []string{
 	"race",
 	"derby",
 	"minigames",
+	"war",
 }
 
 var tags = []string{
@@ -117,6 +118,7 @@ var tags = []string{
 	"LAGSHOT",
 	"HALAL",
 	"STRTOK",
+	"REDIS",
 }
 
 func init() {
