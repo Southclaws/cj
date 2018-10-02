@@ -1,11 +1,11 @@
 package commands
 
 import (
+	"github.com/PuerkitoBio/goquery"
+	"github.com/bwmarrin/discordgo"
 	"io/ioutil"
 	"net/http"
 	"strings"
-
-	"github.com/bwmarrin/discordgo"
 )
 
 func (cm *CommandManager) commandWiki(
@@ -23,11 +23,12 @@ func (cm *CommandManager) commandWiki(
 
 	if len(message.Mentions) > 0 ||
 		strings.Contains(message.Content, "everyone") ||
-		strings.Contains(message.Content, "here") {
+		strings.Contains(message.Content, "here") ||
+		args[0] == '?' {
 		return
 	}
 
-	wikiURL := strings.Replace("http://wiki.sa-mp.com/wiki/"+args, " ", "_", -1)
+	wikiURL := strings.Replace("https://wiki.sa-mp.com/wiki/"+args, " ", "_", -1)
 
 	response, err := http.Get(wikiURL)
 	if err != nil {
@@ -52,6 +53,38 @@ func (cm *CommandManager) commandWiki(
 		_, err = cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n"+wikiURL)
+
+		doc, err := goquery.NewDocument(wikiURL)
+		if err == nil {
+			var wikiContent string
+			description := strings.TrimSpace(doc.Find(".description").Text())
+			parameters := strings.TrimSpace(doc.Find(".parameters").Text()) + "\n"
+			var First *goquery.Selection
+
+			doc.Find(".param").Each(func(i int, selection *goquery.Selection) {
+				First = selection.Find("td").First()
+				parameters = parameters + "\n\t\t`" + First.Text() + "`\t" + First.Next().Text()
+
+			})
+			examplecode := strings.TrimSpace(doc.Find(".pawn").Text())
+
+			if description != "" {
+				wikiContent = "**Description**\n\t" + description
+			}
+			if parameters != "" {
+				wikiContent = wikiContent + "\n**Parameters**\n\t" + parameters
+			}
+			if examplecode != "" {
+				wikiContent = wikiContent + "\n\n**Example Usage**\n```C\n" + examplecode + "```"
+			}
+
+			if wikiContent != "" {
+				_, err = cm.Discord.ChannelMessageSend(
+					message.ChannelID,
+					wikiContent)
+			}
+		}
+
 	}
 
 	return false, err
