@@ -92,13 +92,12 @@ func (cm *CommandManager) commandCommands(
 		Color: 0x3498DB,
 	}
 
+	var cmdlist string
 	for trigger, cmd := range cm.Commands {
-		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name:  trigger,
-			Value: cmd.Description,
-		})
+		cmdlist += fmt.Sprintf("**%s** - %s\n", trigger, cmd.Description)
 	}
 
+	embed.Description = cmdlist
 	_, err = cm.Discord.ChannelMessageSendEmbed(message.ChannelID, embed)
 	return
 }
