@@ -70,12 +70,12 @@ func (cm *CommandManager) commandWiki(
 
 			if description != "" {
 				wikiContent = "**Description**\n\t" + description
-			}
-			if parameters != "" {
-				wikiContent = wikiContent + "\n**Parameters**\n\t" + parameters
-			}
-			if examplecode != "" {
-				wikiContent = wikiContent + "\n\n**Example Usage**\n```C\n" + examplecode + "```"
+				if strings.TrimSpace(parameters) != "" {
+					wikiContent = wikiContent + "\n**Parameters**\n\t" + parameters
+					if examplecode != "" {
+						wikiContent = wikiContent + "\n\n**Example Usage**\n```C\n" + examplecode + "```"
+					}
+				}
 			}
 
 			if wikiContent != "" {
