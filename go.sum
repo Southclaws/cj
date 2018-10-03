@@ -1,5 +1,9 @@
+github.com/PuerkitoBio/goquery v1.4.1 h1:smcIRGdYm/w7JSbcdeLHEMzxmsBQvl8lhf0dSw2nzMI=
+github.com/PuerkitoBio/goquery v1.4.1/go.mod h1:T9ezsOHcCrDCgA8aF1Cqr3sSYbO/xgdy8/R/XiIMAhA=
 github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d h1:ffVejUAmkVQFCv6qihKynFycn326rbRcboioMVgCIhE=
 github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d/go.mod h1:cWIFYwYx1ZVfEoywlnsOuxR4NIQ3NRe2ub2fbFv4n7A=
+github.com/andybalholm/cascadia v1.0.0 h1:hOCXnnZ5A+3eVDX8pvgl4kofXv2ELss0bKcqRySc45o=
+github.com/andybalholm/cascadia v1.0.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/bwmarrin/discordgo v0.17.0 h1:VUZc9ppGi0j9xKsRBYctJqFEFl8u0FSMzDBObw705cM=
 github.com/bwmarrin/discordgo v0.17.0/go.mod h1:5NIvFv5Z7HddYuXbuQegZ684DleQaCFqChP2iuBivJ8=
 github.com/cardigann/go-cloudflare-scraper v0.0.0-20170630233936-6b7caee8e65b h1:wDrpJaWVxyU3ljEROoIEkdcLDaTgQHgERR+Gd68gv8M=
@@ -37,6 +41,7 @@ go.uber.org/zap v1.8.0 h1:r6Za1Rii8+EGOYRDLvpooNOF6kP3iyDnkpzbw67gCQ8=
 go.uber.org/zap v1.8.0/go.mod h1:vwi/ZaCAaUcBkycHslxD9B2zi4UTXhF60s6SWpuDF0Q=
 golang.org/x/crypto v0.0.0-20180513064651-94e3fad7f1b4 h1:WTMZrvoRWzf+3YKGwBvVgUuvEWwzIQ65nA9x6mdIq8Y=
 golang.org/x/crypto v0.0.0-20180513064651-94e3fad7f1b4/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
+golang.org/x/net v0.0.0-20180218175443-cbe0f9307d01/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20180511174649-2491c5de3490 h1:0Q0ESa4hjqMAXX5fW/YoKX7MlU1fWzl2ZNJrv7Yo3ZE=
 golang.org/x/net v0.0.0-20180511174649-2491c5de3490/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

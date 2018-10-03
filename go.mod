@@ -1,7 +1,9 @@
 module github.com/Southclaws/cj
 
 require (
+	github.com/PuerkitoBio/goquery v1.4.1
 	github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d
+	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/bwmarrin/discordgo v0.17.0
 	github.com/cardigann/go-cloudflare-scraper v0.0.0-20170630233936-6b7caee8e65b
 	github.com/davecgh/go-spew v1.1.0 // indirect
