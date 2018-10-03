@@ -28,6 +28,8 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
+	var doc *goquery.Document
+
 	wikiURL := strings.Replace("https://wiki.sa-mp.com/wiki/"+args, " ", "_", -1)
 
 	response, err := http.Get(wikiURL)
@@ -54,35 +56,37 @@ func (cm *CommandManager) commandWiki(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n"+wikiURL)
 
-		doc, err := goquery.NewDocument(wikiURL)
-		if err == nil {
-			var wikiContent string
-			description := strings.TrimSpace(doc.Find(".description").Text())
-			parameters := strings.TrimSpace(doc.Find(".parameters").Text()) + "\n"
-			var First *goquery.Selection
+		doc, err = goquery.NewDocument(wikiURL)
+		if err != nil {
+			return
+		}
 
-			doc.Find(".param").Each(func(i int, selection *goquery.Selection) {
-				First = selection.Find("td").First()
-				parameters = parameters + "\n\t\t`" + First.Text() + "`\t" + First.Next().Text()
+		var wikiContent string
+		description := strings.TrimSpace(doc.Find(".description").Text())
+		parameters := strings.TrimSpace(doc.Find(".parameters").Text()) + "\n"
+		var First *goquery.Selection
 
-			})
-			examplecode := strings.TrimSpace(doc.Find(".pawn").Text())
+		doc.Find(".param").Each(func(i int, selection *goquery.Selection) {
+			First = selection.Find("td").First()
+			parameters = parameters + "\n\t\t`" + First.Text() + "`\t" + First.Next().Text()
 
-			if description != "" {
-				wikiContent = "**Description**\n\t" + description
-				if strings.TrimSpace(parameters) != "" {
-					wikiContent = wikiContent + "\n**Parameters**\n\t" + parameters
-					if examplecode != "" {
-						wikiContent = wikiContent + "\n\n**Example Usage**\n```C\n" + examplecode + "```"
-					}
+		})
+		examplecode := strings.TrimSpace(doc.Find(".pawn").Text())
+
+		if description != "" {
+			wikiContent = "**Description**\n\t" + description
+			if strings.TrimSpace(parameters) != "" {
+				wikiContent = wikiContent + "\n**Parameters**\n\t" + parameters
+				if examplecode != "" {
+					wikiContent = wikiContent + "\n\n**Example Usage**\n```C\n" + examplecode + "```"
 				}
 			}
+		}
 
-			if wikiContent != "" {
-				_, err = cm.Discord.ChannelMessageSend(
-					message.ChannelID,
-					wikiContent)
-			}
+		if wikiContent != "" {
+			_, err = cm.Discord.ChannelMessageSend(
+				message.ChannelID,
+				wikiContent)
 		}
 
 	}
