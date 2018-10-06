@@ -6,11 +6,10 @@ go:
   - "1.11"
 env:
   - GO111MODULE=on
-script:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME"
-    --password-stdin
-  - make build
-  - make push
-branches:
-  only:
-    - master
+jobs:
+  include:
+    - stage: build
+      script: make build
+    - stage: deploy
+      if: branch = master
+      script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && make push
