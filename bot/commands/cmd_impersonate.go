@@ -33,6 +33,9 @@ func (cm *CommandManager) commandImpersonate(
 
 	chain := gomarkov.NewChain(1)
 	for _, m := range messages {
+		if isBadMessage(m.Message) {
+			continue
+		}
 		chain.Add(strings.Split(m.Message, " "))
 	}
 
@@ -42,9 +45,6 @@ func (cm *CommandManager) commandImpersonate(
 		if err != nil {
 			return false, errors.Wrap(err, "failed to impersonate")
 		}
-		if strings.Contains(next, "@everyone") || strings.Contains(next, "@here") {
-			continue
-		}
 		tokens = append(tokens, next)
 	}
 
@@ -52,4 +52,17 @@ func (cm *CommandManager) commandImpersonate(
 	cm.Discord.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
 
 	return
+}
+
+func isBadMessage(m string) bool {
+	if strings.Contains(m, "<@") {
+		return true
+	}
+	if strings.Contains(m, "@everyone") {
+		return true
+	}
+	if strings.Contains(m, "@here") {
+		return true
+	}
+	return false
 }
