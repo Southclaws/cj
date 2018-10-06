@@ -33,17 +33,17 @@ func (cm *CommandManager) commandImpersonate(
 		return false, errors.New("not enough messages from that user")
 	}
 
-	var initial []string
+	var initial string
 	for tries := 0; tries < 10; tries++ {
 		m := messages[rand.Intn(numMessages)]
 		words := strings.Split(m.Message, " ")
 		if len(words) < 2 {
 			continue
 		}
-		initial = append(initial, words[:2]...)
+		initial = words[rand.Intn(len(words))]
 		break
 	}
-	if initial == nil {
+	if initial == "" {
 		return false, errors.New("could not get initial word pair, not enough data")
 	}
 
@@ -51,11 +51,14 @@ func (cm *CommandManager) commandImpersonate(
 		chain.Add(strings.Split(m.Message, " "))
 	}
 
-	tokens := []string{gomarkov.StartToken}
+	tokens := []string{gomarkov.StartToken, initial}
 	for tokens[len(tokens)-1] != gomarkov.EndToken {
 		next, err := chain.Generate(tokens[(len(tokens) - 1):])
 		if err != nil {
 			return false, errors.Wrap(err, "failed to impersonate")
+		}
+		if strings.Contains(next, "@everyone") || strings.Contains(next, "@here") {
+			continue
 		}
 		tokens = append(tokens, next)
 	}
