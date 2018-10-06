@@ -55,9 +55,6 @@ func (cm *CommandManager) commandImpersonate(
 }
 
 func isBadMessage(m string) bool {
-	if strings.Contains(m, "<@") {
-		return true
-	}
 	if strings.Contains(m, "@everyone") {
 		return true
 	}
