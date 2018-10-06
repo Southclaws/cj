@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"math/rand"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -23,7 +22,6 @@ func (cm *CommandManager) commandImpersonate(
 
 	user := message.Mentions[0]
 
-	chain := gomarkov.NewChain(2)
 	messages, err := cm.Storage.GetMessagesForUser(user.ID)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get messages for user")
@@ -33,25 +31,12 @@ func (cm *CommandManager) commandImpersonate(
 		return false, errors.New("not enough messages from that user")
 	}
 
-	var initial string
-	for tries := 0; tries < 10; tries++ {
-		m := messages[rand.Intn(numMessages)]
-		words := strings.Split(m.Message, " ")
-		if len(words) < 2 {
-			continue
-		}
-		initial = words[rand.Intn(len(words))]
-		break
-	}
-	if initial == "" {
-		return false, errors.New("could not get initial word pair, not enough data")
-	}
-
+	chain := gomarkov.NewChain(1)
 	for _, m := range messages {
 		chain.Add(strings.Split(m.Message, " "))
 	}
 
-	tokens := []string{gomarkov.StartToken, initial}
+	tokens := []string{gomarkov.StartToken}
 	for tokens[len(tokens)-1] != gomarkov.EndToken {
 		next, err := chain.Generate(tokens[(len(tokens) - 1):])
 		if err != nil {
@@ -64,7 +49,7 @@ func (cm *CommandManager) commandImpersonate(
 	}
 
 	//nolint:errcheck
-	cm.Discord.ChannelMessageSend(message.ChannelID, strings.Join(tokens, " "))
+	cm.Discord.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
 
 	return
 }
