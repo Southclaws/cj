@@ -9,4 +9,4 @@ env:
 script:
   - make static
   - test $TRAVIS_BRANCH == master && echo "$DOCKER_PASSWORD" | docker login -u
-    "$DOCKER_USERNAME" --password-stdin && make build && make push"
+    "$DOCKER_USERNAME" --password-stdin && make build && make push
