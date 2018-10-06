@@ -99,6 +99,7 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandImpersonate,
 			Source:      CommandSourcePRIMARY,
 			Description: "Impersonate a user by talking like they would.",
+			Cooldown:    time.Minute,
 		},
 	}
 }

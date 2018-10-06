@@ -29,7 +29,7 @@ func (cm *CommandManager) commandImpersonate(
 		return false, errors.Wrap(err, "failed to get messages for user")
 	}
 	numMessages := len(messages)
-	if numMessages < 10 {
+	if numMessages < 100 {
 		return false, errors.New("not enough messages from that user")
 	}
 
