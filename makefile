@@ -1,24 +1,22 @@
 VERSION := $(shell git describe --tags --dirty --always)
+SERVICE := $(shell basename $(shell pwd))
+OWNER := southclaws
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 -include .env
-
-.PHONY: version
-
 
 # -
 # Local Development
 #-
 
-
 static:
 	go get
-	CGO_ENABLED=0 GOOS=linux go build -a $(LDFLAGS) -o cj .
+	CGO_ENABLED=0 GOOS=linux go build -a $(LDFLAGS) -o $(SERVICE) .
 
 fast:
-	go build $(LDFLAGS) -o cj
+	go build $(LDFLAGS) -o $(SERVICE)
 
 local: fast
-	./cj
+	./$(SERVICE)
 
 version:
 	git tag $(VERSION)
@@ -31,20 +29,12 @@ version:
 #-
 
 build:
-	docker build --no-cache -t southclaws/cj:$(VERSION) .
+	docker build --no-cache -t $(OWNER)/$(SERVICE):$(VERSION) .
 
 push:
-	docker push southclaws/cj:$(VERSION)
-	docker tag southclaws/cj:$(VERSION) southclaws/cj:latest
-	docker push southclaws/cj:latest
-	
-run:
-	-docker rm cj
-	docker run \
-		--name cj \
-		--network host \
-		--env-file .env \
-		southclaws/cj:$(VERSION)
+	docker push $(OWNER)/$(SERVICE):$(VERSION)
+	docker tag $(OWNER)/$(SERVICE):$(VERSION) $(OWNER)/$(SERVICE):latest
+	docker push $(OWNER)/$(SERVICE):latest
 
 
 # -
