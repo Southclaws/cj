@@ -16,8 +16,8 @@ func (cm *CommandManager) commandImpersonate(
 	context bool,
 	err error,
 ) {
-	if len(message.Mentions) != 1 {
-		return false, errors.New("you must mention one person")
+	if len(message.Mentions) < 1 {
+		return false, errors.New("you must mention at least one person")
 	}
 
 	for _, user := range message.Mentions {
