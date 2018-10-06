@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 
-	"gopkg.in/mgo.v2"
+	"github.com/globalsign/mgo"
 )
 
 // API exposes a storage API for the bot

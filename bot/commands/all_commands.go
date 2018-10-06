@@ -95,5 +95,10 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Returns an article from SA:MP wiki.",
 			Context:     false,
 		},
+		"/impersonate": {
+			Function:    cm.commandImpersonate,
+			Source:      CommandSourcePRIMARY,
+			Description: "Impersonate a user by talking like they would.",
+		},
 	}
 }

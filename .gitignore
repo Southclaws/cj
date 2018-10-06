@@ -12,6 +12,9 @@ log.txt
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# Goland
+.idea/
+
 # Binaries for programs and plugins
 *.exe
 *.dll

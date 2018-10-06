@@ -3,6 +3,7 @@ package storage
 import (
 	"time"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
 )
 
@@ -28,5 +29,10 @@ func (api *API) RecordChatLog(discordUserID string, discordChannel string, messa
 		err = errors.Wrap(err, "failed to insert chat log")
 	}
 
+	return
+}
+
+func (api *API) GetMessagesForUser(discordUserID string) (messages []ChatLog, err error) {
+	err = api.chat.Find(bson.M{"discorduserid": discordUserID}).All(&messages)
 	return
 }

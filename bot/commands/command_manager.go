@@ -186,6 +186,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	enterContext, err := commandObject.Function(commandArgument, message, false)
 	if err != nil {
+		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
 		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
 		return
 	}

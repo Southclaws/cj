@@ -3,8 +3,8 @@ package storage
 import (
 	"regexp"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
-	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Southclaws/cj/types"
 )
