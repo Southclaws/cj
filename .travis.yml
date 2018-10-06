@@ -9,7 +9,9 @@ env:
 jobs:
   include:
     - stage: build
-      script: make build
+      script: make static
     - stage: deploy
       if: branch = master
-      script: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && make push
+      script:
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME"
+        --password-stdin && make static && make push
