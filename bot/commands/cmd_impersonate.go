@@ -51,13 +51,17 @@ func (cm *CommandManager) commandImpersonate(
 		chain.Add(strings.Split(m.Message, " "))
 	}
 
-	generated, err := chain.Generate(initial)
-	if err != nil {
-		return false, errors.Wrap(err, "failed to impersonate")
+	tokens := []string{gomarkov.StartToken}
+	for tokens[len(tokens)-1] != gomarkov.EndToken {
+		next, err := chain.Generate(tokens[(len(tokens) - 1):])
+		if err != nil {
+			return false, errors.Wrap(err, "failed to impersonate")
+		}
+		tokens = append(tokens, next)
 	}
 
 	//nolint:errcheck
-	cm.Discord.ChannelMessageSend(message.ChannelID, generated)
+	cm.Discord.ChannelMessageSend(message.ChannelID, strings.Join(tokens, " "))
 
 	return
 }
