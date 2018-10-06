@@ -6,12 +6,7 @@ go:
   - "1.11"
 env:
   - GO111MODULE=on
-jobs:
-  include:
-    - stage: build
-      script: make static
-    - stage: deploy
-      if: branch = master
-      script:
-        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME"
-        --password-stdin && make static && make push
+script:
+  - make static
+  - test $TRAVIS_BRANCH == master && echo "$DOCKER_PASSWORD" | docker login -u
+    "$DOCKER_USERNAME" --password-stdin && make build && make push"
