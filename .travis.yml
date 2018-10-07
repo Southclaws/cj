@@ -8,5 +8,5 @@ env:
   - GO111MODULE=on
 script:
   - make static
-  - test $TRAVIS_BRANCH == master && echo "$DOCKER_PASSWORD" | docker login -u
+  - test $TRAVIS_BRANCH = master && echo "$DOCKER_PASSWORD" | docker login -u
     "$DOCKER_USERNAME" --password-stdin && make build && make push
