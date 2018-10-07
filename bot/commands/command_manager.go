@@ -172,9 +172,14 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		}
 	}
 
+	fmt.Println("COMMAND HANDLER")
+
 	// Check if command is on cooldown
 	if when, ok := cm.Cooldowns[commandTrigger]; ok {
-		if time.Since(when) < commandObject.Cooldown {
+		since := time.Since(when)
+		fmt.Println("on cd", when, since)
+		if since < commandObject.Cooldown {
+			err = cm.Discord.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, commandObject.Cooldown))
 			return
 		}
 	}
@@ -221,4 +226,19 @@ func (cm *CommandManager) getCommandSource(message discordgo.Message) (CommandSo
 	}
 
 	return CommandSourceOTHER, nil
+}
+
+var clocks = []string{
+	"🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛",
+}
+
+func pcd(since time.Duration, cooldown time.Duration) (result string) {
+	p := (since.Seconds() / cooldown.Seconds()) * 100.0
+	step := 100.0 / float64(len(clocks))
+	for i := range clocks {
+		if p <= float64(i+1)*step {
+			return clocks[i]
+		}
+	}
+	return ""
 }
