@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron"
 
+	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
@@ -12,7 +13,7 @@ import (
 // Aggregator collects statistics about messages and users
 type Aggregator struct {
 	Config  *types.Config
-	Discord *discordgo.Session
+	Discord *discord.Session
 	Storage *storage.API
 	Forum   *forum.ForumClient
 
@@ -22,7 +23,17 @@ type Aggregator struct {
 }
 
 //nolint:golint
-func (a *Aggregator) Init(*types.Config, *discordgo.Session, *storage.API, *forum.ForumClient) (err error) {
+func (a *Aggregator) Init(
+	config *types.Config,
+	discord *discord.Session,
+	api *storage.API,
+	fc *forum.ForumClient,
+) (err error) {
+	a.Config = config
+	a.Storage = api
+	a.Discord = discord
+	a.Forum = fc
+
 	cron := cron.New()
 	must(cron.AddFunc("@hourly", a.gather))
 	must(cron.AddFunc("@every 7h30m", a.announce))
@@ -48,7 +59,7 @@ func (a *Aggregator) announce() {
 		a.err = err
 		return
 	}
-	_, err = a.Discord.ChannelMessageSendEmbed(a.Config.PrimaryChannel, rankings)
+	_, err = a.Discord.S.ChannelMessageSendEmbed(a.Config.PrimaryChannel, rankings)
 	if err != nil {
 		a.err = err
 	}

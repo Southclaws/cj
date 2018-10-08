@@ -16,18 +16,26 @@ func (cm *CommandManager) commandImpersonate(
 	context bool,
 	err error,
 ) {
-	if len(message.Mentions) < 1 {
-		return false, errors.New("you must mention at least one person")
+	mentions := strings.Split(message.Content, " ")
+
+	if len(mentions) <= 1 || len(mentions) > 10 {
+		return false, errors.New("requires 1-10 usernames")
 	}
 
-	for _, user := range message.Mentions {
+	for _, username := range mentions[1:] {
+		user, ok := cm.Discord.GetUserFromName(username)
+		if !ok {
+			//nolint:errcheck
+			cm.Discord.S.ChannelMessageSend(message.ChannelID, "User "+username+" does not exist")
+			continue
+		}
 
-		messages, err := cm.Storage.GetMessagesForUser(user.ID)
+		messages, err := cm.Storage.GetMessagesForUser(user.User.ID)
 		if err != nil {
 			return false, errors.Wrap(err, "failed to get messages for user")
 		}
 		numMessages := len(messages)
-		if numMessages < 100 {
+		if numMessages < 10 {
 			return false, errors.New("not enough messages from that user")
 		}
 
@@ -49,7 +57,7 @@ func (cm *CommandManager) commandImpersonate(
 		}
 
 		//nolint:errcheck
-		cm.Discord.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
+		cm.Discord.S.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
 	}
 
 	return

@@ -9,6 +9,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 
+	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
@@ -17,7 +18,7 @@ import (
 // CommandManager stores command state
 type CommandManager struct {
 	Config    *types.Config
-	Discord   *discordgo.Session
+	Discord   *discord.Session
 	Storage   *storage.API
 	Forum     *forum.ForumClient
 	Commands  map[string]Command
@@ -29,7 +30,7 @@ type CommandManager struct {
 // Init creates a command manager for the app
 func (cm *CommandManager) Init(
 	config *types.Config,
-	discord *discordgo.Session,
+	discord *discord.Session,
 	api *storage.API,
 	fc *forum.ForumClient,
 ) (err error) {
@@ -98,7 +99,7 @@ func (cm *CommandManager) commandCommands(
 	}
 	embed.Description = cmdlist
 
-	_, err = cm.Discord.ChannelMessageSendEmbed(message.ChannelID, embed)
+	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, embed)
 	return
 }
 
@@ -110,7 +111,7 @@ func (cm *CommandManager) commandHelp(
 	context bool,
 	err error,
 ) {
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, "fuck off")
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, "fuck off")
 	return
 }
 
@@ -179,20 +180,20 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		since := time.Since(when)
 		fmt.Println("on cd", when, since)
 		if since < commandObject.Cooldown {
-			err = cm.Discord.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, commandObject.Cooldown))
+			err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, commandObject.Cooldown))
 			return
 		}
 	}
 
-	err = cm.Discord.ChannelTyping(message.ChannelID)
+	err = cm.Discord.S.ChannelTyping(message.ChannelID)
 	if err != nil {
 		return
 	}
 
 	enterContext, err := commandObject.Function(commandArgument, message, false)
 	if err != nil {
-		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
-		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
+		_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, err.Error())
+		_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, commandObject.Description)
 		return
 	}
 
@@ -215,7 +216,7 @@ func (cm *CommandManager) getCommandSource(message discordgo.Message) (CommandSo
 	} else if message.ChannelID == cm.Config.PrimaryChannel {
 		return CommandSourcePRIMARY, nil
 	} else {
-		ch, err := cm.Discord.Channel(message.ChannelID)
+		ch, err := cm.Discord.S.Channel(message.ChannelID)
 		if err != nil {
 			return CommandSourceOTHER, err
 		}

@@ -96,7 +96,7 @@ func (cm *CommandManager) UserStartsVerification(message discordgo.Message) (err
 		return
 	}
 
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
 		`Hi! This process will verify you are the owner of a SA:MP forum account. Please provide your user profile URL or ID.
 
 Examples:
@@ -177,7 +177,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 	cm.SetVerificationState(&verification, types.VerificationStateAwaitConfirmation)
 
 	//nolint:lll
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID,
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID,
 		fmt.Sprintf(`Thanks! Now you just need to paste this 8-digit verification code into your Bio section then reply with 'done'.
 
 **%s**
@@ -220,7 +220,7 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 	}
 
 	if !verified {
-		_, err = cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.S.ChannelMessageSend(
 			message.ChannelID,
 			"Sorry, your verification failed. The code was not found on your profile page.")
 		return
@@ -231,12 +231,12 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 		return
 	}
 
-	err = cm.Discord.GuildMemberRoleAdd(cm.Config.GuildID, verification.DiscordUser.ID, cm.Config.VerifiedRole)
+	err = cm.Discord.S.GuildMemberRoleAdd(cm.Config.GuildID, verification.DiscordUser.ID, cm.Config.VerifiedRole)
 	if err != nil {
 		return
 	}
 
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
 		"Congratulations! You have been verified as the owner of the forum account %s. Have a nice day!",
 		verification.ForumUser,
 	))
@@ -253,7 +253,7 @@ func (cm *CommandManager) UserCancelsVerification(message discordgo.Message) (er
 
 	cm.Cache.Delete(message.Author.ID)
 
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID,
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID,
 		"You have cancelled your verification. You can start again at any time by sending 'verify'.")
 	return
 }
@@ -272,21 +272,21 @@ func (cm *CommandManager) WarnUserVerificationState(channelid string, verificati
 	case types.VerificationStateAwaitConfirmation:
 		stateMessage = "Your verification is currently awaiting you to post the verification code on your Profile Bio, once you've done that reply with either 'done' or 'cancel'"
 	}
-	_, err = cm.Discord.ChannelMessageSend(channelid, stateMessage)
+	_, err = cm.Discord.S.ChannelMessageSend(channelid, stateMessage)
 	return
 }
 
 // WarnUserNoVerification is simply a message informing the user their
 // Verification does not exist and they need to start the process with 'verify'.
 func (cm *CommandManager) WarnUserNoVerification(channelid string) (err error) {
-	_, err = cm.Discord.ChannelMessageSend(channelid, "You need to start your verification by typing 'verify'.")
+	_, err = cm.Discord.S.ChannelMessageSend(channelid, "You need to start your verification by typing 'verify'.")
 	return
 }
 
 // WarnUserError informs the user of an error and provides them with
 // instructions for what to do next.
 func (cm *CommandManager) WarnUserError(channelid string, errorString string) (err error) {
-	_, err = cm.Discord.ChannelMessageSend(channelid, fmt.Sprintf(`An error occurred: "%s"`, errorString))
+	_, err = cm.Discord.S.ChannelMessageSend(channelid, fmt.Sprintf(`An error occurred: "%s"`, errorString))
 	return
 }
 

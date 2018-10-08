@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 
+	"github.com/Southclaws/cj/discord"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -22,16 +23,17 @@ You can verify your forum account by typing %s below, this helps us ensure peopl
 
 // ConnectDiscord sets up the Discord API and event listeners
 func (app *App) ConnectDiscord() (err error) {
-	app.discordClient, err = discordgo.New("Bot " + app.config.DiscordToken)
+	s, err := discordgo.New("Bot " + app.config.DiscordToken)
 	if err != nil {
 		return
 	}
+	app.discordClient = discord.New(s, *app.config)
 
-	app.discordClient.AddHandler(app.onReady)
-	app.discordClient.AddHandler(app.onMessage)
-	app.discordClient.AddHandler(app.onJoin)
+	app.discordClient.S.AddHandler(app.onReady)
+	app.discordClient.S.AddHandler(app.onMessage)
+	app.discordClient.S.AddHandler(app.onJoin)
 
-	err = app.discordClient.Open()
+	err = app.discordClient.S.Open()
 	if err != nil {
 		return
 	}
@@ -118,7 +120,7 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 	}
 
 	if verified {
-		err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
+		err = app.discordClient.S.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
 		if err != nil {
 			logger.Error("failed to add verified role to member", zap.Error(err))
 		}
@@ -128,7 +130,7 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 			logger.Error("failed to create user channel", zap.Error(err))
 			return
 		}
-		_, err = app.discordClient.ChannelMessageSend(ch.ID, fmt.Sprintf(greeting, "`verify`"))
+		_, err = app.discordClient.S.ChannelMessageSend(ch.ID, fmt.Sprintf(greeting, "`verify`"))
 		if err != nil {
 			logger.Error("failed to send message", zap.Error(err))
 		}
@@ -137,7 +139,7 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 
 func (app *App) doSync() {
 	err := func() (err error) {
-		users, err := app.discordClient.GuildMembers(app.config.GuildID, "", 1000)
+		users, err := app.discordClient.S.GuildMembers(app.config.GuildID, "", 1000)
 		if err != nil {
 			return errors.Wrap(err, "failed to get guild members")
 		}
@@ -150,13 +152,13 @@ func (app *App) doSync() {
 
 			if verified {
 				logger.Debug("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
-				err = app.discordClient.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
+				err = app.discordClient.S.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
 				if err != nil {
 					return errors.Wrapf(err, "failed to add verified role for %s", user.User.ID)
 				}
 			} else {
 				logger.Debug("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
-				err = app.discordClient.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
+				err = app.discordClient.S.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
 				if err != nil {
 					return errors.Wrapf(err, "failed to remove verified role for %s", user.User.ID)
 				}

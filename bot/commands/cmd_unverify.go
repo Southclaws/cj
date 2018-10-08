@@ -22,11 +22,11 @@ func (cm *CommandManager) commandUnVerify(
 
 	err = cm.Storage.RemoveUser(target.ID)
 	if err != nil {
-		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
+		_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, err.Error())
 		return
 	}
 
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, "User un-verified")
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, "User un-verified")
 
 	return
 }

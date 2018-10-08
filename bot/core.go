@@ -12,6 +12,7 @@ import (
 	"github.com/Southclaws/cj/bot/asterisk"
 	"github.com/Southclaws/cj/bot/commands"
 	"github.com/Southclaws/cj/bot/stats"
+	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
@@ -20,7 +21,7 @@ import (
 // App stores program state
 type App struct {
 	config        *types.Config
-	discordClient *discordgo.Session
+	discordClient *discord.Session
 	storage       *storage.API
 	forum         *forum.ForumClient
 	ready         chan error
@@ -30,7 +31,7 @@ type App struct {
 // Extension represents an extension to the bot that receives a pointer to the
 // storage backend.
 type Extension interface {
-	Init(*types.Config, *discordgo.Session, *storage.API, *forum.ForumClient) error
+	Init(*types.Config, *discord.Session, *storage.API, *forum.ForumClient) error
 	OnMessage(discordgo.Message) error
 }
 
@@ -79,13 +80,13 @@ func Start(config *types.Config) {
 
 	app.forum.NewPostAlert("3", func() {
 		//nolint:errcheck
-		app.discordClient.ChannelMessageSend(
+		app.discordClient.S.ChannelMessageSend(
 			config.PrimaryChannel,
 			"New Kalcor Post: http://forum.sa-mp.com/search.php?do=finduser&u=3",
 		)
 	})
 
-	_, err = app.discordClient.ChannelMessageSend(
+	_, err = app.discordClient.S.ChannelMessageSend(
 		config.PrimaryChannel,
 		fmt.Sprintf("Hey, what's cracking now? CJ initialised with version %s", config.Version))
 	if err != nil {

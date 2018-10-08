@@ -64,7 +64,7 @@ func (cm *CommandManager) commandUserInfo(
 		}
 	}
 
-	_, err = cm.Discord.ChannelMessageSend(message.ChannelID, result)
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, result)
 	if err != nil {
 		err = errors.Wrap(err, "failed to send message")
 		return

@@ -9,6 +9,7 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 
+	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
@@ -18,7 +19,7 @@ import (
 // the next message with an asterisk proceeding it.
 type Asterisk struct {
 	Config  *types.Config
-	Discord *discordgo.Session
+	Discord *discord.Session
 	Storage *storage.API
 	Forum   *forum.ForumClient
 
@@ -28,7 +29,7 @@ type Asterisk struct {
 // Init creates a command manager for the app
 func (ast *Asterisk) Init(
 	config *types.Config,
-	discord *discordgo.Session,
+	discord *discord.Session,
 	api *storage.API,
 	fc *forum.ForumClient,
 ) (err error) {
@@ -99,8 +100,8 @@ func (ast *Asterisk) doCorrection(message discordgo.Message) {
 	// reassemble the sentence and edit original message
 	// nolint:errcheck
 	{
-		ast.Discord.ChannelMessageDelete(last.ChannelID, last.ID)
-		ast.Discord.ChannelMessageDelete(message.ChannelID, message.ID)
-		ast.Discord.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " "))
+		ast.Discord.S.ChannelMessageDelete(last.ChannelID, last.ID)
+		ast.Discord.S.ChannelMessageDelete(message.ChannelID, message.ID)
+		ast.Discord.S.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " "))
 	}
 }

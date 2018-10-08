@@ -1,11 +1,12 @@
 package commands
 
 import (
-	"github.com/PuerkitoBio/goquery"
-	"github.com/bwmarrin/discordgo"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/bwmarrin/discordgo"
 )
 
 func (cm *CommandManager) commandWiki(
@@ -17,7 +18,7 @@ func (cm *CommandManager) commandWiki(
 	err error,
 ) {
 	if len(args) == 0 {
-		_, err = cm.Discord.ChannelMessageSend(message.ChannelID, "USAGE : /wiki [function/callback/article_name]")
+		_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, "USAGE : /wiki [function/callback/article_name]")
 		return
 	}
 
@@ -43,16 +44,16 @@ func (cm *CommandManager) commandWiki(
 	}
 
 	if response.StatusCode != 200 {
-		_, err = cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.S.ChannelMessageSend(
 			message.ChannelID,
 			"Could not retrieve SA:MP wiki article:\nGot unexpected response: "+response.Status+".")
 	} else if strings.Contains(string(bodyText), "There is currently no text in this page, you can") ||
 		strings.Contains(string(bodyText), "The requested page title was invalid, empty") {
-		_, err = cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.S.ChannelMessageSend(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n- This article does not exist")
 	} else {
-		_, err = cm.Discord.ChannelMessageSend(
+		_, err = cm.Discord.S.ChannelMessageSend(
 			message.ChannelID,
 			"SA:MP Wiki | "+args+"\n"+wikiURL)
 
@@ -84,7 +85,7 @@ func (cm *CommandManager) commandWiki(
 		}
 
 		if wikiContent != "" {
-			_, err = cm.Discord.ChannelMessageSend(
+			_, err = cm.Discord.S.ChannelMessageSend(
 				message.ChannelID,
 				wikiContent)
 		}
