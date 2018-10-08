@@ -1,9 +1,6 @@
 package stats
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron"
 
@@ -46,17 +43,12 @@ func (a *Aggregator) gather() {
 }
 
 func (a *Aggregator) announce() {
-	statsMessage := strings.Builder{}
-	statsMessage.WriteString("Statistics") //nolint:errcheck
-
-	embed := &discordgo.MessageEmbed{Color: 0x3498DB}
-	for _, tm := range a.topMessages {
-		statsMessage.WriteString(fmt.Sprintf("**%s** - %d\n", tm.User, tm.Messages)) //nolint:errcheck
+	rankings, err := FormatMessageRankings(a.topMessages, a.Discord)
+	if err != nil {
+		a.err = err
+		return
 	}
-
-	embed.Description = statsMessage.String()
-
-	_, err := a.Discord.ChannelMessageSendEmbed(a.Config.PrimaryChannel, embed)
+	_, err = a.Discord.ChannelMessageSendEmbed(a.Config.PrimaryChannel, rankings)
 	if err != nil {
 		a.err = err
 	}

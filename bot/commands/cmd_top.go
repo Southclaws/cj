@@ -1,9 +1,7 @@
 package commands
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/Southclaws/cj/bot/stats"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 )
@@ -21,16 +19,11 @@ func (cm *CommandManager) commandTop(
 		return false, errors.Wrap(err, "failed to get message rankings")
 	}
 
-	statsMessage := strings.Builder{}
-	statsMessage.WriteString("Statistics") //nolint:errcheck
-
-	embed := &discordgo.MessageEmbed{Color: 0x3498DB}
-	for _, tm := range top {
-		statsMessage.WriteString(fmt.Sprintf("**%s** - %d\n", tm.User, tm.Messages)) //nolint:errcheck
+	rankings, err := stats.FormatMessageRankings(top, cm.Discord)
+	if err != nil {
+		return
 	}
 
-	embed.Description = statsMessage.String()
-
-	_, err = cm.Discord.ChannelMessageSendEmbed(cm.Config.PrimaryChannel, embed)
+	_, err = cm.Discord.ChannelMessageSendEmbed(cm.Config.PrimaryChannel, rankings)
 	return
 }
