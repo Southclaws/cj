@@ -25,7 +25,7 @@ func (cm *CommandManager) commandImpersonate(
 	for _, username := range mentions[1:] {
 		user, ok := cm.Discord.GetUserFromName(username)
 		if !ok {
-			continue
+			return false, errors.New("User not found")
 		}
 
 		messages, err := cm.Storage.GetMessagesForUser(user.User.ID)
