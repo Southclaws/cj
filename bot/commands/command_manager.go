@@ -126,7 +126,6 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	storedContext, found := cm.Contexts.Get(message.Author.ID)
 	if found {
-		fmt.Println("found context for", message.Author.Username)
 		contextCommand, ok := storedContext.(Command)
 		if !ok {
 			return errors.New("failed to cast stored context to command type")
@@ -173,12 +172,9 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		}
 	}
 
-	fmt.Println("COMMAND HANDLER")
-
 	// Check if command is on cooldown
 	if when, ok := cm.Cooldowns[commandTrigger]; ok {
 		since := time.Since(when)
-		fmt.Println("on cd", when, since)
 		if since < commandObject.Cooldown {
 			err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, commandObject.Cooldown))
 			return
