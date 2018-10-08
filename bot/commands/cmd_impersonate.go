@@ -25,8 +25,6 @@ func (cm *CommandManager) commandImpersonate(
 	for _, username := range mentions[1:] {
 		user, ok := cm.Discord.GetUserFromName(username)
 		if !ok {
-			//nolint:errcheck
-			cm.Discord.S.ChannelMessageSend(message.ChannelID, "User "+username+" does not exist")
 			continue
 		}
 
