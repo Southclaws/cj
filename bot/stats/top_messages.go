@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/Southclaws/cj/storage"
 )
 
 func (a *Aggregator) gatherTopMessages(top int) (err error) {
@@ -14,18 +15,18 @@ func (a *Aggregator) gatherTopMessages(top int) (err error) {
 }
 
 // FormatMessageRankings formats a TopMessages into a discord embed message
-func FormatMessageRankings(rankings storage.TopMessages, d *discordgo.Session) (embed *discordgo.MessageEmbed, err error) {
+func FormatMessageRankings(rankings storage.TopMessages, s *storage.API) (embed *discordgo.MessageEmbed, err error) {
 	statsMessage := strings.Builder{}
 	statsMessage.WriteString("Statistics\n\n") //nolint:errcheck
 
 	embed = &discordgo.MessageEmbed{Color: 0x3498DB}
-	var user *discordgo.User
+	var user string
 	for _, tm := range rankings {
-		user, err = d.User(tm.User)
+		user, err = s.GetForumNameFromDiscordUser(tm.User)
 		if err != nil {
 			return
 		}
-		statsMessage.WriteString(fmt.Sprintf("**<@%s>** - %d\n", user.Username, tm.Messages)) //nolint:errcheck
+		statsMessage.WriteString(fmt.Sprintf("**<@%s>** - %d\n", user, tm.Messages)) //nolint:errcheck
 	}
 
 	embed.Description = statsMessage.String()

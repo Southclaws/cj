@@ -43,7 +43,7 @@ func (a *Aggregator) gather() {
 }
 
 func (a *Aggregator) announce() {
-	rankings, err := FormatMessageRankings(a.topMessages, a.Discord)
+	rankings, err := FormatMessageRankings(a.topMessages, a.Storage)
 	if err != nil {
 		a.err = err
 		return
