@@ -16,7 +16,8 @@ require (
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robertkrimen/otto v0.0.0-20180506084358-03d472dc43ab // indirect
-	github.com/stretchr/testify v1.2.1 // indirect
+	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
+	github.com/stretchr/testify v1.2.1
 	github.com/texttheater/golang-levenshtein v0.0.0-20180516184445-d188e65d659e
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
@@ -24,7 +25,6 @@ require (
 	golang.org/x/crypto v0.0.0-20180513064651-94e3fad7f1b4 // indirect
 	golang.org/x/net v0.0.0-20180511174649-2491c5de3490 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
 )
