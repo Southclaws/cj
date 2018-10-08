@@ -19,7 +19,7 @@ func (cm *CommandManager) commandTop(
 		return false, errors.Wrap(err, "failed to get message rankings")
 	}
 
-	rankings, err := stats.FormatMessageRankings(top, cm.Storage)
+	rankings, err := stats.FormatMessageRankings(top, cm.Discord)
 	if err != nil {
 		return
 	}
