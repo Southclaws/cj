@@ -1,6 +1,7 @@
 sudo: required
 services:
   - docker
+  - mongodb
 language: go
 go:
   - "1.11"
@@ -8,5 +9,6 @@ env:
   - GO111MODULE=on
 script:
   - make static
+  - make test
   - test $TRAVIS_BRANCH = master && echo "$DOCKER_PASSWORD" | docker login -u
     "$DOCKER_USERNAME" --password-stdin && make build && make push

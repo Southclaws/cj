@@ -101,5 +101,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Impersonate a user by talking like they would.",
 			Cooldown:    time.Minute,
 		},
+		"/top": {
+			Function:    cm.commandTop,
+			Source:      CommandSourcePRIMARY,
+			Description: "Rankings for most messages sent.",
+			Cooldown:    10 * time.Minute,
+		},
 	}
 }

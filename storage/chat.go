@@ -32,7 +32,45 @@ func (api *API) RecordChatLog(discordUserID string, discordChannel string, messa
 	return
 }
 
+// GetMessagesForUser returns all messages from the given discord user.
 func (api *API) GetMessagesForUser(discordUserID string) (messages []ChatLog, err error) {
 	err = api.chat.Find(bson.M{"discorduserid": discordUserID}).All(&messages)
+	return
+}
+
+// TopMessages is a list of users with the most messages
+type TopMessages []TopMessagesEntry
+
+// TopMessagesEntry is a user and their message count
+type TopMessagesEntry struct {
+	User     string `bson:"_id"`
+	Messages int    `bson:"count"`
+}
+
+func (s TopMessages) Len() int           { return len(s) }
+func (s TopMessages) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s TopMessages) Less(i, j int) bool { return s[i].Messages < s[j].Messages }
+
+// GetTopMessages returns n users with the most messages
+func (api *API) GetTopMessages(top int) (result TopMessages, err error) {
+	err = api.chat.Pipe([]bson.M{
+		bson.M{
+			"$group": bson.M{
+				"_id": "$discorduserid",
+				"count": bson.M{
+					"$sum": 1,
+				},
+			},
+		},
+		bson.M{
+			"$sort": bson.M{
+				"count": -1,
+			},
+		},
+		bson.M{
+			"$limit": top,
+		},
+	}).All(&result)
+	// sort.Sort(sort.Reverse(result))
 	return
 }
