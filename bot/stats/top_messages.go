@@ -24,12 +24,13 @@ func FormatMessageRankings(rankings storage.TopMessages, s *storage.API) (embed 
 	for _, tm := range rankings {
 		user, err = s.GetForumNameFromDiscordUser(tm.User)
 		if err != nil {
-			return
+			statsMessage.WriteString(fmt.Sprintf("**<@%s>** - %d (%s)\n", tm.User, err.Error())) //nolint:errcheck
+		} else {
+			statsMessage.WriteString(fmt.Sprintf("**<@%s>** - %d\n", user, tm.Messages)) //nolint:errcheck
 		}
-		statsMessage.WriteString(fmt.Sprintf("**<@%s>** - %d\n", user, tm.Messages)) //nolint:errcheck
 	}
 
 	embed.Description = statsMessage.String()
 
-	return
+	return embed, nil
 }
