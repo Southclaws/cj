@@ -8,10 +8,9 @@ go:
 env:
   - GO111MODULE=on
 script:
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo
-    $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+  # build/test
   - make static
   - make test
-  - test $BRANCH = master && echo "$DOCKER_PASSWORD" | docker login -u
-    "$DOCKER_USERNAME" --password-stdin && make build && make push
+  # deploy, only if on master
+  - if [ "$TRAVIS_BRANCH" = master ]; then echo "$DOCKER_PASSWORD" | docker
+    login -u "$DOCKER_USERNAME" --password-stdin && make build && make push; fi
