@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/mattn/go-shellwords"
 	"github.com/mb-14/gomarkov"
 	"github.com/pkg/errors"
 
@@ -18,9 +19,14 @@ func (cm *CommandManager) commandImpersonate(
 	context bool,
 	err error,
 ) {
-	mentions := strings.Split(message.Content, " ")
+	// this actually allows arbitrary commands to be run by users!
+	// but it runs in a scratch image with no commands... so, it should be fine.
+	mentions, err := shellwords.Parse(message.ContentWithMentionsReplaced())
+	if err != nil {
+		return
+	}
 
-	if len(mentions) <= 1 || len(mentions) > 10 {
+	if len(mentions) <= 1 || len(mentions) > 6 {
 		return false, errors.New("requires 1-10 usernames")
 	}
 
@@ -52,7 +58,11 @@ func (cm *CommandManager) commandImpersonate(
 			if isBadMessage(m.Message) {
 				continue
 			}
-			chain.Add(strings.Split(m.Message, " "))
+			words := strings.Split(m.Message, " ")
+			if len(words) < 3 {
+				continue
+			}
+			chain.Add(words)
 		}
 
 		tokens := []string{gomarkov.StartToken}
@@ -79,6 +89,9 @@ func isBadMessage(m string) bool {
 		return true
 	}
 	if strings.Contains(m, "@here") {
+		return true
+	}
+	if strings.Contains(m, "http") {
 		return true
 	}
 	return false
