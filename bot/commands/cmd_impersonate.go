@@ -6,6 +6,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/mb-14/gomarkov"
 	"github.com/pkg/errors"
+
+	"github.com/Southclaws/cj/storage"
 )
 
 func (cm *CommandManager) commandImpersonate(
@@ -22,16 +24,24 @@ func (cm *CommandManager) commandImpersonate(
 		return false, errors.New("requires 1-10 usernames")
 	}
 
+	var messages []storage.ChatLog
 	for _, username := range mentions[1:] {
-		user, ok := cm.Discord.GetUserFromName(username)
-		if !ok {
-			return false, errors.New("User not found")
+		if username == "CJ" {
+			for _, m := range quotes {
+				messages = append(messages, storage.ChatLog{Message: m})
+			}
+		} else {
+			user, ok := cm.Discord.GetUserFromName(username)
+			if !ok {
+				return false, errors.New("User not found")
+			}
+
+			messages, err = cm.Storage.GetMessagesForUser(user.User.ID)
+			if err != nil {
+				return false, errors.Wrap(err, "failed to get messages for user")
+			}
 		}
 
-		messages, err := cm.Storage.GetMessagesForUser(user.User.ID)
-		if err != nil {
-			return false, errors.Wrap(err, "failed to get messages for user")
-		}
 		numMessages := len(messages)
 		if numMessages < 10 {
 			return false, errors.New("not enough messages from that user")
