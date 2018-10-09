@@ -27,7 +27,7 @@ func (cm *CommandManager) commandImpersonate(
 	}
 
 	if len(mentions) <= 1 || len(mentions) > 6 {
-		return false, errors.New("requires 1-10 usernames")
+		return false, errors.New("requires 1-5 usernames")
 	}
 
 	var messages []storage.ChatLog
