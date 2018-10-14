@@ -220,6 +220,6 @@ func (cm *CommandManager) commandDynamic(
 	context bool,
 	err error,
 ) {
-	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, makeDynamic())
+	cm.Discord.ChannelMessageSend(message.ChannelID, makeDynamic())
 	return
 }

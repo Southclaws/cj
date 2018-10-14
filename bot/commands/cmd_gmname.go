@@ -200,6 +200,6 @@ func (cm *CommandManager) commandGmName(
 	context bool,
 	err error,
 ) {
-	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, generateGmName())
+	cm.Discord.ChannelMessageSend(message.ChannelID, generateGmName())
 	return
 }

@@ -83,15 +83,13 @@ func (cm *CommandManager) commandImpersonate(
 				tokens = append(tokens, next)
 			}
 
-			//nolint:errcheck
-			cm.Discord.S.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
+			cm.Discord.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
 		}
 
 		return
 	}()
 	if err != nil {
-		//nolint:errcheck
-		cm.Discord.S.ChannelMessageSend(message.ChannelID, err.Error())
+		cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
 		return false, nil
 	}
 

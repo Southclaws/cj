@@ -66,7 +66,7 @@ func (cm *CommandManager) commandWhois(
 		}
 	}
 
-	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, result)
+	cm.Discord.ChannelMessageSend(message.ChannelID, result)
 	if err != nil {
 		return
 	}
