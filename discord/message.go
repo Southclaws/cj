@@ -8,7 +8,7 @@ import (
 func (s *Session) ChannelMessageSend(channelID string, content string) {
 	r := strings.NewReplacer(
 		"@everyone", "@(everyone)",
-		"@here@", "@(here)",
+		"@here", "@(here)",
 	)
 	//nolint:errcheck
 	s.S.ChannelMessageSend(channelID, r.Replace(content))
