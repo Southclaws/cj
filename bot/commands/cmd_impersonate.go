@@ -30,52 +30,69 @@ func (cm *CommandManager) commandImpersonate(
 		return false, errors.New("requires 1-5 usernames")
 	}
 
-	var messages []storage.ChatLog
-	for _, username := range mentions[1:] {
-		if username == "CJ" {
-			for _, m := range quotes {
-				messages = append(messages, storage.ChatLog{Message: m})
-			}
-		} else {
-			user, ok := cm.Discord.GetUserFromName(username)
-			if !ok {
-				return false, errors.New("User not found")
+	err = func() (err error) {
+		var messages []storage.ChatLog
+		for i, username := range mentions[1:] {
+			if username == "CJ" {
+				for _, m := range quotes {
+					messages = append(messages, storage.ChatLog{Message: m})
+				}
+			} else {
+				user, ok := cm.Discord.GetUserFromName(username)
+				if !ok {
+					if i == 0 {
+						continue
+					} else {
+						return errors.New("User not found")
+					}
+				}
+
+				messages, err = cm.Storage.GetMessagesForUser(user.User.ID)
+				if err != nil {
+					return errors.Wrap(err, "failed to get messages for user")
+				}
 			}
 
-			messages, err = cm.Storage.GetMessagesForUser(user.User.ID)
-			if err != nil {
-				return false, errors.Wrap(err, "failed to get messages for user")
+			numMessages := len(messages)
+			if numMessages < 10 {
+				if i == 0 {
+					continue
+				} else {
+					return errors.New("not enough messages from that user")
+				}
 			}
+
+			chain := gomarkov.NewChain(1)
+			for _, m := range messages {
+				if isBadMessage(m.Message) {
+					continue
+				}
+				words := strings.Split(m.Message, " ")
+				if len(words) < 3 {
+					continue
+				}
+				chain.Add(words)
+			}
+
+			tokens := []string{gomarkov.StartToken}
+			for tokens[len(tokens)-1] != gomarkov.EndToken {
+				next, err := chain.Generate(tokens[(len(tokens) - 1):])
+				if err != nil {
+					return errors.Wrap(err, "failed to impersonate")
+				}
+				tokens = append(tokens, next)
+			}
+
+			//nolint:errcheck
+			cm.Discord.S.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
 		}
 
-		numMessages := len(messages)
-		if numMessages < 10 {
-			return false, errors.New("not enough messages from that user")
-		}
-
-		chain := gomarkov.NewChain(1)
-		for _, m := range messages {
-			if isBadMessage(m.Message) {
-				continue
-			}
-			words := strings.Split(m.Message, " ")
-			if len(words) < 3 {
-				continue
-			}
-			chain.Add(words)
-		}
-
-		tokens := []string{gomarkov.StartToken}
-		for tokens[len(tokens)-1] != gomarkov.EndToken {
-			next, err := chain.Generate(tokens[(len(tokens) - 1):])
-			if err != nil {
-				return false, errors.Wrap(err, "failed to impersonate")
-			}
-			tokens = append(tokens, next)
-		}
-
+		return
+	}()
+	if err != nil {
 		//nolint:errcheck
-		cm.Discord.S.ChannelMessageSend(message.ChannelID, strings.Join(tokens[1:len(tokens)-1], " "))
+		cm.Discord.S.ChannelMessageSend(message.ChannelID, err.Error())
+		return false, nil
 	}
 
 	return
