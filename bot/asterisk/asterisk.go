@@ -90,10 +90,6 @@ func (ast *Asterisk) doCorrection(message discordgo.Message) {
 		return
 	}
 
-	if correction == "@everyone" || correction == "@here" {
-		return
-	}
-
 	// apply the correction
 	words[target] = correction
 
@@ -102,6 +98,6 @@ func (ast *Asterisk) doCorrection(message discordgo.Message) {
 	{
 		ast.Discord.S.ChannelMessageDelete(last.ChannelID, last.ID)
 		ast.Discord.S.ChannelMessageDelete(message.ChannelID, message.ID)
-		ast.Discord.S.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " "))
+		ast.Discord.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " "))
 	}
 }
