@@ -98,6 +98,8 @@ func (ast *Asterisk) doCorrection(message discordgo.Message) {
 	{
 		ast.Discord.S.ChannelMessageDelete(last.ChannelID, last.ID)
 		ast.Discord.S.ChannelMessageDelete(message.ChannelID, message.ID)
-		ast.Discord.ChannelMessageSend(message.ChannelID, last.Author.Username+" meant to say: "+strings.Join(words, " "))
+		ast.Discord.ChannelMessageSend(
+			message.ChannelID,
+			last.Author.Username+" meant to say: "+strings.Join(words, " "))
 	}
 }
