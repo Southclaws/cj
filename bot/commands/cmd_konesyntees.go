@@ -91,6 +91,11 @@ func parseVoiceParams(text string) (string, int, int, error) {
 		}
 	}
 
+	text = strings.TrimSpace(text)
+	if len(text) == 0 {
+		return "", 0, 0, errors.New("the text can't be empty")
+	}
+
 	return text, speed, voice, nil
 }
 
