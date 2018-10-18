@@ -54,8 +54,8 @@ func (cm *CommandManager) commandKonesyntees(
 }
 
 func parseVoiceParams(text string) (string, int, int, error) {
-	params := strings.Split(text, " ")
 	text = text[13:]
+	params := strings.Split(text, " ")
 	speed := 0
 	voice := 0
 
