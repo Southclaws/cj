@@ -53,7 +53,6 @@ type Command struct {
 	Function    func(args string, message discordgo.Message, contextual bool) (context bool, err error)
 	Source      CommandSource
 	Description string
-	Context     bool
 	Cooldown    time.Duration
 }
 
@@ -194,9 +193,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	}
 
 	if enterContext {
-		if commandObject.Context {
-			cm.Contexts.Set(message.Author.ID, commandObject, cache.DefaultExpiration)
-		}
+		cm.Contexts.Set(message.Author.ID, commandObject, cache.DefaultExpiration)
 	}
 
 	if commandObject.Cooldown > 0 {
