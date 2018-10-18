@@ -25,8 +25,7 @@ func (cm *CommandManager) commandKonesyntees(
 		return
 	}
 
-	url := fmt.Sprintf("https://teenus.eki.ee/konesyntees?haal=%d&kiirus=%d&tekst=%s", voice, speed, strings.Replace(text, " ", "%20", -1))
-
+	url := fmt.Sprintf("http://teenus.eki.ee/konesyntees?haal=%d&kiirus=%d&tekst=%s", voice, speed, strings.Replace(text, " ", "%20", -1))
 	response, err := http.Get(url)
 	if err != nil {
 		return
