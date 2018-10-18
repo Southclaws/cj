@@ -24,6 +24,9 @@ func (cm *CommandManager) commandKonesyntees(
 	if err != nil {
 		return
 	}
+	if len(text) > 100 {
+		return false, errors.New("text too long")
+	}
 
 	url := fmt.Sprintf("http://teenus.eki.ee/konesyntees?haal=%d&kiirus=%d&tekst=%s", voice, speed, strings.Replace(text, " ", "%20", -1))
 	response, err := http.Get(url)
