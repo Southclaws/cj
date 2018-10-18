@@ -89,5 +89,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Rankings for most messages sent.",
 			Cooldown:    time.Minute * 10,
 		},
+		"/konesyntees": {
+			Function:    cm.commandKonesyntees,
+			Source:      CommandSourcePRIMARY,
+			Description: "Use superior Estonian technology to express your feelings like you've never before!",
+			Cooldown:    time.Minute,
+		},
 	}
 }
