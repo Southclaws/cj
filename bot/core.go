@@ -9,7 +9,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 
-	"github.com/Southclaws/cj/bot/asterisk"
 	"github.com/Southclaws/cj/bot/commands"
 	"github.com/Southclaws/cj/bot/stats"
 	"github.com/Southclaws/cj/discord"
@@ -67,7 +66,6 @@ func Start(config *types.Config) {
 
 	app.extensions = []Extension{
 		&commands.CommandManager{},
-		&asterisk.Asterisk{},
 		&stats.Aggregator{},
 	}
 
