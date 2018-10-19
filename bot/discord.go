@@ -73,6 +73,14 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 			go app.doSync()
 		}
 
+		channels, err := app.discordClient.S.GuildChannels(app.config.GuildID)
+		if err != nil {
+			return errors.Wrap(err, "failed to get channels")
+		}
+		for _, ch := range channels {
+			app.channels[ch.ID] = ch
+		}
+
 		return nil
 	}()
 }
@@ -81,6 +89,11 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) {
 	if len(app.ready) > 0 {
 		<-app.ready
+	}
+
+	_, ok := app.channels[event.ChannelID]
+	if !ok {
+		return
 	}
 
 	if event.Message.Author.ID == app.config.BotID {

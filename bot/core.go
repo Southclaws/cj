@@ -25,6 +25,7 @@ type App struct {
 	forum         *forum.ForumClient
 	ready         chan error
 	extensions    []Extension
+	channels      map[string]*discordgo.Channel
 }
 
 // Extension represents an extension to the bot that receives a pointer to the
@@ -39,6 +40,7 @@ func Start(config *types.Config) {
 	app := App{
 		config: config,
 		ready:  make(chan error),
+		channels: make(map[string]*discordgo.Channel),
 	}
 
 	var err error
