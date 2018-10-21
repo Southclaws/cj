@@ -54,6 +54,10 @@ func (cm *CommandManager) commandKonesyntees(
 }
 
 func parseVoiceParams(text string) (string, int, int, error) {
+	if len(text) < 14 {
+		return "", 0, 0, errors.New("the command must have some sort of params")
+	}
+
 	text = text[13:]
 	params := strings.Split(text, " ")
 	speed := 0
@@ -62,6 +66,10 @@ func parseVoiceParams(text string) (string, int, int, error) {
 	for i := 0; i < len(params); i++ {
 		if strings.HasPrefix(params[i], "--") == false {
 			break
+		}
+
+		if len(text) < len(params[i])+2 {
+			return "", 0, 0, errors.New("the text can't be empty")
 		}
 
 		text = text[len(params[i])+1:]
@@ -80,8 +88,8 @@ func parseVoiceParams(text string) (string, int, int, error) {
 		}
 
 		if strings.Compare(param, "speed") == 0 {
-			if value < -9 || value > 6 {
-				return "", 0, 0, errors.New("speed must be in the range of -9 .. 6")
+			if value < -9 || value > 9 {
+				return "", 0, 0, errors.New("speed must be in the range of -9 .. 9")
 			}
 
 			speed = value
