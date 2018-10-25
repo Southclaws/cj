@@ -13,6 +13,7 @@ import (
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
+	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
 // CommandManager stores command state
@@ -153,6 +154,18 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	commandObject, exists := cm.Commands[commandTrigger]
 	if !exists {
+		newdist := 100
+		result := "None"
+		for word, _ := range cm.Commands {
+			dist := levenshtein.DistanceForStrings([]rune(commandTrigger), []rune(word), levenshtein.DefaultOptions)
+			
+			if newdist > dist {
+				newdist = dist
+				result = word
+			}
+		}
+	        body := fmt.Sprintf("Did you mean %s ?", result)
+	        cm.Discord.ChannelMessageSend(message.ChannelID, body)
 		return
 	}
 
