@@ -99,7 +99,7 @@ func (cm *CommandManager) UserStartsVerification(message discordgo.Message) (err
 	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
 		`Hi! This process will verify you are the owner of a SA:MP forum account. Please provide your user profile URL or ID.
 
-Examples:
+For example: (Note: These are ***EXAMPLES***, don't just copy paste these...)
 
 • %s
 • %s
@@ -143,7 +143,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 		return
 	}
 
-	matched, err := regexp.MatchString(`^(http:\/\/)?forum\.sa-mp\.com\/member\.php\?u=[0-9]*$`, message.Content)
+	matched, err := regexp.MatchString(`^\s*?(https?:\/\/)?forum\.sa-mp\.com\/member\.php\?u=[0-9]*\s*?$`, message.Content)
 	if err != nil {
 		err = cm.WarnUserVerificationState(message.ChannelID, verification)
 		return
@@ -168,7 +168,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 		profileURL = fmt.Sprintf("http://forum.sa-mp.com/member.php?u=%d", value)
 	}
 
-	verification.ForumUser = profileURL
+	verification.ForumUser = strings.Trim(profileURL, " \n")
 	verification.Code, err = GenerateRandomString(8)
 	if err != nil {
 		return

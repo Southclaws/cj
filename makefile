@@ -30,7 +30,7 @@ version:
 
 # -
 # Docker
-#-
+# -
 
 build:
 	docker build --no-cache -t $(OWNER)/$(SERVICE):$(VERSION) .

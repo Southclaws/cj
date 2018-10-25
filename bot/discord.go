@@ -91,9 +91,14 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		<-app.ready
 	}
 
-	_, ok := app.channels[event.ChannelID]
-	if !ok {
+	ch, err := app.discordClient.S.Channel(event.ChannelID)
+	if err != nil {
 		return
+	}
+	if ch.Type == discordgo.ChannelTypeGuildText {
+		if ch.GuildID != app.config.GuildID {
+			return
+		}
 	}
 
 	if event.Message.Author.ID == app.config.BotID {
@@ -115,7 +120,7 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		}
 	}
 
-	err := app.storage.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
+	err = app.storage.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
 	if err != nil {
 		logger.Error("failed to record chat log", zap.Error(err))
 	}
