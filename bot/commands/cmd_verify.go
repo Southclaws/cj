@@ -101,9 +101,9 @@ func (cm *CommandManager) UserStartsVerification(message discordgo.Message) (err
 
 Examples:
 
-- %s
-- %s
-- %s
+• %s
+• %s
+• %s
 
 Each stage of the verification process will time-out after 5 minutes,
 if you take longer than that to respond you will need to start again.`,
