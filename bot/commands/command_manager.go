@@ -154,8 +154,8 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	commandObject, exists := cm.Commands[commandTrigger]
 	if !exists {
-		newdist := 100
-		result := "None"
+		newdist := 2
+		result := ""
 		for word, _ := range cm.Commands {
 			dist := levenshtein.DistanceForStrings([]rune(commandTrigger), []rune(word), levenshtein.DefaultOptions)
 			
@@ -164,7 +164,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 				result = word
 			}
 		}
-	        body := fmt.Sprintf("Did you mean %s ?", result)
+	        body := fmt.Sprintf("Did you mean %s?", result)
 	        cm.Discord.ChannelMessageSend(message.ChannelID, body)
 		return
 	}
