@@ -4,7 +4,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.4.1
 	github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d
 	github.com/andybalholm/cascadia v1.0.0 // indirect
-	github.com/bwmarrin/discordgo v0.18.0
+	github.com/bwmarrin/discordgo v0.19.0
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
 	github.com/gorilla/websocket v1.2.0 // indirect
