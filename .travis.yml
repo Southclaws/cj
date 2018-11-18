@@ -11,7 +11,6 @@ script:
   # build/test
   - make static
   - make test
-  # deploy, only if on master
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "$DOCKER_PASSWORD" |
-    docker login -u "$DOCKER_USERNAME" --password-stdin && make build && make
-    push; fi
+  # deploy, only if on master and not a PR
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "$DOCKER_PASSWORD" | docker
+    login -u "$DOCKER_USERNAME" --password-stdin && make build && make push; fi
