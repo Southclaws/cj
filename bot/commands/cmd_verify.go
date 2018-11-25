@@ -153,7 +153,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 
 	// If it didn't match, check if it's just a user ID
 	if matched {
-		if strings.HasPrefix(message.Content, "http://") {
+		if strings.HasPrefix(message.Content, "http") {
 			profileURL = message.Content
 		} else {
 			profileURL = "http://" + message.Content
