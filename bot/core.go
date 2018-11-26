@@ -45,15 +45,19 @@ func Start(config *types.Config) {
 
 	var err error
 
-	app.storage, err = storage.New(storage.Config{
-		MongoHost: config.MongoHost,
-		MongoPort: config.MongoPort,
-		MongoName: config.MongoName,
-		MongoUser: config.MongoUser,
-		MongoPass: config.MongoPass,
-	})
-	if err != nil {
-		logger.Fatal("failed to connect to database", zap.Error(err))
+	if !config.NoDatabase {
+		app.storage, err = storage.New(storage.Config{
+			MongoHost: config.MongoHost,
+			MongoPort: config.MongoPort,
+			MongoName: config.MongoName,
+			MongoUser: config.MongoUser,
+			MongoPass: config.MongoPass,
+		})
+		if err != nil {
+			logger.Fatal("failed to connect to database", zap.Error(err))
+		}
+	} else {
+		app.storage = &storage.Memory{}
 	}
 
 	app.forum, err = forum.NewForumClient()
