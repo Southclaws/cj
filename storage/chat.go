@@ -16,7 +16,7 @@ type ChatLog struct {
 }
 
 // RecordChatLog records a chat message from a user in a channel
-func (api *API) RecordChatLog(discordUserID string, discordChannel string, message string) (err error) {
+func (m *MongoStorer) RecordChatLog(discordUserID string, discordChannel string, message string) (err error) {
 	record := ChatLog{
 		time.Now().Unix(),
 		discordUserID,
@@ -24,7 +24,7 @@ func (api *API) RecordChatLog(discordUserID string, discordChannel string, messa
 		message,
 	}
 
-	err = api.chat.Insert(record)
+	err = m.chat.Insert(record)
 	if err != nil {
 		err = errors.Wrap(err, "failed to insert chat log")
 	}
@@ -33,8 +33,8 @@ func (api *API) RecordChatLog(discordUserID string, discordChannel string, messa
 }
 
 // GetMessagesForUser returns all messages from the given discord user.
-func (api *API) GetMessagesForUser(discordUserID string) (messages []ChatLog, err error) {
-	err = api.chat.Find(bson.M{"discorduserid": discordUserID}).All(&messages)
+func (m *MongoStorer) GetMessagesForUser(discordUserID string) (messages []ChatLog, err error) {
+	err = m.chat.Find(bson.M{"discorduserid": discordUserID}).All(&messages)
 	return
 }
 
@@ -52,8 +52,8 @@ func (s TopMessages) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s TopMessages) Less(i, j int) bool { return s[i].Messages < s[j].Messages }
 
 // GetTopMessages returns n users with the most messages
-func (api *API) GetTopMessages(top int) (result TopMessages, err error) {
-	err = api.chat.Pipe([]bson.M{
+func (m *MongoStorer) GetTopMessages(top int) (result TopMessages, err error) {
+	err = m.chat.Pipe([]bson.M{
 		bson.M{
 			"$group": bson.M{
 				"_id": "$discorduserid",

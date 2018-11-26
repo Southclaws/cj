@@ -4,10 +4,26 @@ import (
 	"fmt"
 
 	"github.com/globalsign/mgo"
+
+	"github.com/Southclaws/cj/types"
 )
 
-// API exposes a storage API for the bot
-type API struct {
+// Storer describes a type that is capable of persisting data
+type Storer interface {
+	RecordChatLog(discordUserID string, discordChannel string, message string) (err error)
+	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
+	GetTopMessages(top int) (result TopMessages, err error)
+	StoreVerifiedUser(verification types.Verification) (err error)
+	RemoveUser(id string) (err error)
+	IsUserVerified(discordUserID string) (verified bool, err error)
+	GetDiscordUserForumUser(forumUserID string) (discordUserID string, err error)
+	GetForumUserFromDiscordUser(discordUserID string) (forumUserID string, err error)
+	GetForumNameFromDiscordUser(discordUserID string) (forumUserName string, err error)
+	GetDiscordUserFromForumName(forumName string) (discordUserID string, err error)
+}
+
+// MongoStorer exposes a storage MongoStorer for the bot
+type MongoStorer struct {
 	mongo    *mgo.Session
 	accounts *mgo.Collection
 	chat     *mgo.Collection
@@ -23,15 +39,15 @@ type Config struct {
 }
 
 // New constructs a new storage API and connects to the database
-func New(config Config) (api *API, err error) {
-	api = new(API)
-	api.mongo, err = mgo.Dial(fmt.Sprintf("%s:%s", config.MongoHost, config.MongoPort))
+func New(config Config) (m *MongoStorer, err error) {
+	m = new(MongoStorer)
+	m.mongo, err = mgo.Dial(fmt.Sprintf("%s:%s", config.MongoHost, config.MongoPort))
 	if err != nil {
 		return
 	}
 
 	if config.MongoPass != "" {
-		err = api.mongo.Login(&mgo.Credential{
+		err = m.mongo.Login(&mgo.Credential{
 			Source:   config.MongoName,
 			Username: config.MongoUser,
 			Password: config.MongoPass,
@@ -41,8 +57,8 @@ func New(config Config) (api *API, err error) {
 		}
 	}
 
-	api.accounts = api.mongo.DB(config.MongoName).C("accounts")
-	api.chat = api.mongo.DB(config.MongoName).C("chat")
+	m.accounts = m.mongo.DB(config.MongoName).C("accounts")
+	m.chat = m.mongo.DB(config.MongoName).C("chat")
 
 	return
 }

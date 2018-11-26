@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var api *API
+var api *MongoStorer
 
 func TestMain(m *testing.M) {
 	var err error

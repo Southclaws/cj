@@ -18,8 +18,8 @@ type User struct {
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
-func (api *API) StoreVerifiedUser(verification types.Verification) (err error) {
-	err = api.accounts.Insert(&User{
+func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
+	err = m.accounts.Insert(&User{
 		DiscordUserID:    verification.DiscordUser.ID,
 		ForumUserID:      verification.ForumUser,
 		VerificationCode: verification.Code,
@@ -30,13 +30,13 @@ func (api *API) StoreVerifiedUser(verification types.Verification) (err error) {
 }
 
 // RemoveUser removes a user by their Discord ID
-func (api *API) RemoveUser(id string) (err error) {
-	return api.accounts.Remove(bson.M{"discord_user_id": id})
+func (m *MongoStorer) RemoveUser(id string) (err error) {
+	return m.accounts.Remove(bson.M{"discord_user_id": id})
 }
 
 // IsUserVerified returns a discord user, a blank string or an error
-func (api *API) IsUserVerified(discordUserID string) (verified bool, err error) {
-	count, err := api.accounts.Find(bson.M{"discord_user_id": discordUserID}).Count()
+func (m *MongoStorer) IsUserVerified(discordUserID string) (verified bool, err error) {
+	count, err := m.accounts.Find(bson.M{"discord_user_id": discordUserID}).Count()
 	if err != nil {
 		return
 	}
@@ -47,10 +47,10 @@ func (api *API) IsUserVerified(discordUserID string) (verified bool, err error) 
 }
 
 // GetDiscordUserForumUser returns a discord user, a blank string or an error
-func (api *API) GetDiscordUserForumUser(forumUserID string) (discordUserID string, err error) {
+func (m *MongoStorer) GetDiscordUserForumUser(forumUserID string) (discordUserID string, err error) {
 	var user User
 
-	err = api.accounts.Find(bson.M{"forum_user_id": forumUserID}).One(&user)
+	err = m.accounts.Find(bson.M{"forum_user_id": forumUserID}).One(&user)
 	if err != nil {
 		err = errors.Wrap(err, "failed to query user by forum ID")
 		return
@@ -61,10 +61,10 @@ func (api *API) GetDiscordUserForumUser(forumUserID string) (discordUserID strin
 }
 
 // GetForumUserFromDiscordUser returns a link to user's profile, a blank string or an error
-func (api *API) GetForumUserFromDiscordUser(discordUserID string) (forumUserID string, err error) {
+func (m *MongoStorer) GetForumUserFromDiscordUser(discordUserID string) (forumUserID string, err error) {
 	var user User
 
-	err = api.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
+	err = m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
 	if err != nil {
 		err = errors.Wrap(err, "failed to query forum ID by discord ID")
 		return
@@ -75,10 +75,10 @@ func (api *API) GetForumUserFromDiscordUser(discordUserID string) (forumUserID s
 }
 
 // GetForumNameFromDiscordUser returns user's name on SA-MP Forums, a blank string or an error
-func (api *API) GetForumNameFromDiscordUser(discordUserID string) (forumUserName string, err error) {
+func (m *MongoStorer) GetForumNameFromDiscordUser(discordUserID string) (forumUserName string, err error) {
 	var user User
 
-	err = api.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
+	err = m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to query forum name by discord ID")
 	}
@@ -88,12 +88,12 @@ func (api *API) GetForumNameFromDiscordUser(discordUserID string) (forumUserName
 }
 
 // GetDiscordUserFromForumName returns user's name on SA-MP Forums, a blank string or an error
-func (api *API) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
+func (m *MongoStorer) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
 	var user User
 
 	regex := bson.M{"$regex": bson.RegEx{Pattern: "^" + regexp.QuoteMeta(forumName) + "$", Options: "i"}}
 
-	err = api.accounts.Find(bson.M{"forum_user_name": regex}).One(&user)
+	err = m.accounts.Find(bson.M{"forum_user_name": regex}).One(&user)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to query user by forum name")
 	}

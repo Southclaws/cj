@@ -21,7 +21,7 @@ import (
 type App struct {
 	config        *types.Config
 	discordClient *discord.Session
-	storage       *storage.API
+	storage       storage.Storer
 	forum         *forum.ForumClient
 	ready         chan error
 	extensions    []Extension
@@ -31,15 +31,15 @@ type App struct {
 // Extension represents an extension to the bot that receives a pointer to the
 // storage backend.
 type Extension interface {
-	Init(*types.Config, *discord.Session, *storage.API, *forum.ForumClient) error
+	Init(*types.Config, *discord.Session, storage.Storer, *forum.ForumClient) error
 	OnMessage(discordgo.Message) error
 }
 
 // Start starts the app with the specified config and blocks until fatal error
 func Start(config *types.Config) {
 	app := App{
-		config: config,
-		ready:  make(chan error),
+		config:   config,
+		ready:    make(chan error),
 		channels: make(map[string]*discordgo.Channel),
 	}
 

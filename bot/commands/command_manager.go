@@ -20,7 +20,7 @@ import (
 type CommandManager struct {
 	Config    *types.Config
 	Discord   *discord.Session
-	Storage   *storage.API
+	Storage   storage.Storer
 	Forum     *forum.ForumClient
 	Commands  map[string]Command
 	Contexts  *cache.Cache
@@ -32,7 +32,7 @@ type CommandManager struct {
 func (cm *CommandManager) Init(
 	config *types.Config,
 	discord *discord.Session,
-	api *storage.API,
+	api storage.Storer,
 	fc *forum.ForumClient,
 ) (err error) {
 	cm.Config = config

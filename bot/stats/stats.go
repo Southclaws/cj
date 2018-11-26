@@ -14,7 +14,7 @@ import (
 type Aggregator struct {
 	Config  *types.Config
 	Discord *discord.Session
-	Storage *storage.API
+	Storage storage.Storer
 	Forum   *forum.ForumClient
 
 	topMessages storage.TopMessages
@@ -26,7 +26,7 @@ type Aggregator struct {
 func (a *Aggregator) Init(
 	config *types.Config,
 	discord *discord.Session,
-	api *storage.API,
+	api storage.Storer,
 	fc *forum.ForumClient,
 ) (err error) {
 	a.Config = config
