@@ -79,6 +79,7 @@ var gamemodes = []string{
 	"race",
 	"racing",
 	"roleplay",
+	"dmrp",
 	"rp",
 	"rpg",
 	"sex",
