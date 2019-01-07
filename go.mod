@@ -14,7 +14,7 @@ require (
 	github.com/mattn/go-shellwords v1.0.3
 	github.com/mb-14/gomarkov v0.0.0-20180818070845-1bd158c9a5f3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pkg/errors v0.8.0
+	github.com/pkg/errors v0.8.1
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robertkrimen/otto v0.0.0-20180506084358-03d472dc43ab // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
