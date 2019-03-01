@@ -13,7 +13,7 @@ type WikiThread struct {
 var wikiThread WikiThread
 
 func LoadWikiThreads() error {
-	wikiJSON, err := os.OpenFile("storage/wikasdi_threads.json", os.O_RDONLY, 0755)
+	wikiJSON, err := os.OpenFile("storage/wiki_threads.json", os.O_RDONLY, 0755)
 	if err != nil {
 		return err
 	}
