@@ -1,14 +1,12 @@
 package commands
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kristoisberg/gonesyntees"
 	"github.com/pkg/errors"
 )
 
@@ -24,32 +22,23 @@ func (cm *CommandManager) commandKonesyntees(
 	if err != nil {
 		return
 	}
+
 	if len(text) > 100 {
 		return false, errors.New("text too long")
 	}
 
-	url := fmt.Sprintf("http://teenus.eki.ee/konesyntees?haal=%d&kiirus=%d&tekst=%s", voice, speed, strings.Replace(text, " ", "%20", -1))
-	response, err := http.Get(url)
+	response, err := gonesyntees.Request(text, gonesyntees.Voice(voice), speed)
+
 	if err != nil {
 		return
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	audio, err := http.Get(response.MP3Url)
 	if err != nil {
 		return
 	}
 
-	url, err = getVoiceMp3Url(string(data))
-	if err != nil {
-		return
-	}
-
-	response, err = http.Get(url)
-	if err != nil {
-		return
-	}
-
-	cm.Discord.ChannelFileSend(message.ChannelID, "konesyntees.mp3", response.Body)
+	cm.Discord.ChannelFileSend(message.ChannelID, "konesyntees.mp3", audio.Body)
 	return
 }
 
@@ -108,21 +97,4 @@ func parseVoiceParams(text string) (string, int, int, error) {
 	}
 
 	return text, speed, voice, nil
-}
-
-func getVoiceMp3Url(data string) (url string, err error) {
-	dec := json.NewDecoder(strings.NewReader(data))
-	var urls map[string]string
-
-	err = dec.Decode(&urls)
-	if err != nil {
-		return
-	}
-
-	url, exists := urls["mp3url"]
-	if exists == false {
-		err = errors.New("the correct URL doesn't exist for some reason")
-	}
-
-	return
 }
