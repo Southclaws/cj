@@ -9,7 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b
-	github.com/mattn/go-shellwords v1.0.3
+	github.com/mattn/go-shellwords v1.0.5
 	github.com/mb-14/gomarkov v0.0.0-20180818070845-1bd158c9a5f3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
