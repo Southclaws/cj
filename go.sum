@@ -25,6 +25,8 @@ github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b h1:UC1MCu
 github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b/go.mod h1:sTWuuRwVNP5H0sz9z6WVB03IMHQayKyvLcRJlt9Kfok=
 github.com/mattn/go-shellwords v1.0.3 h1:K/VxK7SZ+cvuPgFSLKi5QPI9Vr/ipOf4C1gN+ntueUk=
 github.com/mattn/go-shellwords v1.0.3/go.mod h1:3xCvwCdWdlDJUrvuMn7Wuy9eWs4pE8vqg+NOMyg4B2o=
+github.com/mattn/go-shellwords v1.0.5 h1:JhhFTIOslh5ZsPrpa3Wdg8bF0WI3b44EMblmU9wIsXc=
+github.com/mattn/go-shellwords v1.0.5/go.mod h1:3xCvwCdWdlDJUrvuMn7Wuy9eWs4pE8vqg+NOMyg4B2o=
 github.com/mb-14/gomarkov v0.0.0-20180818070845-1bd158c9a5f3 h1:/ltBv0sE+Ew1+57Qla2BifiYd0c8J/Gv6S3+vWMnAzw=
 github.com/mb-14/gomarkov v0.0.0-20180818070845-1bd158c9a5f3/go.mod h1:zQmHoMvvVJb7cxyt1wGT77lqUaeOFXlogOppOr4uHVo=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
