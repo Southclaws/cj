@@ -7,7 +7,6 @@ import (
 	"github.com/Southclaws/cj/storage"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bwmarrin/discordgo"
-	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
 var cmdUsage string = "USAGE : /wiki [function/callback/article]"
@@ -37,7 +36,7 @@ func (cm *CommandManager) commandWiki(
 		exists bool
 	)
 
-	wikiThread, exists = searchThread(args)
+	wikiThread, exists = storage.SearchThread(args)
 
 	if !exists {
 		cm.Discord.ChannelMessageSend(message.ChannelID, "SA:MP Wiki | "+args+"\n- This article does not exist")
@@ -103,26 +102,4 @@ func (cm *CommandManager) commandWiki(
 	}
 
 	return false, err
-}
-
-func searchThread(thread string) ([]string, bool) {
-	maxdistance := 3
-	var results []string
-	wikiThreads := storage.GetWikiThread().Thread
-
-	for i := range wikiThreads {
-
-		dist := levenshtein.DistanceForStrings(
-			[]rune(strings.ToLower(wikiThreads[i])),
-			[]rune(strings.ToLower(thread)),
-			levenshtein.DefaultOptions,
-		) 
-		if dist == 0 {
-			return []string{wikiThreads[i]}, true
-		}
-		if dist <= maxdistance {
-			results = append(results, wikiThreads[i])
-		}
-	}
-	return results, len(results) != 0
 }
