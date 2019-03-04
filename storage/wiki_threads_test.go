@@ -1,27 +1,19 @@
 package storage
 
 import (
-	"strings"
 	"testing"
+	"fmt"
 )
 
 func TestWIKI(t *testing.T) {
-	err := LoadWikiThreads()
-	if err != nil {
-		t.Error("Wiki threads must be loaded; ", err.Error())
+	testWikiSearch := [3]string{"GetPlayerName", "onplayerconnect", "Db_get_field_assoc_float"}
+	var found = [3]bool{false, false, false}
+	for i := range testWikiSearch {
+		_, found[i] = SearchThread(testWikiSearch[i])
 	}
-	testWikiSearch := [3]string{"GetPlayerName", "OnPlayerConnect", "Limits"}
-	var found [3]bool
-	for i := range GetWikiThread().Thread {
-		for a := range testWikiSearch {
-			if strings.Compare(GetWikiThread().Thread[i], testWikiSearch[a]) == 0 {
-				found[a] = true
-			}
-		}
-	}
-	for tst := range found {
-		if found[tst] != true {
-			t.Error("\"wiki_threads.go\" not works correcly! ", err.Error())
+	for a := range found {
+		if found[a] != true {
+			t.Error("Something's gone wrong")
 		}
 	}
 }
