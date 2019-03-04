@@ -2,7 +2,6 @@ package storage
 
 import (
 	"testing"
-	"fmt"
 )
 
 func TestWIKI(t *testing.T) {
