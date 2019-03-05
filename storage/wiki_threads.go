@@ -2,7 +2,6 @@ package storage
 
 import (
 	"strings"
-    "fmt"
 
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
@@ -24,7 +23,6 @@ func SearchThread(thread string) ([]string, bool) {
 			results = append(results, wikiThreads[i])
 		}
 	}
-    fmt.Println(results)
 	return results, len(results) != 0
 }
 
