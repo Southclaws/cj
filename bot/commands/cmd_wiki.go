@@ -44,7 +44,7 @@ func (cm *CommandManager) commandWiki(
 	}
 
 	if len(wikiThread) != 1 {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "What are you looking for?\nSA:MP Wiki | `"+strings.Join(wikiThread, "` & `")+"`")
+		cm.Discord.ChannelMessageSend(message.ChannelID, "What are you looking for?\nResults from *SA:MP Wiki*:\n__"+strings.Join(wikiThread, "__\n__")+"__")
 		return
 	}
 
