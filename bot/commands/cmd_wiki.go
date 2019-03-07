@@ -1,12 +1,15 @@
 package commands
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strings"
+	"fmt"
 
 	"github.com/Southclaws/cj/storage"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bwmarrin/discordgo"
+	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
 var cmdUsage string = "USAGE : /wiki [function/callback/article]"
@@ -22,6 +25,9 @@ func (cm *CommandManager) commandWiki(
 	if len(args) == 0 {
 		cm.Discord.ChannelMessageSend(message.ChannelID, cmdUsage)
 		return
+	} else if len(args) < 3 {
+		cm.Discord.ChannelMessageSend(message.ChannelID, "Query must be 3 characters or more")
+		return
 	}
 
 	if len(message.Mentions) > 0 ||
@@ -33,22 +39,33 @@ func (cm *CommandManager) commandWiki(
 
 	var (
 		wikiThread []string
-		exists bool
+		wikiURL string
+		articleName string = strings.Replace(args, " ", "_", -1)
 	)
 
-	wikiThread, exists = storage.SearchThread(args)
+	wikiThread = storage.SearchThread(args)
 
-	if !exists {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "SA:MP Wiki | "+args+"\n- This article does not exist")
-		return 
-	}
+	if len(wikiThread) >  0 {
+		if len(wikiThread) != 1 {
+			cm.Discord.ChannelMessageSend(message.ChannelID, "What are you looking for?\nResults from *SA:MP Wiki*:\n__"+strings.Join(wikiThread, "__\n__")+"__")
+			return
+		} else {
+			dist := levenshtein.DistanceForStrings(
+				[]rune(strings.ToLower(wikiThread[0])),
+				[]rune(strings.ToLower(articleName)),
+				levenshtein.DefaultOptions,
+			)
+			fmt.Println(articleName)
+			if dist <= 2 {
+				articleName = wikiThread[0]
+			}
+			fmt.Println(dist)
+			fmt.Println("local - "+wikiThread[0])
+			fmt.Println(articleName)
+		}			
+	}	
 
-	if len(wikiThread) != 1 {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "What are you looking for?\nResults from *SA:MP Wiki*:\n__"+strings.Join(wikiThread, "__\n__")+"__")
-		return
-	}
-
-	wikiURL := "https://wiki.sa-mp.com/wiki/"+wikiThread[0]
+	wikiURL = "https://wiki.sa-mp.com/wiki/"+articleName
 
 	var doc *goquery.Document
 
@@ -57,14 +74,24 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
+	bodyText, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return
+	}
+
 	if response.StatusCode != 200 {
 		cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"Could not retrieve SA:MP wiki article:\nGot unexpected response: "+response.Status+".")
+	} else if strings.Contains(string(bodyText), "There is currently no text in this page, you can") ||
+		strings.Contains(string(bodyText), "The requested page title was invalid, empty") {
+		cm.Discord.ChannelMessageSend(
+			message.ChannelID,
+			"SA:MP Wiki | "+args+"\n- This article does not exist")
 	} else {
 		cm.Discord.ChannelMessageSend(
 			message.ChannelID,
-			"SA:MP Wiki | "+wikiThread[0]+"\n"+wikiURL)
+			"SA:MP Wiki | "+articleName+"\n"+wikiURL)
 
 		doc, err = goquery.NewDocument(wikiURL)
 		if err != nil {
