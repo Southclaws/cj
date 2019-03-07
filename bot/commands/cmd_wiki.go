@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"fmt"
 
 	"github.com/Southclaws/cj/storage"
 	"github.com/PuerkitoBio/goquery"
@@ -55,13 +54,9 @@ func (cm *CommandManager) commandWiki(
 				[]rune(strings.ToLower(articleName)),
 				levenshtein.DefaultOptions,
 			)
-			fmt.Println(articleName)
 			if dist <= 2 {
 				articleName = wikiThread[0]
 			}
-			fmt.Println(dist)
-			fmt.Println("local - "+wikiThread[0])
-			fmt.Println(articleName)
 		}			
 	}	
 
