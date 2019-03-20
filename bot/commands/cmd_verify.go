@@ -107,9 +107,9 @@ For example: (Note: These are ***EXAMPLES***, don't just copy paste these...)
 
 Each stage of the verification process will time-out after 5 minutes,
 if you take longer than that to respond you will need to start again.`,
-		`http://forum.sa-mp.com/member.php?u=50199`,
-		`forum.sa-mp.com/member.php?u=50199`,
-		`50199`,
+		`http://forum.sa-mp.com/member.php?u=240708`,
+		`forum.sa-mp.com/member.php?u=240708`,
+		`240708`,
 	))
 
 	if err != nil {
