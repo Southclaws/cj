@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Southclaws/cj/storage"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
-var cmdUsage string = "USAGE : /wiki [function/callback/article]"
+var cmdUsage = "USAGE : /wiki [function/callback/article]"
 
 func (cm *CommandManager) commandWiki(
 	args string,
-	message discordgo.Message, 
+	message discordgo.Message,
 	contextual bool,
 ) (
 	context bool,
@@ -37,30 +37,30 @@ func (cm *CommandManager) commandWiki(
 	}
 
 	var (
-		wikiThread []string
-		wikiURL string
-		articleName string = strings.Replace(args, " ", "_", -1)
+		wikiThread  []string
+		wikiURL     string
+		articleName = strings.Replace(args, " ", "_", -1)
 	)
 
 	wikiThread = storage.SearchThread(args)
 
-	if len(wikiThread) >  0 {
+	if len(wikiThread) > 0 {
 		if len(wikiThread) != 1 {
 			cm.Discord.ChannelMessageSend(message.ChannelID, "What are you looking for?\nResults from *SA:MP Wiki*:\n__"+strings.Join(wikiThread, "__\n__")+"__")
 			return
-		} else {
-			dist := levenshtein.DistanceForStrings(
-				[]rune(strings.ToLower(wikiThread[0])),
-				[]rune(strings.ToLower(articleName)),
-				levenshtein.DefaultOptions,
-			)
-			if dist <= 2 {
-				articleName = wikiThread[0]
-			}
-		}			
-	}	
+		}
+		dist := levenshtein.DistanceForStrings(
+			[]rune(strings.ToLower(wikiThread[0])),
+			[]rune(strings.ToLower(articleName)),
+			levenshtein.DefaultOptions,
+		)
+		if dist <= 2 {
+			articleName = wikiThread[0]
+		}
 
-	wikiURL = "https://wiki.sa-mp.com/wiki/"+articleName
+	}
+
+	wikiURL = "https://wiki.sa-mp.com/wiki/" + articleName
 
 	var doc *goquery.Document
 
