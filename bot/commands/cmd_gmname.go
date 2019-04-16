@@ -59,7 +59,7 @@ var morewords = []string{
 	"krisk",
 	"mom",
 	"motherfuckers",
-	"openmp",
+	"open.mp",
 	"parkour",
 	"pisd",
 	"profesionals",
