@@ -119,7 +119,7 @@ var tags = []string{
 	"NGG",
 	"NGRP",
 	"OFFICIAL",
-	"OPENMP",
+	"OPEN.MP",
 	"PAWN",
 	"PAWNO",
 	"PISD",
