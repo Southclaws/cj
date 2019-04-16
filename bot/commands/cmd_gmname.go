@@ -69,7 +69,7 @@ var morewords = []string{
 	"shoters",
 	"scripters",
 	"white",
-	"you(them)tubers"
+	"you(them)tubers",
 }
 
 var gamemodes = []string{
