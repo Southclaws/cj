@@ -37,10 +37,10 @@ func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err er
 			})
 	} else {
 		err = m.accounts.Insert(&User{
-			DiscordUserID: verification.DiscordUser.ID,
-			ForumUserID:   verification.ForumUser,
-			ForumUserName: verification.UserProfile.UserName,
-			BurgerVerify:  true,
+			DiscordUserID:  verification.DiscordUser.ID,
+			BurgerUserID:   verification.ForumUser,
+			BurgerUserName: verification.UserProfile.UserName,
+			BurgerVerify:   true,
 		})
 	}
 
