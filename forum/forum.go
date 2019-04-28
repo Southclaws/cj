@@ -78,7 +78,7 @@ func (fc *ForumClient) GetUserProfilePage(url string) (UserProfile, error) {
 func (fc *ForumClient) getUserName(root *xmlpath.Node) (string, error) {
 	var result string
 
-	path := xmlpath.MustCompile(`//span[@class='largetext']//strong//span//strong`)
+	path := xmlpath.MustCompile(`//span[@class='largetext']//strong//span`)
 
 	result, ok := path.String(root)
 	if !ok {
