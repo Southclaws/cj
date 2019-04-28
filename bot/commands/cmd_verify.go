@@ -95,7 +95,7 @@ func (cm *CommandManager) UserStartsVerification(message discordgo.Message) (err
 	}
 
 	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
-		`Hi! This process will verify you are the owner of a burgershot forum account. Please provide your user profile URL or ID.
+		`Hi! This process will verify you are the owner of a Burgershot forum account. Please provide your user profile URL or ID.
 
 For example: (Note: These are ***EXAMPLES***, don't just copy paste these...)
 

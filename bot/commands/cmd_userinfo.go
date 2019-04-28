@@ -46,7 +46,7 @@ func (cm *CommandManager) commandUserInfo(
 			}
 
 			if verified {
-				result += fmt.Sprintf("The user <@%s> is not verified on burgershot, they need to message CJ with `verify`.", user.ID)
+				result += fmt.Sprintf("The user <@%s> is not verified on Burgershot, they need to message CJ with `verify`.", user.ID)
 			} else {
 				result += fmt.Sprintf("<@%s> is not verified. ", user.ID)
 			}

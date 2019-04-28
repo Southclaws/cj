@@ -4,7 +4,7 @@
 
 ![CJ](cj.png)
 
-CJ verifies burgershot (formerly SA:MP) forum accounts and performs other tasks if you ask nicely.
+CJ verifies Burgershot (formerly SA:MP) forum accounts and performs other tasks if you ask nicely.
 
 Not really in development and not accepting new features. I fix bugs from time to time but it serves it purpose as a
 verification tool and basic forum interface.
