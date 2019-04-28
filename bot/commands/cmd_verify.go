@@ -52,6 +52,16 @@ func (cm *CommandManager) commandVerify(
 		return
 	}
 
+	verified, err = cm.Storage.IsUserLegacyVerified(message.Author.ID)
+	if err != nil {
+		return
+	}
+
+	if verified {
+		err = errors.New("user is legacy verified, use reverify instead")
+		return
+	}
+
 	switch message.Content {
 	case "verify":
 		err = cm.UserStartsVerification(message)
@@ -97,7 +107,7 @@ func (cm *CommandManager) UserStartsVerification(message discordgo.Message) (err
 	}
 
 	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
-		`Hi! This process will verify you are the owner of a SA:MP forum account. Please provide your user profile URL or ID.
+		`Hi! This process will verify you are the owner of a burgershot forum account. Please provide your user profile URL or ID.
 
 For example: (Note: These are ***EXAMPLES***, don't just copy paste these...)
 
@@ -107,9 +117,9 @@ For example: (Note: These are ***EXAMPLES***, don't just copy paste these...)
 
 Each stage of the verification process will time-out after 5 minutes,
 if you take longer than that to respond you will need to start again.`,
-		`http://forum.sa-mp.com/member.php?u=240708`,
-		`forum.sa-mp.com/member.php?u=240708`,
-		`240708`,
+		`https://burgershot.gg/member.php?action=profile&uid=3`,
+		`burgershot.gg/member.php?action=profile&uid=3`,
+		`3`,
 	))
 
 	if err != nil {
@@ -143,7 +153,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 		return
 	}
 
-	matched, err := regexp.MatchString(`^\s*?(https?:\/\/)?forum\.sa-mp\.com\/member\.php\?u=[0-9]*\s*?$`, message.Content)
+	matched, err := regexp.MatchString(`^\s*?(https?:\/\/)?burgershot\.gg\/member\.php\?action=profile\&uid=[0-9]*\s*?$`, message.Content)
 	if err != nil {
 		err = cm.WarnUserVerificationState(message.ChannelID, verification)
 		return
@@ -153,10 +163,10 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 
 	// If it didn't match, check if it's just a user ID
 	if matched {
-		if strings.HasPrefix(message.Content, "http") {
+		if strings.HasPrefix(message.Content, "https") {
 			profileURL = message.Content
 		} else {
-			profileURL = "http://" + message.Content
+			profileURL = "https://" + message.Content
 		}
 	} else {
 		var value int
@@ -165,7 +175,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 			err = cm.WarnUserVerificationState(message.ChannelID, verification)
 			return
 		}
-		profileURL = fmt.Sprintf("http://forum.sa-mp.com/member.php?u=%d", value)
+		profileURL = fmt.Sprintf("https://burgershot.gg/member.php?action=profile&uid=%d", value)
 	}
 
 	verification.ForumUser = strings.Trim(profileURL, " \n")
@@ -177,15 +187,13 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 	cm.SetVerificationState(&verification, types.VerificationStateAwaitConfirmation)
 
 	//nolint:lll
+
+	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(`Debug: %s`, strings.Trim(profileURL, " \n")))
+
 	cm.Discord.ChannelMessageSend(message.ChannelID,
-		fmt.Sprintf(`Thanks! Now you just need to paste this 8-digit verification code into your Bio section then reply with 'done'.
-
-**%s**
-
-You can edit this section here: http://forum.sa-mp.com/profile.php?do=editprofile in the 'Additional Information' section at the bottom.
-
-You must ensure your "About Me" section is visible to *Everyone*, you can change this setting here: http://forum.sa-mp.com/profile.php?do=privacy`,
-			verification.Code))
+		fmt.Sprintf(`Thanks! Now you just need to paste this ID in the "Discord ID" section of your profile: **%s**.
+		When you have done this, please reply with the message 'done'.`,
+			message.Author.ID))
 	return
 }
 
@@ -214,7 +222,7 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 		return
 	}
 
-	verified, err := cm.CheckUserPageForCode(verification.UserProfile, verification.Code)
+	verified, err := cm.CheckUserPageForDiscordID(verification.UserProfile, message.Author.ID)
 	if err != nil {
 		return
 	}
@@ -270,7 +278,7 @@ func (cm *CommandManager) WarnUserVerificationState(channelid string, verificati
 	case types.VerificationStateAwaitProfileURL:
 		stateMessage = "Your verification is currently awaiting a profile URL or profile ID."
 	case types.VerificationStateAwaitConfirmation:
-		stateMessage = "Your verification is currently awaiting you to post the verification code on your Profile Bio, once you've done that reply with either 'done' or 'cancel'"
+		stateMessage = "Your re-verification is currently awaiting you to add your discord ID to your profile, once you've done that reply with either 'done' or 'cancel'"
 	}
 	cm.Discord.ChannelMessageSend(channelid, stateMessage)
 	return
@@ -290,9 +298,9 @@ func (cm *CommandManager) WarnUserError(channelid string, errorString string) (e
 	return
 }
 
-// CheckUserPageForCode checks if a verification code has been posted by a user.
-func (cm *CommandManager) CheckUserPageForCode(page forum.UserProfile, code string) (bool, error) {
-	if strings.Contains(page.BioText, code) {
+// CheckUserPageForDiscordID checks if a discord ID has been posted by a user.
+func (cm *CommandManager) CheckUserPageForDiscordID(page forum.UserProfile, id string) (bool, error) {
+	if strings.Contains(page.DiscordID, id) {
 		return true, nil
 	}
 	return false, nil

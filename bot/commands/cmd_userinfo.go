@@ -39,7 +39,17 @@ func (cm *CommandManager) commandUserInfo(
 		}
 
 		if !verified {
-			result += fmt.Sprintf("<@%s> is not verified. ", user.ID)
+			verified, err = cm.Storage.IsUserLegacyVerified(user.ID)
+			if err != nil {
+				result += err.Error() + " "
+				continue
+			}
+
+			if verified {
+				result += fmt.Sprintf("The user <@%s> is not verified on burgershot, they need to message CJ with 'reverify'.", user.ID)
+			} else {
+				result += fmt.Sprintf("<@%s> is not verified. ", user.ID)
+			}
 		} else {
 			link, err = cm.Storage.GetForumUserFromDiscordUser(user.ID)
 			if err != nil {

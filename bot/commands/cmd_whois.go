@@ -16,6 +16,7 @@ func (cm *CommandManager) commandWhois(
 ) {
 	var (
 		verified bool
+		legacy   bool
 		count    = 0
 		username string
 		link     string
@@ -48,7 +49,13 @@ func (cm *CommandManager) commandWhois(
 				continue
 			}
 
-			if !verified {
+			legacy, err = cm.Storage.IsUserLegacyVerified(user.ID)
+			if err != nil {
+				result += err.Error()
+				continue
+			}
+
+			if !verified && !legacy {
 				result += fmt.Sprintf("The user <@%s> is not verified. ", user.ID)
 			} else {
 				username, err = cm.Storage.GetForumNameFromDiscordUser(user.ID)
@@ -61,7 +68,7 @@ func (cm *CommandManager) commandWhois(
 					return
 				}
 
-				result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums. ", user.ID, username, link)
+				result += fmt.Sprintf("<@%s> is **%s** (%s). ", user.ID, username, link)
 			}
 		}
 	}

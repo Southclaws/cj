@@ -15,6 +15,7 @@ type User struct {
 	ForumUserID      string `json:"forum_user_id" bson:"forum_user_id"`
 	VerificationCode string `json:"verification_code" bson:"verification_code"`
 	ForumUserName    string `json:"forum_user_name" bson:"forum_user_name"`
+	BurgershotVeri   bool   `json:"burgershot_verified" bson:"burgershot_verified"`
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
@@ -24,7 +25,25 @@ func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err er
 		ForumUserID:      verification.ForumUser,
 		VerificationCode: verification.Code,
 		ForumUserName:    verification.UserProfile.UserName,
+		BurgershotVeri:   true,
 	})
+
+	return
+}
+
+// SetLegacyUserToVerified is for re-verification when a legacy verified user gets set to verified.
+func (m *MongoStorer) SetLegacyUserToVerified(verification types.Verification) (err error) {
+	err = m.accounts.Update(
+		bson.D{
+			{"discord_user_id", verification.DiscordUser.ID},
+		},
+		bson.D{
+			{"$set", bson.D{
+				{"forum_user_id", verification.ForumUser},
+				{"forum_user_name", verification.UserProfile.UserName},
+				{"burgershot_verified", true},
+			}},
+		})
 
 	return
 }
@@ -35,9 +54,34 @@ func (m *MongoStorer) RemoveUser(id string) (err error) {
 }
 
 // IsUserVerified returns a discord user, a blank string or an error
+// Difference between IsUserLegacyVerified: this specifically checks if the user verified on burgershot.
 func (m *MongoStorer) IsUserVerified(discordUserID string) (verified bool, err error) {
-	count, err := m.accounts.Find(bson.M{"discord_user_id": discordUserID}).Count()
+	count, err := m.accounts.Find(
+		bson.D{
+			{"discord_user_id", discordUserID},
+			{"burgershot_verified", bson.D{
+				{"$exists", true},
+			}}}).Count()
 	if err != nil {
+		return
+	}
+	if count > 0 {
+		verified = true
+	}
+	return
+}
+
+// IsUserLegacyVerified returns a discord user, a blank string or an error
+// Difference between IsUserVerified: this specifically checks if the user verified on SA:MP.
+func (m *MongoStorer) IsUserLegacyVerified(discordUserID string) (verified bool, err error) {
+	count, err := m.accounts.Find(
+		bson.D{
+			{"discord_user_id", discordUserID},
+			{"burgershot_verified", bson.D{
+				{"$exists", false},
+			}}}).Count()
+	if err != nil {
+
 		return
 	}
 	if count > 0 {

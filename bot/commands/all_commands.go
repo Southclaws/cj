@@ -21,7 +21,12 @@ func (cm *CommandManager) LoadCommands() {
 		"verify": {
 			Function:    cm.commandVerify,
 			Source:      CommandSourcePRIVATE,
-			Description: "Verify you are the owner of a SA:MP forum account.",
+			Description: "Verify you are the owner of a burgershot forum account.",
+		},
+		"reverify": {
+			Function:    cm.commandReVerify,
+			Source:      CommandSourcePRIVATE,
+			Description: "Verify you are the owner of a burgershot forum account.",
 		},
 		"/say": {
 			Function:    cm.commandSay,
