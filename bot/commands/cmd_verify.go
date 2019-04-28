@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -179,16 +177,11 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 	}
 
 	verification.ForumUser = strings.Trim(profileURL, " \n")
-	verification.Code, err = GenerateRandomString(8)
 	if err != nil {
 		return
 	}
 
 	cm.SetVerificationState(&verification, types.VerificationStateAwaitConfirmation)
-
-	//nolint:lll
-
-	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(`Debug: %s`, strings.Trim(profileURL, " \n")))
 
 	cm.Discord.ChannelMessageSend(message.ChannelID,
 		fmt.Sprintf(`Thanks! Now you just need to paste this ID in the "Discord ID" section of your profile: **%s**.
@@ -230,7 +223,7 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 	if !verified {
 		cm.Discord.ChannelMessageSend(
 			message.ChannelID,
-			"Sorry, your verification failed. The code was not found on your profile page.")
+			"Sorry, your verification failed. Your discord id was not found on your profile page.")
 		return
 	}
 
@@ -304,36 +297,4 @@ func (cm *CommandManager) CheckUserPageForDiscordID(page forum.UserProfile, id s
 		return true, nil
 	}
 	return false, nil
-}
-
-/*
-Author: Matt Silverlock
-Date: 2014-05-24
-Accessed: 2017-02-22
-https://elithrar.github.io/article/generating-secure-random-numbers-crypto-rand
-*/
-
-// GenerateRandomBytes returns securely generated random bytes.
-// It will return an error if the system's secure random
-// number generator fails to function correctly, in which
-// case the caller should not continue.
-func GenerateRandomBytes(n int) ([]byte, error) {
-	b := make([]byte, n)
-	_, err := rand.Read(b) //nolint:gas
-	// Note that err == nil only if we read len(b) bytes.
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
-}
-
-// GenerateRandomString returns a URL-safe, base64 encoded
-// securely generated random string.
-// It will return an error if the system's secure random
-// number generator fails to function correctly, in which
-// case the caller should not continue.
-func GenerateRandomString(s int) (string, error) {
-	b, err := GenerateRandomBytes(s)
-	return base64.URLEncoding.EncodeToString(b), err
 }
