@@ -11,21 +11,19 @@ import (
 
 // User is a recorded and verified SA:MP forum user.
 type User struct {
-	DiscordUserID    string `json:"discord_user_id" bson:"discord_user_id"`
-	ForumUserID      string `json:"forum_user_id" bson:"forum_user_id"`
-	VerificationCode string `json:"verification_code" bson:"verification_code"`
-	ForumUserName    string `json:"forum_user_name" bson:"forum_user_name"`
-	BurgershotVeri   bool   `json:"burgershot_verified" bson:"burgershot_verified"`
+	DiscordUserID string `json:"discord_user_id" bson:"discord_user_id"`
+	ForumUserID   string `json:"forum_user_id" bson:"forum_user_id"`
+	ForumUserName string `json:"forum_user_name" bson:"forum_user_name"`
+	BurgerVerify  bool   `json:"burgershot_verified" bson:"burgershot_verified"`
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
 func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
 	err = m.accounts.Insert(&User{
-		DiscordUserID:    verification.DiscordUser.ID,
-		ForumUserID:      verification.ForumUser,
-		VerificationCode: verification.Code,
-		ForumUserName:    verification.UserProfile.UserName,
-		BurgershotVeri:   true,
+		DiscordUserID: verification.DiscordUser.ID,
+		ForumUserID:   verification.ForumUser,
+		ForumUserName: verification.UserProfile.UserName,
+		BurgerVerify:  true,
 	})
 
 	return

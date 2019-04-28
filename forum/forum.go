@@ -18,20 +18,12 @@ type ForumClient struct {
 
 // UserProfile stores data available on a user's profile page
 type UserProfile struct {
-	UserName        string
-	JoinDate        string
-	TotalPosts      int
-	Reputation      int
-	BioText         string
-	DiscordID       string
-	VisitorMessages []VisitorMessage
-	Errors          []error
-}
-
-// VisitorMessage represents a single visitor message available on a user page.
-type VisitorMessage struct {
-	UserName string
-	Message  string
+	UserName   string
+	JoinDate   string
+	TotalPosts int
+	Reputation int
+	DiscordID  string
+	Errors     []error
 }
 
 // NewForumClient creates a new forum clienta
@@ -71,16 +63,6 @@ func (fc *ForumClient) GetUserProfilePage(url string) (UserProfile, error) {
 	}
 
 	result.Reputation, err = fc.getReputation(root)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
-	}
-
-	result.BioText, err = fc.getUserBio(root)
-	if err != nil {
-		result.Errors = append(result.Errors, err)
-	}
-
-	result.VisitorMessages, err = fc.getFirstTenUserVisitorMessages(root)
 	if err != nil {
 		result.Errors = append(result.Errors, err)
 	}
@@ -156,20 +138,6 @@ func (fc *ForumClient) getReputation(root *xmlpath.Node) (int, error) {
 	return result, nil
 }
 
-// getUserBio returns the bio text.
-func (fc *ForumClient) getUserBio(root *xmlpath.Node) (string, error) {
-	var result string
-
-	path := xmlpath.MustCompile(`//*[@id="collapseobj_aboutme"]/div/ul/li[1]/dl/dd[1]`)
-
-	result, ok := path.String(root)
-	if !ok {
-		return result, errors.New("user bio xmlpath did not return a result")
-	}
-
-	return result, nil
-}
-
 func (fc *ForumClient) getUserDiscordID(root *xmlpath.Node) (string, error) {
 	var result string
 
@@ -178,38 +146,6 @@ func (fc *ForumClient) getUserDiscordID(root *xmlpath.Node) (string, error) {
 	result, ok := path.String(root)
 	if !ok {
 		return result, errors.New("user discord id xmlpath did not resturn a result")
-	}
-
-	return result, nil
-}
-
-// getFirstTenUserVisitorMessages returns up to ten visitor messages from
-func (fc *ForumClient) getFirstTenUserVisitorMessages(root *xmlpath.Node) (result []VisitorMessage, err error) {
-	mainPath := xmlpath.MustCompile(`//*[@id="message_list"]/*`)
-	userPath := xmlpath.MustCompile(`.//div[2]/div[1]/div/a`)
-	textPath := xmlpath.MustCompile(`.//div[2]/div[2]`)
-
-	if !mainPath.Exists(root) {
-		return result, errors.New("visitor messages xmlpath did not return a result")
-	}
-
-	var ok bool
-	var user string
-	var text string
-
-	messageBlock := mainPath.Iter(root)
-
-	for messageBlock.Next() {
-		user, ok = userPath.String(messageBlock.Node())
-		if !ok {
-			continue
-		}
-		text, ok = textPath.String(messageBlock.Node())
-		if !ok {
-			continue
-		}
-
-		result = append(result, VisitorMessage{UserName: user, Message: text})
 	}
 
 	return result, nil
