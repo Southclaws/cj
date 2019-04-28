@@ -93,7 +93,7 @@ func (m *MongoStorer) IsUserLegacyVerified(discordUserID string) (verified bool,
 func (m *MongoStorer) GetDiscordUserForumUser(forumUserID string) (discordUserID string, err error) {
 	var user User
 
-	err = m.accounts.Find(bson.M{"forum_user_id": forumUserID}).One(&user)
+	err = m.accounts.Find(bson.M{"burger_user_id": forumUserID}).One(&user)
 	if err != nil {
 		err = errors.Wrap(err, "failed to query user by forum ID")
 		return
