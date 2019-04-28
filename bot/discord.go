@@ -43,14 +43,14 @@ func (app *App) ConnectDiscord() (err error) {
 		return
 	}
 
-	logger.Info("finished initialising discord module")
+	zap.L().Info("finished initialising discord module")
 
 	return
 }
 
 // nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
-	logger.Debug("connected to Discord gateway")
+	zap.L().Debug("connected to Discord gateway")
 
 	app.ready <- func() error {
 		roles, err := s.GuildRoles(app.config.GuildID)
@@ -110,25 +110,25 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 
 	if app.config.DebugUser != "" {
 		if event.Message.Author.ID != app.config.DebugUser {
-			logger.Debug("ignoring command from non debug user")
+			zap.L().Debug("ignoring command from non debug user")
 			return
 		}
-		logger.Debug("accepting command from debug user")
+		zap.L().Debug("accepting command from debug user")
 	}
 
 	for _, ex := range app.extensions {
 		e := ex.OnMessage(*event.Message)
 		if e != nil {
-			logger.Error("unhandled error from OnMessage", zap.Error(e))
+			zap.L().Error("unhandled error from OnMessage", zap.Error(e))
 		}
 	}
 
 	err = app.storage.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
 	if err != nil {
-		logger.Error("failed to record chat log", zap.Error(err))
+		zap.L().Error("failed to record chat log", zap.Error(err))
 	}
 
-	logger.Debug("processed message",
+	zap.L().Debug("processed message",
 		zap.String("author", event.Message.Author.Username),
 		zap.String("message", event.Message.Content),
 	)
@@ -137,23 +137,23 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 	verified, err := app.storage.IsUserVerified(event.Member.User.ID)
 	if err != nil {
-		logger.Error("failed to check if user verified", zap.Error(err))
+		zap.L().Error("failed to check if user verified", zap.Error(err))
 	}
 
 	if verified {
 		err = app.discordClient.S.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
 		if err != nil {
-			logger.Error("failed to add verified role to member", zap.Error(err))
+			zap.L().Error("failed to add verified role to member", zap.Error(err))
 		}
 	} else {
 		ch, err := s.UserChannelCreate(event.Member.User.ID)
 		if err != nil {
-			logger.Error("failed to create user channel", zap.Error(err))
+			zap.L().Error("failed to create user channel", zap.Error(err))
 			return
 		}
 		_, err = app.discordClient.S.ChannelMessageSend(ch.ID, fmt.Sprintf(greeting, "`verify`"))
 		if err != nil {
-			logger.Error("failed to send message", zap.Error(err))
+			zap.L().Error("failed to send message", zap.Error(err))
 		}
 	}
 }
@@ -172,13 +172,13 @@ func (app *App) doSync() {
 			}
 
 			if verified {
-				logger.Debug("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
+				zap.L().Debug("synchronising roles by adding verified status to user", zap.String("user", user.User.Username))
 				err = app.discordClient.S.GuildMemberRoleAdd(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
 				if err != nil {
 					return errors.Wrapf(err, "failed to add verified role for %s", user.User.ID)
 				}
 			} else {
-				logger.Debug("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
+				zap.L().Debug("synchronising roles by removing verified status from user", zap.String("user", user.User.Username))
 				err = app.discordClient.S.GuildMemberRoleRemove(app.config.GuildID, user.User.ID, app.config.VerifiedRole)
 				if err != nil {
 					return errors.Wrapf(err, "failed to remove verified role for %s", user.User.ID)
@@ -188,7 +188,7 @@ func (app *App) doSync() {
 		return
 	}()
 	if err != nil {
-		logger.Fatal("failed to perform initialisation sync",
+		zap.L().Fatal("failed to perform initialisation sync",
 			zap.Error(err))
 	}
 }

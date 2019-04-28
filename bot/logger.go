@@ -7,8 +7,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var logger *zap.Logger
-
 func init() {
 	var (
 		debug  = os.Getenv("DEBUG")
@@ -24,8 +22,10 @@ func init() {
 		config.Level.SetLevel(zap.DebugLevel)
 	}
 
-	logger, err = config.Build()
+	logger, err := config.Build()
 	if err != nil {
 		panic(err)
 	}
+
+	zap.ReplaceGlobals(logger)
 }

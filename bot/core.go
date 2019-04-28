@@ -54,7 +54,7 @@ func Start(config *types.Config) {
 			MongoPass: config.MongoPass,
 		})
 		if err != nil {
-			logger.Fatal("failed to connect to database", zap.Error(err))
+			zap.L().Fatal("failed to connect to database", zap.Error(err))
 		}
 	} else {
 		app.storage = &storage.Memory{}
@@ -62,12 +62,12 @@ func Start(config *types.Config) {
 
 	app.forum, err = forum.NewForumClient()
 	if err != nil {
-		logger.Fatal("failed to initialise forum client", zap.Error(err))
+		zap.L().Fatal("failed to initialise forum client", zap.Error(err))
 	}
 
 	err = app.ConnectDiscord()
 	if err != nil {
-		logger.Fatal("failed to connect to discord", zap.Error(err))
+		zap.L().Fatal("failed to connect to discord", zap.Error(err))
 	}
 
 	app.extensions = []Extension{
@@ -78,7 +78,7 @@ func Start(config *types.Config) {
 	for _, ex := range app.extensions {
 		err = ex.Init(config, app.discordClient, app.storage, app.forum)
 		if err != nil {
-			logger.Fatal("failed to initialise extension", zap.Error(err))
+			zap.L().Fatal("failed to initialise extension", zap.Error(err))
 		}
 	}
 
@@ -86,10 +86,10 @@ func Start(config *types.Config) {
 		config.PrimaryChannel,
 		fmt.Sprintf("Hey, what's cracking now? CJ initialised with version %s", config.Version))
 	if err != nil {
-		logger.Fatal("failed to send initialisation message", zap.Error(err))
+		zap.L().Fatal("failed to send initialisation message", zap.Error(err))
 	}
 
-	logger.Debug("started with debug logging enabled",
+	zap.L().Debug("started with debug logging enabled",
 		zap.Int("extensions", len(app.extensions)),
 		zap.Any("config", config))
 
