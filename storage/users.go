@@ -9,7 +9,7 @@ import (
 	"github.com/Southclaws/cj/types"
 )
 
-// User is a recorded and verified SA:MP forum user.
+// User is a recorded and verified burgershot forum user.
 type User struct {
 	DiscordUserID string `json:"discord_user_id" bson:"discord_user_id"`
 	ForumUserID   string `json:"forum_user_id" bson:"forum_user_id"`

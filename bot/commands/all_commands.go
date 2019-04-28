@@ -23,11 +23,6 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIVATE,
 			Description: "Verify you are the owner of a burgershot forum account.",
 		},
-		"reverify": {
-			Function:    cm.commandReVerify,
-			Source:      CommandSourcePRIVATE,
-			Description: "Verify you are the owner of a burgershot forum account.",
-		},
 		"/say": {
 			Function:    cm.commandSay,
 			Source:      CommandSourceADMINISTRATIVE,
@@ -36,7 +31,7 @@ func (cm *CommandManager) LoadCommands() {
 		"/userinfo": {
 			Function:    cm.commandUserInfo,
 			Source:      CommandSourcePRIMARY,
-			Description: "Get a user's SA:MP forum info.",
+			Description: "Get a user's burgershot forum info.",
 		},
 		"/whois": {
 			Function:    cm.commandWhois,
