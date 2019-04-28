@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"regexp"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -107,8 +107,8 @@ Each stage of the verification process will time-out after 5 minutes,
 if you take longer than that to respond you will need to start again.
 
 Need some help regarding verification? You can always read the thread that explains how to verify! (%s)`,
-		`https://burgershot.gg/member.php?action=profile&uid=3`,
-		`burgershot.gg/member.php?action=profile&uid=3`,
+		`https://www.burgershot.gg/member.php?action=profile&uid=3`,
+		`www.burgershot.gg/member.php?action=profile&uid=3`,
 		`3`,
 		`https://www.burgershot.gg/showthread.php?tid=480`,
 	))
@@ -144,21 +144,13 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 		return
 	}
 
-	matched, err := regexp.MatchString(`^\s*?(https?:\/\/)?burgershot\.gg\/member\.php\?action=profile\&uid=[0-9]*\s*?$`, message.Content)
-	if err != nil {
-		err = cm.WarnUserVerificationState(message.ChannelID, verification)
-		return
-	}
-
 	var profileURL string
-
-	// If it didn't match, check if it's just a user ID
-	if matched {
-		if strings.HasPrefix(message.Content, "https") {
-			profileURL = message.Content
-		} else {
-			profileURL = "https://" + message.Content
+	u, err := url.Parse(message.Content)
+	if err == nil {
+		if u.Scheme != "https" {
+			u.Scheme = "https"
 		}
+		profileURL = u.String()
 	} else {
 		var value int
 		value, err = strconv.Atoi(message.Content)
@@ -166,10 +158,10 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 			err = cm.WarnUserVerificationState(message.ChannelID, verification)
 			return
 		}
-		profileURL = fmt.Sprintf("https://burgershot.gg/member.php?action=profile&uid=%d", value)
+		profileURL = strings.Trim(fmt.Sprintf("https://burgershot.gg/member.php?action=profile&uid=%d", value), " \n")
 	}
 
-	verification.ForumUser = strings.Trim(profileURL, " \n")
+	verification.ForumUser = profileURL
 	if err != nil {
 		return
 	}
