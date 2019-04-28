@@ -46,7 +46,28 @@ func (cm *CommandManager) commandVerify(
 	}
 
 	if verified {
-		err = errors.New("user already verified")
+		var role bool
+
+		member, discorderr := cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
+		if discorderr != nil {
+			err = errors.New("failed to get member")
+		}
+
+		for _, r := range member.Roles {
+			if r == cm.Config.VerifiedRole {
+				role = true
+			}
+		}
+
+		if !role {
+			discorderr = cm.Discord.S.GuildMemberRoleAdd(cm.Config.GuildID, message.Author.ID, cm.Config.VerifiedRole)
+			if discorderr != nil {
+				err = errors.New(fmt.Sprintf("failed to add verified role for %s", message.Author.ID))
+			}
+			cm.Discord.ChannelMessageSend(message.ChannelID, "You have now recieved your verified role.")
+		} else {
+			cm.Discord.ChannelMessageSend(message.ChannelID, "User already has verified role.")
+		}
 		return
 	}
 
