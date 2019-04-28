@@ -82,14 +82,6 @@ func Start(config *types.Config) {
 		}
 	}
 
-	app.forum.NewPostAlert("3", func() {
-		//nolint:errcheck
-		app.discordClient.S.ChannelMessageSend(
-			config.PrimaryChannel,
-			"New Kalcor Post: http://forum.sa-mp.com/search.php?do=finduser&u=3",
-		)
-	})
-
 	_, err = app.discordClient.S.ChannelMessageSend(
 		config.PrimaryChannel,
 		fmt.Sprintf("Hey, what's cracking now? CJ initialised with version %s", config.Version))
