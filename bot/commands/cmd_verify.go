@@ -104,10 +104,13 @@ For example: (Note: These are ***EXAMPLES***, don't just copy paste these...)
 • %s
 
 Each stage of the verification process will time-out after 5 minutes,
-if you take longer than that to respond you will need to start again.`,
+if you take longer than that to respond you will need to start again.
+
+Need some help regarding verification? You can always read the thread that explains how to verify! (%s)`,
 		`https://burgershot.gg/member.php?action=profile&uid=3`,
 		`burgershot.gg/member.php?action=profile&uid=3`,
 		`3`,
+		`https://www.burgershot.gg/showthread.php?tid=480`,
 	))
 
 	if err != nil {
