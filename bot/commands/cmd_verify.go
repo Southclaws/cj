@@ -146,7 +146,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 
 	var profileURL string
 	u, err := url.Parse(message.Content)
-	if err == nil {
+	if err == nil && strings.Contains(u.Hostname(), "burgershot.gg") {
 		if u.Scheme != "https" {
 			u.Scheme = "https"
 		}
