@@ -81,7 +81,26 @@ func (cm *CommandManager) commandWhois(
 					result += fmt.Sprintf("<@%s> is **%s** (%s)\n", user.ID, legacyusername, legacylink)
 				}
 				if !legacy {
-					result += fmt.Sprintf("<@%s> is **%s** (%s). ", user.ID, username, link)
+					result += fmt.Sprintf("<@%s> is **%s** (%s).", user.ID, username, link)
+				}
+
+				soldiers := [11]string{
+					"553980497470947329", // J0sh
+					"151085460830027779", // Spacemud
+					"224289512790949890", // Hual
+					"371708093286973461", // Y_Less
+					"313287736213897216", // Riddick
+					"86435690711093248",  // Southclaws
+					"185832908638912512", // BigETI
+					"243718819573399562", // maddinat0r
+					"253685655471783936", // Graber
+					"149359093348433921", // Kar
+				}
+
+				for _, soldier := range soldiers {
+					if soldier == user.ID {
+						result += fmt.Sprintf("\nThis person is also a **4/11 veteran**.")
+					}
 				}
 			}
 		}
