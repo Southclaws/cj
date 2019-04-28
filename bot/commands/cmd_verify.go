@@ -273,7 +273,7 @@ func (cm *CommandManager) WarnUserVerificationState(channelid string, verificati
 	case types.VerificationStateAwaitProfileURL:
 		stateMessage = "Your verification is currently awaiting a profile URL or profile ID."
 	case types.VerificationStateAwaitConfirmation:
-		stateMessage = "Your re-verification is currently awaiting you to add your discord ID to your profile, once you've done that reply with either 'done' or 'cancel'"
+		stateMessage = "Your verification is currently awaiting you to add your discord ID to your profile, once you've done that reply with either `done` or `cancel`"
 	}
 	cm.Discord.ChannelMessageSend(channelid, stateMessage)
 	return

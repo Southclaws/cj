@@ -31,12 +31,12 @@ func (m *Memory) IsUserLegacyVerified(discordUserID string) (verified bool, err 
 func (m *Memory) GetDiscordUserForumUser(forumUserID string) (discordUserID string, err error) {
 	return
 }
-func (m *Memory) GetForumUserFromDiscordUser(discordUserID string) (forumUserID string, err error) {
+func (m *Memory) GetForumUserFromDiscordUser(discordUserID string) (legacyUserID string, burgerUserID string, err error) {
 	return
 }
-func (m *Memory) GetForumNameFromDiscordUser(discordUserID string) (forumUserName string, err error) {
+func (m *Memory) GetForumNameFromDiscordUser(discordUserID string) (legacyUserName string, burgerUserName string, err error) {
 	return
 }
-func (m *Memory) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
+func (m *Memory) GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error) {
 	return
 }

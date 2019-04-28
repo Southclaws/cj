@@ -11,10 +11,12 @@ import (
 
 // User is a recorded and verified burgershot forum user.
 type User struct {
-	DiscordUserID string `json:"discord_user_id" bson:"discord_user_id"`
-	ForumUserID   string `json:"forum_user_id" bson:"forum_user_id"`
-	ForumUserName string `json:"forum_user_name" bson:"forum_user_name"`
-	BurgerVerify  bool   `json:"burgershot_verified" bson:"burgershot_verified"`
+	DiscordUserID  string `json:"discord_user_id" bson:"discord_user_id"`
+	ForumUserID    string `json:"forum_user_id" bson:"forum_user_id"`
+	BurgerUserID   string `json:"burger_user_id" bson:"burger_user_id"`
+	ForumUserName  string `json:"forum_user_name" bson:"forum_user_name"`
+	BurgerUserName string `json:"burger_user_name" bson:"burger_user_name"`
+	BurgerVerify   bool   `json:"burgershot_verified" bson:"burgershot_verified"`
 }
 
 // StoreVerifiedUser is for when a user finishes their verification.
@@ -37,8 +39,8 @@ func (m *MongoStorer) SetLegacyUserToVerified(verification types.Verification) (
 		},
 		bson.D{
 			{"$set", bson.D{
-				{"forum_user_id", verification.ForumUser},
-				{"forum_user_name", verification.UserProfile.UserName},
+				{"burger_user_id", verification.ForumUser},
+				{"burger_user_name", verification.UserProfile.UserName},
 				{"burgershot_verified", true},
 			}},
 		})
@@ -103,7 +105,7 @@ func (m *MongoStorer) GetDiscordUserForumUser(forumUserID string) (discordUserID
 }
 
 // GetForumUserFromDiscordUser returns a link to user's profile, a blank string or an error
-func (m *MongoStorer) GetForumUserFromDiscordUser(discordUserID string) (forumUserID string, err error) {
+func (m *MongoStorer) GetForumUserFromDiscordUser(discordUserID string) (legacyUserID string, burgerUserID string, err error) {
 	var user User
 
 	err = m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
@@ -112,34 +114,49 @@ func (m *MongoStorer) GetForumUserFromDiscordUser(discordUserID string) (forumUs
 		return
 	}
 
-	forumUserID = user.ForumUserID
+	legacyUserID = user.ForumUserID
+	burgerUserID = user.BurgerUserID
 	return
 }
 
-// GetForumNameFromDiscordUser returns user's name on SA-MP Forums, a blank string or an error
-func (m *MongoStorer) GetForumNameFromDiscordUser(discordUserID string) (forumUserName string, err error) {
+// GetForumNameFromDiscordUser returns user's name on SA-MP Forums & Burgershot, a blank string or an error
+func (m *MongoStorer) GetForumNameFromDiscordUser(discordUserID string) (legacyUserName string, burgerUserName string, err error) {
 	var user User
 
 	err = m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to query forum name by discord ID")
+		return "", "", errors.Wrap(err, "failed to query forum name by discord ID")
 	}
 
-	forumUserName = user.ForumUserName
+	legacyUserName = user.ForumUserName
+	burgerUserName = user.BurgerUserName
 	return
 }
 
 // GetDiscordUserFromForumName returns user's name on SA-MP Forums, a blank string or an error
-func (m *MongoStorer) GetDiscordUserFromForumName(forumName string) (discordUserID string, err error) {
-	var user User
+func (m *MongoStorer) GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error) {
+	var legacyUser User
+	var burgerUser User
 
 	regex := bson.M{"$regex": bson.RegEx{Pattern: "^" + regexp.QuoteMeta(forumName) + "$", Options: "i"}}
 
-	err = m.accounts.Find(bson.M{"forum_user_name": regex}).One(&user)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to query user by forum name")
+	erro := m.accounts.Find(bson.M{"forum_user_name": regex}).One(&legacyUser)
+	if erro != nil {
+		legacyUserID = ""
+	} else {
+		legacyUserID = legacyUser.DiscordUserID
 	}
 
-	discordUserID = user.DiscordUserID
+	erro = m.accounts.Find(bson.M{"burger_user_name": regex}).One(&burgerUser)
+	if erro != nil {
+		burgerUserID = ""
+	} else {
+		burgerUserID = burgerUser.DiscordUserID
+	}
+
+	if len(burgerUserID) == 0 && len(legacyUserID) == 0 {
+		err = errors.New("user not found")
+	}
+
 	return
 }
