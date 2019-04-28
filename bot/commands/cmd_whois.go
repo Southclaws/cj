@@ -15,21 +15,31 @@ func (cm *CommandManager) commandWhois(
 	err error,
 ) {
 	var (
-		verified bool
-		count    = 0
-		username string
-		link     string
-		result   string
+		verified       bool
+		legacy         bool
+		count          = 0
+		username       string
+		legacyusername string
+		link           string
+		legacylink     string
+		result         string
 	)
 
 	if len(message.Mentions) == 0 {
-		var userID string
-		userID, err = cm.Storage.GetDiscordUserFromForumName(args)
+		var legacyuserID string
+		var burgeruserID string
+
+		legacyuserID, burgeruserID, err = cm.Storage.GetDiscordUserFromForumName(args)
 		if err != nil {
 			return
 		}
 
-		result += fmt.Sprintf("**%s** is here as <@%s>", args, userID)
+		if len(legacyuserID) > 0 {
+			result += fmt.Sprintf("**%s** on the SA:MP forums is here as <@%s>\n", args, legacyuserID)
+		}
+		if len(burgeruserID) > 0 {
+			result += fmt.Sprintf("**%s** on Burgershot is here as <@%s>", args, burgeruserID)
+		}
 	} else {
 		for _, user := range message.Mentions {
 			if count == 5 {
@@ -48,20 +58,31 @@ func (cm *CommandManager) commandWhois(
 				continue
 			}
 
-			if !verified {
+			legacy, err = cm.Storage.IsUserLegacyVerified(user.ID)
+			if err != nil {
+				result += err.Error()
+				continue
+			}
+
+			if !verified && !legacy {
 				result += fmt.Sprintf("The user <@%s> is not verified. ", user.ID)
 			} else {
-				username, err = cm.Storage.GetForumNameFromDiscordUser(user.ID)
+				legacyusername, username, err = cm.Storage.GetForumNameFromDiscordUser(user.ID)
 				if err != nil {
 					return
 				}
 
-				link, err = cm.Storage.GetForumUserFromDiscordUser(user.ID)
+				legacylink, link, err = cm.Storage.GetForumUserFromDiscordUser(user.ID)
 				if err != nil {
 					return
 				}
 
-				result += fmt.Sprintf("<@%s> is **%s** (%s) on SA-MP forums. ", user.ID, username, link)
+				if len(legacylink) > 0 && len(legacyusername) > 0 {
+					result += fmt.Sprintf("<@%s> is **%s** (%s)\n", user.ID, legacyusername, legacylink)
+				}
+				if !legacy {
+					result += fmt.Sprintf("<@%s> is **%s** (%s). ", user.ID, username, link)
+				}
 			}
 		}
 	}

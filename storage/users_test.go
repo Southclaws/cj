@@ -109,7 +109,7 @@ func TestApp_GetForumUserFromDiscordUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := api.GetForumUserFromDiscordUser(tt.args.discordUserID)
+			_, got, err := api.GetForumUserFromDiscordUser(tt.args.discordUserID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("App.GetForumUserFromDiscordUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -136,7 +136,7 @@ func TestApp_GetForumNameFromDiscordUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := api.GetForumNameFromDiscordUser(tt.args.discordUserID)
+			_, got, err := api.GetForumNameFromDiscordUser(tt.args.discordUserID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("App.GetForumNameFromDiscordUser() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -16,10 +16,11 @@ type Storer interface {
 	StoreVerifiedUser(verification types.Verification) (err error)
 	RemoveUser(id string) (err error)
 	IsUserVerified(discordUserID string) (verified bool, err error)
+	IsUserLegacyVerified(discordUserID string) (verified bool, err error)
 	GetDiscordUserForumUser(forumUserID string) (discordUserID string, err error)
-	GetForumUserFromDiscordUser(discordUserID string) (forumUserID string, err error)
-	GetForumNameFromDiscordUser(discordUserID string) (forumUserName string, err error)
-	GetDiscordUserFromForumName(forumName string) (discordUserID string, err error)
+	GetForumUserFromDiscordUser(discordUserID string) (legacyUserID string, burgerUserID string, err error)
+	GetForumNameFromDiscordUser(discordUserID string) (legacyUserName string, burgerUserName string, err error)
+	GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error)
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot
