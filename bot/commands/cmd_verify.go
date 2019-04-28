@@ -215,12 +215,12 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 		return
 	}
 
-	verified, err := cm.CheckUserPageForDiscordID(verification.UserProfile, message.Author.ID)
+	matched, err := cm.CheckUserPageForDiscordID(verification.UserProfile, message.Author.ID)
 	if err != nil {
 		return
 	}
 
-	if !verified {
+	if !matched {
 		cm.Discord.ChannelMessageSend(
 			message.ChannelID,
 			"Sorry, your verification failed. Your discord id was not found on your profile page.")
