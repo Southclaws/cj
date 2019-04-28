@@ -16,9 +16,6 @@ func (m *Memory) GetTopMessages(top int) (result TopMessages, err error) {
 func (m *Memory) StoreVerifiedUser(verification types.Verification) (err error) {
 	return
 }
-func (m *Memory) SetLegacyUserToVerified(verification types.Verification) (err error) {
-	return
-}
 func (m *Memory) RemoveUser(id string) (err error) {
 	return
 }

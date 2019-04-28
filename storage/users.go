@@ -21,29 +21,28 @@ type User struct {
 
 // StoreVerifiedUser is for when a user finishes their verification.
 func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
-	err = m.accounts.Insert(&User{
-		DiscordUserID: verification.DiscordUser.ID,
-		ForumUserID:   verification.ForumUser,
-		ForumUserName: verification.UserProfile.UserName,
-		BurgerVerify:  true,
-	})
 
-	return
-}
-
-// SetLegacyUserToVerified is for re-verification when a legacy verified user gets set to verified.
-func (m *MongoStorer) SetLegacyUserToVerified(verification types.Verification) (err error) {
-	err = m.accounts.Update(
-		bson.D{
-			{"discord_user_id", verification.DiscordUser.ID},
-		},
-		bson.D{
-			{"$set", bson.D{
-				{"burger_user_id", verification.ForumUser},
-				{"burger_user_name", verification.UserProfile.UserName},
-				{"burgershot_verified", true},
-			}},
+	legacy, err := m.IsUserLegacyVerified(verification.DiscordUser.ID)
+	if legacy {
+		err = m.accounts.Update(
+			bson.D{
+				{"discord_user_id", verification.DiscordUser.ID},
+			},
+			bson.D{
+				{"$set", bson.D{
+					{"burger_user_id", verification.ForumUser},
+					{"burger_user_name", verification.UserProfile.UserName},
+					{"burgershot_verified", true},
+				}},
+			})
+	} else {
+		err = m.accounts.Insert(&User{
+			DiscordUserID: verification.DiscordUser.ID,
+			ForumUserID:   verification.ForumUser,
+			ForumUserName: verification.UserProfile.UserName,
+			BurgerVerify:  true,
 		})
+	}
 
 	return
 }

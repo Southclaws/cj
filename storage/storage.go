@@ -14,7 +14,6 @@ type Storer interface {
 	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
 	StoreVerifiedUser(verification types.Verification) (err error)
-	SetLegacyUserToVerified(verification types.Verification) (err error)
 	RemoveUser(id string) (err error)
 	IsUserVerified(discordUserID string) (verified bool, err error)
 	IsUserLegacyVerified(discordUserID string) (verified bool, err error)

@@ -217,21 +217,9 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 		return
 	}
 
-	legacy, err := cm.Storage.IsUserLegacyVerified(message.Author.ID)
+	err = cm.Storage.StoreVerifiedUser(verification)
 	if err != nil {
 		return
-	}
-
-	if legacy {
-		err = cm.Storage.SetLegacyUserToVerified(verification)
-		if err != nil {
-			return
-		}
-	} else {
-		err = cm.Storage.StoreVerifiedUser(verification)
-		if err != nil {
-			return
-		}
 	}
 
 	err = cm.Discord.S.GuildMemberRoleAdd(cm.Config.GuildID, verification.DiscordUser.ID, cm.Config.VerifiedRole)
