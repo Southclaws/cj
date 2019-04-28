@@ -66,7 +66,10 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 			}
 		}
 		if !found {
-			return errors.Errorf("verified role %s not found.", app.config.VerifiedRole)
+			zap.L().Error("verified role not found",
+				zap.String("id", app.config.VerifiedRole),
+				zap.Any("roles", roles))
+			return errors.New("verified role not found")
 		}
 
 		if !app.config.NoInitSync {
