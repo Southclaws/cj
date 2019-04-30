@@ -244,8 +244,8 @@ func (cm *CommandManager) UserConfirmsProfile(message discordgo.Message) (err er
 	}
 
 	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(
-		"Congratulations! You have been verified as the owner of the forum account %s. Have a nice day!",
-		verification.ForumUser,
+		"Congratulations! You have been verified as the owner of the forum account **%s**. Have a nice day!",
+		verification.UserProfile.UserName,
 	))
 	return err
 }
