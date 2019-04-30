@@ -81,6 +81,15 @@ func (cm *CommandManager) commandWhois(
 					result += fmt.Sprintf("<@%s> is **%s** (%s)\n", user.ID, legacyusername, legacylink)
 				}
 				if !legacy {
+					profile, profileerr := cm.Forum.GetUserProfilePage(link)
+					if profileerr != nil {
+						return
+					}
+
+					if profile.UserName != username {
+						cm.Storage.UpdateUserUsername(user.ID, profile.UserName)
+						username = profile.UserName
+					}
 					result += fmt.Sprintf("<@%s> is **%s** (%s).", user.ID, username, link)
 				}
 
@@ -99,7 +108,7 @@ func (cm *CommandManager) commandWhois(
 
 				for _, soldier := range soldiers {
 					if soldier == user.ID {
-						result += fmt.Sprintf("\nThis person is also a **4/11 veteran**.")
+						result += fmt.Sprintf("\nThis person is also a **4/11 veteran**.\n")
 					}
 				}
 			}
