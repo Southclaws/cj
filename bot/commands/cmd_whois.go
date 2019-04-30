@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 func (cm *CommandManager) commandWhois(
@@ -81,6 +82,15 @@ func (cm *CommandManager) commandWhois(
 					result += fmt.Sprintf("<@%s> is **%s** (%s)\n", user.ID, legacyusername, legacylink)
 				}
 				if !legacy {
+					profile, profileerr := cm.Forum.GetUserProfilePage(link)
+					if profileerr != nil {
+						zap.L().Error("unable to fetch profile", zap.Error(profileerr))
+					}
+
+					if profile.UserName != username && len(profile.UserName) > 0 {
+						cm.Storage.UpdateUserUsername(user.ID, profile.UserName)
+						username = profile.UserName
+					}
 					result += fmt.Sprintf("<@%s> is **%s** (%s).", user.ID, username, link)
 				}
 
@@ -99,7 +109,7 @@ func (cm *CommandManager) commandWhois(
 
 				for _, soldier := range soldiers {
 					if soldier == user.ID {
-						result += fmt.Sprintf("\nThis person is also a **4/11 veteran**.")
+						result += fmt.Sprintf("\nThis person is also a **4/11 veteran**.\n")
 					}
 				}
 			}
