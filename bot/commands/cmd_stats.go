@@ -6,20 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Southclaws/samp-servers-api/types"
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-resty/resty"
 )
-
-type serverCore struct {
-	Address    string `json:"ip"`
-	Hostname   string `json:"hn"`
-	Players    int    `json:"pc"`
-	MaxPlayers int    `json:"pm"`
-	Gamemode   string `json:"gm"`
-	Language   string `json:"la"`
-	Password   bool   `json:"pa"`
-	Version    string `json:"vn"`
-}
 
 type serverRules struct {
 	Mapname   string `json:"mapname"`
@@ -31,11 +21,11 @@ type serverRules struct {
 }
 
 type serverListing struct {
-	Core        serverCore  `json:"core"`
-	Rules       serverRules `json:"ru,omitempty"`
-	Description string      `json:"description"`
-	Banner      string      `json:"banner"`
-	Active      bool        `json:"active"`
+	Core        types.ServerCore `json:"core"`
+	Rules       serverRules      `json:"ru,omitempty"`
+	Description string           `json:"description"`
+	Banner      string           `json:"banner"`
+	Active      bool             `json:"active"`
 }
 
 func (cm *CommandManager) commandStats(
