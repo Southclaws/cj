@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 func (cm *CommandManager) commandWhois(
@@ -83,10 +84,10 @@ func (cm *CommandManager) commandWhois(
 				if !legacy {
 					profile, profileerr := cm.Forum.GetUserProfilePage(link)
 					if profileerr != nil {
-						return
+						zap.L().Error("unable to fetch profile", zap.Error(profileerr))
 					}
 
-					if profile.UserName != username {
+					if profile.UserName != username && len(profile.UserName) > 0 {
 						cm.Storage.UpdateUserUsername(user.ID, profile.UserName)
 						username = profile.UserName
 					}
