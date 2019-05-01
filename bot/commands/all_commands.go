@@ -95,5 +95,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Use superior Estonian technology to express your feelings like you've never before!",
 			Cooldown:    time.Minute,
 		},
+		"/breakthings": {
+			Function:    cm.commandBLNS,
+			Source:      CommandSourcePRIMARY,
+			Description: "What's the latest iOS unicode bug???",
+			Cooldown:    time.Minute,
+		},
 	}
 }
