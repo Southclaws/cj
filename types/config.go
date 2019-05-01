@@ -20,4 +20,5 @@ type Config struct {
 	Admin                 string `split_words:"true" required:"true"`  // user who has control over the bot
 	NoInitSync            bool   `split_words:"true" required:"false"` // if set, does not run database role sync on init
 	NoDatabase            bool   `split_words:"true" required:"false"` // if set, does not connect to database
+	WikiURL               string `split_words:"true" required:"false"` // wiki git repository url to clone
 }
