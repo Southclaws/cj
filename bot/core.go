@@ -82,6 +82,13 @@ func Start(config *types.Config) {
 		}
 	}
 
+	if config.WikiURL != "" {
+		err = storage.EnsureWiki(config.WikiURL)
+		if err != nil {
+			zap.L().Fatal("failed to ensure wiki", zap.Error(err))
+		}
+	}
+
 	_, err = app.discordClient.S.ChannelMessageSend(
 		config.PrimaryChannel,
 		fmt.Sprintf("Hey, what's cracking now? CJ initialised with version %s", config.Version))
