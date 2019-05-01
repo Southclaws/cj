@@ -1,17 +1,27 @@
 package commands
 
 import (
-	"io/ioutil"
-	"net/http"
+	"os"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkg/errors"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 )
 
-var cmdUsage = "USAGE : /wiki [function/callback/article]"
+var (
+	cmdUsage         = "USAGE : /wiki [function/callback]"
+	errManyThreads   = errors.New("more than one thread could be meant")
+	errNoThreadFound = errors.New("no thread found")
+)
+
+// WikiReturns holds structure of expected results from @readWiki
+type WikiReturns struct {
+	Err     error
+	Threads []string
+	Thread  string
+}
 
 func (cm *CommandManager) commandWiki(
 	args string,
@@ -36,92 +46,116 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
-	var (
-		wikiThread  []string
-		wikiURL     string
-		articleName = strings.Replace(args, " ", "_", -1)
-	)
-
-	wikiThread = storage.SearchThread(args)
-
-	if len(wikiThread) > 0 {
-		if len(wikiThread) != 1 {
-			cm.Discord.ChannelMessageSend(message.ChannelID, "What are you looking for?\nResults from *SA:MP Wiki*:\n__"+strings.Join(wikiThread, "__\n__")+"__")
-			return
-		}
-		dist := levenshtein.DistanceForStrings(
-			[]rune(strings.ToLower(wikiThread[0])),
-			[]rune(strings.ToLower(articleName)),
-			levenshtein.DefaultOptions,
-		)
-		if dist <= 2 {
-			articleName = wikiThread[0]
-		}
-
-	}
-
-	wikiURL = "https://wiki.sa-mp.com/wiki/" + articleName
-
-	var doc *goquery.Document
-
-	response, err := http.Get(wikiURL)
-	if err != nil {
+	if !storage.WikiExists() {
 		return
 	}
 
-	bodyText, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return
-	}
+	wikiResult := readWiki(args)
 
-	if response.StatusCode != 200 {
-		cm.Discord.ChannelMessageSend(
-			message.ChannelID,
-			"Could not retrieve SA:MP wiki article:\nGot unexpected response: "+response.Status+".")
-	} else if strings.Contains(string(bodyText), "There is currently no text in this page, you can") ||
-		strings.Contains(string(bodyText), "The requested page title was invalid, empty") {
-		cm.Discord.ChannelMessageSend(
-			message.ChannelID,
-			"SA:MP Wiki | "+args+"\n- This article does not exist")
+	if wikiResult.Err == errManyThreads {
+		cm.Discord.ChannelMessageSend(message.ChannelID, errManyThreads.Error()+"\nThe most similar funcs/callbacks are:\n* __**"+strings.Join(wikiResult.Threads, "**__\n* __**")+"**__")
+		return
+	} else if wikiResult.Err == errNoThreadFound {
+		cm.Discord.ChannelMessageSend(message.ChannelID, errNoThreadFound.Error())
+		return
+	} else if wikiResult.Err == nil {
+		cm.Discord.ChannelMessageSend(message.ChannelID, wikiResult.Thread)
 	} else {
-		cm.Discord.ChannelMessageSend(
-			message.ChannelID,
-			"SA:MP Wiki | "+articleName+"\n"+wikiURL)
-
-		doc, err = goquery.NewDocument(wikiURL)
-		if err != nil {
-			return
-		}
-
-		var wikiContent string
-		description := strings.TrimSpace(doc.Find(".description").Text())
-		parameters := strings.TrimSpace(doc.Find(".parameters").Text()) + "\n"
-		var First *goquery.Selection
-
-		doc.Find(".param").Each(func(i int, selection *goquery.Selection) {
-			First = selection.Find("td").First()
-			parameters = parameters + "\n\t\t`" + First.Text() + "`\t" + First.Next().Text()
-
-		})
-		examplecode := strings.TrimSpace(doc.Find(".pawn").Text())
-
-		if description != "" {
-			wikiContent = "**Description**\n\t" + description
-			if strings.TrimSpace(parameters) != "" {
-				wikiContent = wikiContent + "\n**Parameters**\n\t" + parameters
-				if examplecode != "" {
-					wikiContent = wikiContent + "\n\n**Example Usage**\n```C\n" + examplecode + "```"
-				}
-			}
-		}
-
-		if wikiContent != "" {
-			cm.Discord.ChannelMessageSend(
-				message.ChannelID,
-				wikiContent)
-		}
-
+		err = wikiResult.Err
 	}
 
 	return false, err
+}
+
+func readWiki(article string) *WikiReturns {
+	files, err := getWikiFiles()
+	if err != nil {
+		return &WikiReturns{Err: err}
+	}
+
+	threadToRead := searchThread(files, article)
+
+	switch len(threadToRead) {
+	case 0:
+		return &WikiReturns{Err: errNoThreadFound}
+	case 1:
+		readThread(threadToRead[0])
+		//TODO parse markdown, format & return as a &WikiResult{Thread:}
+	default:
+		var threads []string
+		for foo := range threadToRead {
+			threads = append(threads, strings.TrimSuffix(strings.ReplaceAll(strings.ReplaceAll(threadToRead[foo], "functions/", "function: "), "callbacks/", "callback: "), ".md"))
+		}
+		return &WikiReturns{Err: errManyThreads, Threads: threads}
+	}
+
+	return &WikiReturns{}
+}
+
+func readThread(file string) {
+
+}
+
+func searchThread(threads []string, thread string) (results []string) {
+	maxdistance := 3
+	for i := range threads {
+		origin := strings.TrimSuffix(strings.TrimLeft(strings.TrimLeft(strings.TrimLeft(threads[i], "scripting/"), "functions/"), "callbacks/"), ".md")
+		dist := levenshtein.DistanceForStrings(
+			[]rune(strings.ToLower(origin)),
+			[]rune(strings.ToLower(thread)),
+			levenshtein.DefaultOptions,
+		)
+		if dist == 0 {
+			return []string{threads[i]}
+		}
+		if dist <= maxdistance {
+			results = append(results, threads[i])
+		}
+	}
+	return
+}
+
+func getWikiFiles() (files []string, err error) {
+	var (
+		cb  *os.File
+		fn  *os.File
+		tmp []string
+	)
+	cb, err = os.Open("./wiki/scripting/callbacks")
+	if err != nil {
+		return
+	}
+
+	fn, err = os.Open("./wiki/scripting/functions")
+	if err != nil {
+		cb.Close()
+		return
+	}
+
+	defer cb.Close()
+	defer fn.Close()
+
+	tmp, err = cb.Readdirnames(0)
+	if err != nil {
+		return
+	}
+
+	for foo := range tmp {
+		tmp[foo] = "callbacks/" + tmp[foo]
+	}
+
+	files = tmp
+
+	tmp, err = fn.Readdirnames(0)
+	if err != nil {
+		return
+	}
+
+	for foo := range tmp {
+		tmp[foo] = "functions/" + tmp[foo]
+	}
+
+	files = append(files, tmp...)
+
+	return
 }
