@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"math/rand"
+	// "math/rand"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/minimaxir/big-list-of-naughty-strings/naughtystrings"
+	// "github.com/fluidkeys/fork-big-list-of-naughty-strings/naughtystrings"
 )
 
 func (cm *CommandManager) commandBLNS(
@@ -15,8 +15,8 @@ func (cm *CommandManager) commandBLNS(
 	context bool,
 	err error,
 ) {
-	s := naughtystrings.Unencoded()
-	i := rand.Int31n(int32(len(s)))
-	cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, s[i])
+	// s := naughtystrings.Unencoded()
+	// i := rand.Int31n(int32(len(s)))
+	// cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, s[i])
 	return
 }
