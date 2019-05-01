@@ -95,5 +95,16 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Use superior Estonian technology to express your feelings like you've never before!",
 			Cooldown:    time.Minute,
 		},
+		"/stats": {
+			Function:    cm.commandStats,
+			Source:      CommandSourcePRIMARY,
+			Description: "Query a server for information using the SA:MP servers API.",
+		},
+		"/breakthings": {
+			Function:    cm.commandBLNS,
+			Source:      CommandSourcePRIMARY,
+			Description: "What's the latest iOS unicode bug???",
+			Cooldown:    time.Minute,
+		},
 	}
 }

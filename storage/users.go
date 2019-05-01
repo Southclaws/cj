@@ -47,6 +47,21 @@ func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err er
 	return
 }
 
+// UpdateUserName updates a person's Burgershot forum name in the database. In case they have their name changed.
+func (m *MongoStorer) UpdateUserUsername(discordUserID string, username string) (err error) {
+	err = m.accounts.Update(
+		bson.D{
+			{"discord_user_id", discordUserID},
+		},
+		bson.D{
+			{"$set", bson.D{
+				{"burger_user_name", username},
+			}},
+		})
+
+	return
+}
+
 // RemoveUser removes a user by their Discord ID
 func (m *MongoStorer) RemoveUser(id string) (err error) {
 	return m.accounts.Remove(bson.M{"discord_user_id": id})

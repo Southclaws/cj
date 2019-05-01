@@ -1,13 +1,18 @@
 module github.com/Southclaws/cj
 
 go 1.12
+replace github.com/go-resty/resty => gopkg.in/resty.v1 v1.12.0
 
 require (
 	github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d
+	github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b
 	github.com/bwmarrin/discordgo v0.19.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0 // indirect
+	github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
+	github.com/joho/godotenv v1.3.0
+	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b
 	github.com/mattn/go-shellwords v1.0.5
 	github.com/mb-14/gomarkov v0.0.0-20190125094512-044dd0dcb5e7
@@ -19,6 +24,11 @@ require (
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0
+	go.uber.org/zap v1.10.0
+	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
+	golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09 // indirect
+	golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872 // indirect
+	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/src-d/go-git.v4 v4.11.0
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
