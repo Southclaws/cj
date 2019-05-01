@@ -8,7 +8,7 @@ import (
 
 	"github.com/Southclaws/samp-servers-api/types"
 	"github.com/bwmarrin/discordgo"
-	"github.com/go-resty/resty"
+	"gopkg.in/resty.v1"
 )
 
 type serverRules struct {

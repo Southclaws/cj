@@ -8,7 +8,6 @@ require (
 	github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b
 	github.com/bwmarrin/discordgo v0.19.0
 	github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
-	github.com/go-resty/resty v1.12.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b
@@ -25,6 +24,7 @@ require (
 	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
 	golang.org/x/net v0.0.0-20190501004415-9ce7a6920f09 // indirect
 	golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872 // indirect
+	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
 )
