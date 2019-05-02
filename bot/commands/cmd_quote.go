@@ -47,6 +47,7 @@ func (cm *CommandManager) commandQuote(
 
 		// Misses stuff like verify and doesn't allow commands to be sent either.
 		if len(randmessage.Message) > 6 && strings.Index(randmessage.Message, "/") != 0 {
+			// TODO: Do through the query.
 			for _, channel := range restrictedChannels {
 				if randmessage.DiscordChannel == channel {
 					restricted = true
@@ -59,6 +60,11 @@ func (cm *CommandManager) commandQuote(
 		}
 	}
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("\"%s\" ~ <@%s>", randmessage.Message, randmessage.DiscordUserID))
+	user, err := cm.Discord.S.User(randmessage.DiscordUserID)
+	if err != nil {
+		cm.Discord.ChannelMessageSend(message.ChannelID, "Failed to get user.")
+		return
+	}
+	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("\"%s\" ~ %s", randmessage.Message, user.Username))
 	return
 }
