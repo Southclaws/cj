@@ -52,9 +52,16 @@ func (cm *CommandManager) Init(
 // Command represents a public, private or administrative command
 type Command struct {
 	Function    func(args string, message discordgo.Message, contextual bool) (context bool, err error)
-	Source      CommandSource
 	Description string
-	Cooldown    time.Duration
+	Settings    struct {
+		Cooldown time.Duration          `bson:"cooldown"`
+		Channels []string               `bson:"channels"`
+		Roles    []string               `bson:"roles"`
+		Settings map[string]interface{} `bson:"settings"`
+	}
+
+	Source   CommandSource // DEPRECATED
+	Cooldown time.Duration // DEPRECATED
 }
 
 // CommandSource represents the source of a command.
