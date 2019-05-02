@@ -74,3 +74,13 @@ func (m *MongoStorer) GetTopMessages(top int) (result TopMessages, err error) {
 	// sort.Sort(sort.Reverse(result))
 	return
 }
+
+// GetRandomMessage returns a random message from the database.
+func (m *MongoStorer) GetRandomMessage() (log ChatLog, err error) {
+	err = m.chat.Pipe([]bson.M{
+		{"$sample": bson.M{
+			"size": 1,
+		}},
+	}).One(&log)
+	return
+}
