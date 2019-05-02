@@ -5,12 +5,15 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	// "github.com/fluidkeys/fork-big-list-of-naughty-strings/naughtystrings"
+
+	"github.com/Southclaws/cj/types"
 )
 
 func (cm *CommandManager) commandBLNS(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

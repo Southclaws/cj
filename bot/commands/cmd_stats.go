@@ -6,9 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Southclaws/samp-servers-api/types"
+	apitypes "github.com/Southclaws/samp-servers-api/types"
 	"github.com/bwmarrin/discordgo"
 	"gopkg.in/resty.v1"
+
+	"github.com/Southclaws/cj/types"
 )
 
 type serverRules struct {
@@ -21,17 +23,18 @@ type serverRules struct {
 }
 
 type serverListing struct {
-	Core        types.ServerCore `json:"core"`
-	Rules       serverRules      `json:"ru,omitempty"`
-	Description string           `json:"description"`
-	Banner      string           `json:"banner"`
-	Active      bool             `json:"active"`
+	Core        apitypes.ServerCore `json:"core"`
+	Rules       serverRules         `json:"ru,omitempty"`
+	Description string              `json:"description"`
+	Banner      string              `json:"banner"`
+	Active      bool                `json:"active"`
 }
 
 func (cm *CommandManager) commandStats(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

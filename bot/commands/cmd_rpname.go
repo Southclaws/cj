@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/Southclaws/cj/types"
 )
 
 var rpfirsts = []string{
@@ -77,6 +79,7 @@ func (cm *CommandManager) commandRP(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

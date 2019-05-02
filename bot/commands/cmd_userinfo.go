@@ -7,12 +7,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/Southclaws/cj/forum"
+	"github.com/Southclaws/cj/types"
 )
 
 func (cm *CommandManager) commandUserInfo(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

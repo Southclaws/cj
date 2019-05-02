@@ -9,12 +9,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/Southclaws/cj/storage"
+	"github.com/Southclaws/cj/types"
 )
 
 func (cm *CommandManager) commandImpersonate(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

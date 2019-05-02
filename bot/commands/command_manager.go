@@ -51,7 +51,7 @@ func (cm *CommandManager) Init(
 
 // Command represents a public, private or administrative command
 type Command struct {
-	Function    func(args string, message discordgo.Message, contextual bool) (context bool, err error)
+	Function    func(args string, message discordgo.Message, contextual bool, settings types.CommandSettings) (context bool, err error)
 	Description string
 	Settings    types.CommandSettings
 
@@ -87,6 +87,7 @@ func (cm *CommandManager) commandCommands(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
@@ -109,6 +110,7 @@ func (cm *CommandManager) commandHelp(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
@@ -134,7 +136,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		}
 		if contextCommand.Source == source {
 			var continueContext bool
-			continueContext, err = contextCommand.Function(message.Content, message, true)
+			continueContext, err = contextCommand.Function(message.Content, message, true, contextCommand.Settings)
 			if err != nil {
 				cm.Contexts.Delete(message.Author.ID)
 				return
@@ -177,6 +179,11 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
+	settings, err := cm.Storage.GetCommandSettings(commandTrigger)
+	if err != nil {
+		return
+	}
+
 	if source != commandObject.Source {
 		return
 	}
@@ -206,7 +213,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
-	enterContext, err := commandObject.Function(commandArgument, message, false)
+	enterContext, err := commandObject.Function(commandArgument, message, false, settings)
 	if err != nil {
 		cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
 		cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
@@ -214,6 +221,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	}
 
 	if enterContext {
+		commandObject.Settings = settings
 		cm.Contexts.Set(message.Author.ID, commandObject, cache.DefaultExpiration)
 	}
 
