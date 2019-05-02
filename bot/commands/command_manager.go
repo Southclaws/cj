@@ -184,7 +184,14 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
-	if source != commandObject.Source {
+	var allowed bool
+	for _, ch := range settings.Channels {
+		if ch == message.ChannelID {
+			allowed = true
+			break
+		}
+	}
+	if !allowed {
 		return
 	}
 
@@ -202,8 +209,8 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	// Check if command is on cooldown
 	if when, ok := cm.Cooldowns[commandTrigger]; ok {
 		since := time.Since(when)
-		if since < commandObject.Cooldown {
-			err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, commandObject.Cooldown))
+		if since < settings.Cooldown {
+			err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, settings.Cooldown))
 			return
 		}
 	}
