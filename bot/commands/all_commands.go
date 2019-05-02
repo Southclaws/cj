@@ -106,5 +106,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "What's the latest iOS unicode bug???",
 			Cooldown:    time.Minute,
 		},
+		"/quote": {
+			Function:	 cm.commandQuote,
+			Source:		 CommandSourcePRIMARY,
+			Description: "Get a random quote from one of the channels.",
+			//Cooldown:	 time.Minute,
+		},
 	}
 }
