@@ -107,10 +107,10 @@ func (cm *CommandManager) LoadCommands() {
 			Cooldown:    time.Minute,
 		},
 		"/quote": {
-			Function:	 cm.commandQuote,
-			Source:		 CommandSourcePRIMARY,
+			Function:    cm.commandQuote,
+			Source:      CommandSourcePRIMARY,
 			Description: "Get a random quote from one of the channels.",
-			//Cooldown:	 time.Minute,
+			Cooldown:    time.Minute * 5,
 		},
 	}
 }
