@@ -71,7 +71,7 @@ func (cm *CommandManager) commandStats(
 	}
 
 	if len(serverInfo.Rules.Artwork) > 0 {
-		artwork = "Yes"
+		artwork = serverInfo.Rules.Artwork
 	} else {
 		artwork = "No"
 	}
