@@ -53,12 +53,7 @@ func (cm *CommandManager) Init(
 type Command struct {
 	Function    func(args string, message discordgo.Message, contextual bool) (context bool, err error)
 	Description string
-	Settings    struct {
-		Cooldown time.Duration          `bson:"cooldown"`
-		Channels []string               `bson:"channels"`
-		Roles    []string               `bson:"roles"`
-		Settings map[string]interface{} `bson:"settings"`
-	}
+	Settings    types.CommandSettings
 
 	Source   CommandSource // DEPRECATED
 	Cooldown time.Duration // DEPRECATED
