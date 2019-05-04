@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
@@ -21,6 +22,7 @@ func (cm *CommandManager) commandQuote(
 		randmessage storage.ChatLog
 		messagerr   error
 		restricted  bool
+		nick        string
 	)
 
 	restrictedChannels := [11]string{
@@ -60,11 +62,23 @@ func (cm *CommandManager) commandQuote(
 		}
 	}
 
-	user, err := cm.Discord.S.User(randmessage.DiscordUserID)
-	if err != nil {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "Failed to get user.")
-		return
+	user, membererr := cm.Discord.S.GuildMember(message.GuildID, randmessage.DiscordUserID)
+	if membererr != nil || len(user.Nick) == 0 {
+		// No longer on the server or has no nickname.
+		user, membererr := cm.Discord.S.User(randmessage.DiscordUserID)
+		if membererr != nil {
+			cm.Discord.ChannelMessageSend(message.ChannelID, "Failed to get user.")
+			err = membererr
+			return
+		}
+
+		nick = user.Username
+	} else {
+		nick = user.Nick
 	}
-	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("\"%s\" ~ %s", randmessage.Message, user.Username))
+
+	time := time.Unix(randmessage.Timestamp, 0)
+	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("\"%s\" ~ **%s**, **%s %d**", randmessage.Message, nick,
+		time.Month().String(), time.Year()))
 	return
 }
