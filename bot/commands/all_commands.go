@@ -140,6 +140,8 @@ func (cm *CommandManager) LoadCommands() {
 					zap.Error(err))
 			}
 		}
+
+		commands[k] = v
 	}
 
 	cm.Commands = commands

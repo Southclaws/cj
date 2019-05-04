@@ -1,16 +1,18 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
-	"github.com/urfave/cli"
 
 	"github.com/Southclaws/cj/types"
 )
+
+var matchConfigInput = regexp.MustCompile(`(?ms)\x60\x60\x60.*\n(.+)\n\x60\x60\x60`)
 
 func (cm *CommandManager) commandConfig(
 	args string,
@@ -21,132 +23,54 @@ func (cm *CommandManager) commandConfig(
 	context bool,
 	err error,
 ) {
-	app := cli.NewApp()
-	app.Name = "/config"
-	app.HideHelp = true
-	app.Commands = []cli.Command{
-		{
-			Name: "cooldown",
-			Action: func(c *cli.Context) error {
-				cmd, set, err := cm.getCommand(c)
-				if err != nil {
-					return err
-				}
-				value, err := time.ParseDuration(c.Args().Tail()[0])
-				if err != nil {
-					return err
-				}
-				cm.Discord.ChannelMessageSend(message.ChannelID, "Updated command cooldown.")
-				cmd.Settings.Cooldown = value
-				return set(cmd)
-			},
-		},
-		{
-			Name: "add-channel",
-			Action: func(c *cli.Context) error {
-				cmd, set, err := cm.getCommand(c)
-				if err != nil {
-					return err
-				}
-				cmd.Settings.Channels = append(cmd.Settings.Channels, c.Args().Tail()[0])
-				cm.Discord.ChannelMessageSend(message.ChannelID, "Added channel to command.")
-				return set(cmd)
-			},
-		},
-		{
-			Name: "del-channel",
-			Action: func(c *cli.Context) error {
-				cmd, set, err := cm.getCommand(c)
-				if err != nil {
-					return err
-				}
-				var found bool
-				for i, ch := range cmd.Settings.Channels {
-					if ch == c.Args().Tail()[0] {
-						cmd.Settings.Channels = append(cmd.Settings.Channels[:i], cmd.Settings.Channels[i+1:]...)
-						found = true
-						break
-					}
-				}
-				if found {
-					cm.Discord.ChannelMessageSend(message.ChannelID, "Removed channel from command.")
-				} else {
-					cm.Discord.ChannelMessageSend(message.ChannelID, "Channel not found in command.")
-				}
-				return set(cmd)
-			},
-		},
-		{
-			Name: "add-role",
-			Action: func(c *cli.Context) error {
-				cmd, set, err := cm.getCommand(c)
-				if err != nil {
-					return err
-				}
-				cmd.Settings.Roles = append(cmd.Settings.Roles, c.Args().Tail()[0])
-				cm.Discord.ChannelMessageSend(message.ChannelID, "Added role to command.")
-				return set(cmd)
-			},
-		},
-		{
-			Name: "del-role",
-			Action: func(c *cli.Context) error {
-				cmd, set, err := cm.getCommand(c)
-				if err != nil {
-					return err
-				}
-				var found bool
-				for i, ch := range cmd.Settings.Roles {
-					if ch == c.Args().Tail()[0] {
-						cmd.Settings.Roles = append(cmd.Settings.Roles[:i], cmd.Settings.Roles[i+1:]...)
-						found = true
-						break
-					}
-				}
-				if found {
-					cm.Discord.ChannelMessageSend(message.ChannelID, "Removed role from command.")
-				} else {
-					cm.Discord.ChannelMessageSend(message.ChannelID, "Role not found in command.")
-				}
-				return set(cmd)
-			},
-		},
-	}
-
-	help := func(c *cli.Context, command string) {
-		var commands []string
-		for _, cmd := range app.Commands {
-			commands = append(commands, cmd.Name)
-		}
-		cm.Discord.ChannelMessageSend(
-			message.ChannelID,
-			fmt.Sprintf("/config valid subcommands: %s", strings.Join(commands, " ")))
+	t := strings.SplitN(args, "\n", 2)
+	if len(t[0]) == 0 {
+		cm.Discord.ChannelMessageSend(message.ChannelID, `Usage:
+/config [command] to view the current configuration
+/config [command]⏎
+[raw JSON as a code block]
+to update the configuration
+`)
 		return
 	}
-	app.CommandNotFound = help
-	app.OnUsageError = func(c *cli.Context, err error, isSubcommand bool) error {
-		help(c, "")
-		return nil
+	command := t[0]
+
+	cmd, set, err := cm.getCommand(command)
+	if err != nil {
+		cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
+		return false, nil
 	}
 
-	splitArgs := strings.Split(args, " ")
-	splitArgs = append(splitArgs[:0], append([]string{"/config"}, splitArgs[0:]...)...)
-	return false, app.Run(splitArgs)
+	if len(t) == 1 {
+		var b []byte
+		b, err = json.Marshal(cmd.Settings)
+		if err != nil {
+			return false, err
+		}
+		cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("```json\n%s```", string(b)))
+	} else {
+		match := matchConfigInput.FindStringSubmatch(message.Content)
+		if err = json.Unmarshal([]byte(match[1]), &cmd.Settings); err != nil {
+			return false, err
+		}
+		if err = set(cmd); err != nil {
+			return false, err
+		}
+		var b []byte
+		b, err = json.Marshal(cmd.Settings)
+		if err != nil {
+			return false, err
+		}
+		cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Updated to:\n```json\n%s```", string(b)))
+	}
+
+	return false, nil
 }
 
-func (cm *CommandManager) getCommand(c *cli.Context) (cmd Command, f func(Command) error, err error) {
-	if c.NArg() == 0 {
-		err = errors.New("Usage: /config [command] [settings]")
-		return
-	}
-	command := c.Args().First()
-	if command == "" {
-		err = errors.New("Usage: /config [command] [settings]")
-		return
-	}
+func (cm *CommandManager) getCommand(command string) (cmd Command, f func(Command) error, err error) {
 	commandObject, ok := cm.Commands[command]
 	if !ok {
-		err = errors.New("Unrecognised command")
+		err = errors.Errorf("Unrecognised command `%s`", command)
 		return
 	}
 	return commandObject, func(newCommand Command) error {
@@ -154,30 +78,3 @@ func (cm *CommandManager) getCommand(c *cli.Context) (cmd Command, f func(Comman
 		return cm.Storage.SetCommandSettings(command, newCommand.Settings)
 	}, nil
 }
-
-// 	cooldown := c.Duration("cooldown")
-// 	addChannel := c.String("add-channel")
-// 	delChannel := c.String("del-channel")
-// 	addRole := c.String("add-role")
-// 	delRole := c.String("del-role")
-
-// 	if cooldown.Seconds() == 0 &&
-// 		addChannel == "" &&
-// 		delChannel == "" &&
-// 		addRole == "" &&
-// 		delRole == "" {
-// 		cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf(`Config for %s:
-// - Cooldown: %v
-// - Channels: %s
-// - Roles: %s
-// 			`,
-// 			command,
-// 			commandObject.Settings.Cooldown,
-// 			commandObject.Settings.Channels,
-// 			commandObject.Settings.Roles,
-// 		))
-// 		return nil
-
-// 	}
-
-// }
