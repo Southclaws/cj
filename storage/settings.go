@@ -2,8 +2,8 @@ package storage
 
 import (
 	"github.com/Southclaws/cj/types"
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"gopkg.in/mgo.v2"
 )
 
 // SetCommandSettings upsets command settings
