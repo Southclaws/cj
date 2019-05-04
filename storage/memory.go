@@ -46,6 +46,6 @@ func (m *Memory) GetDiscordUserFromForumName(forumName string) (legacyUserID str
 func (m *Memory) SetCommandSettings(command string, settings types.CommandSettings) (err error) {
 	return
 }
-func (m *Memory) GetCommandSettings(command string) (settings types.CommandSettings, err error) {
+func (m *Memory) GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error) {
 	return
 }

@@ -28,7 +28,7 @@ type Storer interface {
 	GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error)
 
 	SetCommandSettings(command string, settings types.CommandSettings) (err error)
-	GetCommandSettings(command string) (settings types.CommandSettings, err error)
+	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot

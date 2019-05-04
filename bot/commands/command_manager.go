@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
@@ -179,9 +180,14 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
-	settings, err := cm.Storage.GetCommandSettings(commandTrigger)
+	settings, found, err := cm.Storage.GetCommandSettings(commandTrigger)
 	if err != nil {
 		return
+	}
+	if !found {
+		settings.Cooldown = cm.Config.DefaultCooldown
+		settings.Channels = []string{cm.Config.DefaultChannel}
+		settings.Roles = []string{cm.Config.DefaultRole}
 	}
 
 	var allowed bool
@@ -205,18 +211,10 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		}
 	}
 	if !allowed {
+		zap.L().Debug("command not allowed with current channel or role",
+			zap.String("channel", message.ChannelID),
+			zap.Any("config", settings))
 		return
-	}
-
-	switch source {
-	case CommandSourceADMINISTRATIVE:
-		if message.ChannelID != cm.Config.AdministrativeChannel {
-			return
-		}
-	case CommandSourcePRIMARY:
-		if message.ChannelID != cm.Config.PrimaryChannel {
-			return
-		}
 	}
 
 	// Check if command is on cooldown
