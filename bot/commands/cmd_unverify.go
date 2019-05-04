@@ -3,12 +3,15 @@ package commands
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
+
+	"github.com/Southclaws/cj/types"
 )
 
 func (cm *CommandManager) commandUnVerify(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

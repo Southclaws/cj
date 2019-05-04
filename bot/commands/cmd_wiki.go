@@ -6,9 +6,11 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
+
+	"github.com/Southclaws/cj/storage"
+	"github.com/Southclaws/cj/types"
 )
 
 var cmdUsage = "USAGE : /wiki [function/callback/article]"
@@ -17,6 +19,7 @@ func (cm *CommandManager) commandWiki(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

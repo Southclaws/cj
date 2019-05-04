@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/Southclaws/cj/types"
 )
 
 var quotes = []string{
@@ -998,6 +1000,7 @@ func (cm *CommandManager) commandCJQuote(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

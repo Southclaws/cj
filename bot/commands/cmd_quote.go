@@ -5,14 +5,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/Southclaws/cj/storage"
+	"github.com/Southclaws/cj/types"
 )
 
 func (cm *CommandManager) commandQuote(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
