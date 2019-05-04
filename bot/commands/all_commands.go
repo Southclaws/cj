@@ -2,12 +2,14 @@ package commands
 
 import (
 	"time"
+
+	"go.uber.org/zap"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
 func (cm *CommandManager) LoadCommands() {
-	cm.Commands = map[string]Command{
+	commands := map[string]Command{
 		"/commands": {
 			Function:    cm.commandCommands,
 			Source:      CommandSourcePRIMARY,
@@ -17,6 +19,11 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandHelp,
 			Source:      CommandSourcePRIMARY,
 			Description: "Displays a list of commands.",
+		},
+		"/config": {
+			Function:    cm.commandConfig,
+			Source:      CommandSourcePRIMARY,
+			Description: "Configure command settings.",
 		},
 		"verify": {
 			Function:    cm.commandVerify,
@@ -106,5 +113,36 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "What's the latest iOS unicode bug???",
 			Cooldown:    time.Minute,
 		},
+		"/quote": {
+			Function:    cm.commandQuote,
+			Source:      CommandSourcePRIMARY,
+			Description: "Get a random quote from one of the channels.",
+			Cooldown:    time.Minute * 2,
+		},
 	}
+	for k, v := range commands {
+		v.Settings.Cooldown = cm.Config.DefaultCooldown
+		v.Settings.Channels = []string{cm.Config.DefaultChannel}
+		v.Settings.Roles = []string{cm.Config.DefaultRole}
+		v.Settings.Command = k
+
+		settings, found, err := cm.Storage.GetCommandSettings(k)
+		if err != nil {
+			zap.L().Fatal("failed to load command settings",
+				zap.Error(err))
+		}
+		if found {
+			v.Settings = settings
+		} else {
+			err = cm.Storage.SetCommandSettings(k, v.Settings)
+			if err != nil {
+				zap.L().Fatal("failed to assign command settings",
+					zap.Error(err))
+			}
+		}
+
+		commands[k] = v
+	}
+
+	cm.Commands = commands
 }

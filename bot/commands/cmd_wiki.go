@@ -4,10 +4,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Southclaws/cj/storage"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 	"github.com/texttheater/golang-levenshtein/levenshtein"
+
+	"github.com/Southclaws/cj/storage"
+	"github.com/Southclaws/cj/types"
 )
 
 var (
@@ -27,6 +29,7 @@ func (cm *CommandManager) commandWiki(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/Southclaws/cj/types"
 )
 
 var firsts = []string{
@@ -75,6 +77,7 @@ func (cm *CommandManager) commandMP(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

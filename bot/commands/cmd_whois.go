@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -11,6 +12,7 @@ func (cm *CommandManager) commandWhois(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,

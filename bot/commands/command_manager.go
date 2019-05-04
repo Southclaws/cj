@@ -8,6 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
@@ -51,10 +52,12 @@ func (cm *CommandManager) Init(
 
 // Command represents a public, private or administrative command
 type Command struct {
-	Function    func(args string, message discordgo.Message, contextual bool) (context bool, err error)
-	Source      CommandSource
+	Function    func(args string, message discordgo.Message, contextual bool, settings types.CommandSettings) (context bool, err error)
 	Description string
-	Cooldown    time.Duration
+	Settings    types.CommandSettings
+
+	Source   CommandSource // DEPRECATED
+	Cooldown time.Duration // DEPRECATED
 }
 
 // CommandSource represents the source of a command.
@@ -85,6 +88,7 @@ func (cm *CommandManager) commandCommands(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
@@ -107,6 +111,7 @@ func (cm *CommandManager) commandHelp(
 	args string,
 	message discordgo.Message,
 	contextual bool,
+	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
@@ -132,7 +137,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		}
 		if contextCommand.Source == source {
 			var continueContext bool
-			continueContext, err = contextCommand.Function(message.Content, message, true)
+			continueContext, err = contextCommand.Function(message.Content, message, true, contextCommand.Settings)
 			if err != nil {
 				cm.Contexts.Delete(message.Author.ID)
 				return
@@ -175,26 +180,48 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
-	if source != commandObject.Source {
+	settings, found, err := cm.Storage.GetCommandSettings(commandTrigger)
+	if err != nil {
 		return
 	}
+	if !found {
+		settings.Cooldown = cm.Config.DefaultCooldown
+		settings.Channels = []string{cm.Config.DefaultChannel}
+		settings.Roles = []string{cm.Config.DefaultRole}
+	}
 
-	switch source {
-	case CommandSourceADMINISTRATIVE:
-		if message.ChannelID != cm.Config.AdministrativeChannel {
+	var allowed bool
+	for _, ch := range settings.Channels {
+		if ch == message.ChannelID {
+			allowed = true
+			break
+		}
+	}
+	for _, sr := range settings.Roles {
+		var u *discordgo.Member
+		u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
+		if err != nil {
 			return
 		}
-	case CommandSourcePRIMARY:
-		if message.ChannelID != cm.Config.PrimaryChannel {
-			return
+		for _, ur := range u.Roles {
+			if sr == ur {
+				allowed = true
+				break
+			}
 		}
+	}
+	if !allowed {
+		zap.L().Debug("command not allowed with current channel or role",
+			zap.String("channel", message.ChannelID),
+			zap.Any("config", settings))
+		return
 	}
 
 	// Check if command is on cooldown
 	if when, ok := cm.Cooldowns[commandTrigger]; ok {
 		since := time.Since(when)
-		if since < commandObject.Cooldown {
-			err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, commandObject.Cooldown))
+		if since < settings.Cooldown {
+			err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, settings.Cooldown))
 			return
 		}
 	}
@@ -204,7 +231,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
-	enterContext, err := commandObject.Function(commandArgument, message, false)
+	enterContext, err := commandObject.Function(commandArgument, message, false, settings)
 	if err != nil {
 		cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
 		cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
@@ -212,6 +239,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	}
 
 	if enterContext {
+		commandObject.Settings = settings
 		cm.Contexts.Set(message.Author.ID, commandObject, cache.DefaultExpiration)
 	}
 

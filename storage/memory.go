@@ -13,6 +13,9 @@ func (m *Memory) GetMessagesForUser(discordUserID string) (messages []ChatLog, e
 func (m *Memory) GetTopMessages(top int) (result TopMessages, err error) {
 	return
 }
+func (m *Memory) GetRandomMessage() (result ChatLog, err error) {
+	return
+}
 func (m *Memory) StoreVerifiedUser(verification types.Verification) (err error) {
 	return
 }
@@ -38,5 +41,11 @@ func (m *Memory) GetForumNameFromDiscordUser(discordUserID string) (legacyUserNa
 	return
 }
 func (m *Memory) GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error) {
+	return
+}
+func (m *Memory) SetCommandSettings(command string, settings types.CommandSettings) (err error) {
+	return
+}
+func (m *Memory) GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error) {
 	return
 }

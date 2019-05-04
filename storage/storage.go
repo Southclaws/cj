@@ -2,8 +2,10 @@ package storage
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/globalsign/mgo"
+	"github.com/patrickmn/go-cache"
 
 	"github.com/Southclaws/cj/types"
 )
@@ -13,6 +15,8 @@ type Storer interface {
 	RecordChatLog(discordUserID string, discordChannel string, message string) (err error)
 	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
+	GetRandomMessage() (result ChatLog, err error)
+
 	StoreVerifiedUser(verification types.Verification) (err error)
 	UpdateUserUsername(discordUserID string, username string) (err error)
 	RemoveUser(id string) (err error)
@@ -22,6 +26,9 @@ type Storer interface {
 	GetForumUserFromDiscordUser(discordUserID string) (legacyUserID string, burgerUserID string, err error)
 	GetForumNameFromDiscordUser(discordUserID string) (legacyUserName string, burgerUserName string, err error)
 	GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error)
+
+	SetCommandSettings(command string, settings types.CommandSettings) (err error)
+	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot
@@ -29,6 +36,8 @@ type MongoStorer struct {
 	mongo    *mgo.Session
 	accounts *mgo.Collection
 	chat     *mgo.Collection
+	settings *mgo.Collection
+	cache    *cache.Cache
 }
 
 // Config represents database connection info
@@ -61,6 +70,8 @@ func New(config Config) (m *MongoStorer, err error) {
 
 	m.accounts = m.mongo.DB(config.MongoName).C("accounts")
 	m.chat = m.mongo.DB(config.MongoName).C("chat")
+	m.settings = m.mongo.DB(config.MongoName).C("settings")
+	m.cache = cache.New(time.Hour*24, time.Hour*12)
 
 	return
 }
