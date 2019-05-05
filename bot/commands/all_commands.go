@@ -27,6 +27,10 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIMARY,
 			Description: "Configure command settings.",
 		},
+		"/roles": {
+			Function:    cm.commandRoles,
+			Description: "List of roles and their IDs.",
+		},
 		"verify": {
 			Function:    cm.commandVerify,
 			Source:      CommandSourcePRIVATE,
