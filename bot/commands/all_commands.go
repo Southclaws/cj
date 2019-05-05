@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	"github.com/Southclaws/cj/types"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
@@ -29,6 +31,7 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandVerify,
 			Source:      CommandSourcePRIVATE,
 			Description: "Verify you are the owner of a Burgershot forum account.",
+			Settings:    types.CommandSettings{Private: true},
 		},
 		"/say": {
 			Function:    cm.commandSay,
