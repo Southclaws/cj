@@ -26,6 +26,6 @@ func (cm *CommandManager) commandRoles(
 	for _, r := range roles {
 		msg.WriteString(fmt.Sprintf("`%s`: %s\n", r.ID, r.Name))
 	}
-	cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, msg.String())
+	cm.Discord.ChannelMessageSend(message.ChannelID, msg.String())
 	return
 }
