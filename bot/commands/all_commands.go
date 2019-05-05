@@ -126,6 +126,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Get a random quote from one of the channels.",
 			Cooldown:    time.Minute * 2,
 		},
+		"/impersonate": {
+			Function:    cm.commandImpersonate,
+			Description: "Impersonate a user using markov chains.",
+			Cooldown:    time.Minute * 10,
+		},
 	}
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
