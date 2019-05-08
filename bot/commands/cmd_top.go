@@ -4,7 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 
-	"github.com/Southclaws/cj/bot/stats"
+	"github.com/Southclaws/cj/bot/heartbeat/stats"
 	"github.com/Southclaws/cj/types"
 )
 
