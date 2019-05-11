@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -9,6 +10,10 @@ import (
 
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
+)
+
+var (
+	nameMentionRegex = regexp.MustCompile("([^\\\\])(@.*)")
 )
 
 func (cm *CommandManager) commandQuote(
@@ -81,7 +86,8 @@ func (cm *CommandManager) commandQuote(
 	}
 
 	time := time.Unix(randmessage.Timestamp, 0)
-	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("\"%s\" ~ **%s**, **%s %d**", randmessage.Message, nick,
+	messageWithSilentQuotes := nameMentionRegex.ReplaceAllString(randmessage.Message, "$1\\$2")
+	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("\"%s\" ~ **%s**, **%s %d**", messageWithSilentQuotes, nick,
 		time.Month().String(), time.Year()))
 	return
 }
