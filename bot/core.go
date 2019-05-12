@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/bot/commands"
-	"github.com/Southclaws/cj/bot/stats"
+	"github.com/Southclaws/cj/bot/heartbeat"
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
@@ -72,10 +72,11 @@ func Start(config *types.Config) {
 
 	app.extensions = []Extension{
 		&commands.CommandManager{},
-		&stats.Aggregator{},
+		&heartbeat.Heartbeat{},
 	}
 
 	for _, ex := range app.extensions {
+		zap.L().Debug("initialising extension")
 		err = ex.Init(config, app.discordClient, app.storage, app.forum)
 		if err != nil {
 			zap.L().Fatal("failed to initialise extension", zap.Error(err))
