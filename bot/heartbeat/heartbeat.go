@@ -12,6 +12,7 @@ import (
 
 	"github.com/Southclaws/cj/bot/heartbeat/common"
 	"github.com/Southclaws/cj/bot/heartbeat/stats"
+	"github.com/Southclaws/cj/bot/heartbeat/talking"
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
@@ -52,6 +53,7 @@ func (a *Heartbeat) Init(
 	aps := []ActionProvider{
 		// &hello{}, // for testing lol
 		&stats.Aggregator{},
+		&talking.Talk{},
 	}
 
 	cr := cron.New()
@@ -93,6 +95,7 @@ func (h *hello) Init(c *types.Config, d *discord.Session, s storage.Storer, f *f
 	h.d = d
 	return nil
 }
+
 func (h *hello) Register() []common.Action {
 	return []common.Action{
 		{
