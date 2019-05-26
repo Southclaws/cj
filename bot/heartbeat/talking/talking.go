@@ -41,12 +41,12 @@ func (t *Talk) Init(
 func (t *Talk) Register() (actions []common.Action) {
 	return []common.Action{
 		{
-			Schedule: "1/10 * * * *",
+			Schedule: "@every 10m",
 			Chance:   0.5,
 			Call:     t.quote,
 		},
 		{
-			Schedule: "1/15 * * * *",
+			Schedule: "@every 15m",
 			Chance:   0.2,
 			Call:     t.impersonate,
 		},
@@ -123,7 +123,7 @@ func (t *Talk) impersonate() (err error) {
 	if err != nil {
 		return
 	}
-	var userID = m.DiscordUserID
+	userID := m.DiscordUserID
 
 	messages, err := t.Storage.GetMessagesForUser(userID)
 	if err != nil {
