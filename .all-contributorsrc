@@ -68,6 +68,17 @@
       "contributions": [
         "content"
       ]
+    },
+    {
+      "login": "dakyskye",
+      "name": "Lasha Kanteladze",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/32128756?v=4",
+      "profile": "https://twitter.com/dakyskye",
+      "contributions": [
+        "code",
+        "test",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
