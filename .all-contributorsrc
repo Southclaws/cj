@@ -90,6 +90,15 @@
         "test",
         "ideas"
       ]
+    },
+    {
+      "login": "Bios-Marcel",
+      "name": "Marcel Schramm",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/19377618?v=4",
+      "profile": "https://marcelschr.me",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
