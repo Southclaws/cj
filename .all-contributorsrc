@@ -79,6 +79,17 @@
         "test",
         "ideas"
       ]
+    },
+    {
+      "login": "kristoisberg",
+      "name": "Kristo Isberg",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/7974602?v=4",
+      "profile": "https://kristo.xyz",
+      "contributions": [
+        "code",
+        "test",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
