@@ -32,6 +32,15 @@
         "bug",
         "maintenance"
       ]
+    },
+    {
+      "login": "Dayvison",
+      "name": "Dayvison",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/10089094?v=4",
+      "profile": "https://github.com/Dayvison",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
