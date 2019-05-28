@@ -41,6 +41,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "AGraber",
+      "name": "Adrian Graber",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/18301034?v=4",
+      "profile": "https://adriangraber.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7
