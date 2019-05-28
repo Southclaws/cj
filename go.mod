@@ -9,7 +9,7 @@ require (
 	github.com/bwmarrin/discordgo v0.19.0
 	github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
 	github.com/joho/godotenv v1.3.0
-	github.com/kelseyhightower/envconfig v1.3.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b
 	github.com/mattn/go-shellwords v1.0.5
 	github.com/mb-14/gomarkov v0.0.0-20180818070845-1bd158c9a5f3
