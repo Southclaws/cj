@@ -108,6 +108,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "GiampaoloFalqui",
+      "name": "Giampaolo Falqui",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/4460702?v=4",
+      "profile": "https://github.com/GiampaoloFalqui",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7
