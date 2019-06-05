@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	"github.com/Southclaws/cj/types"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
@@ -25,10 +27,15 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIMARY,
 			Description: "Configure command settings.",
 		},
+		"/roles": {
+			Function:    cm.commandRoles,
+			Description: "List of roles and their IDs.",
+		},
 		"verify": {
 			Function:    cm.commandVerify,
 			Source:      CommandSourcePRIVATE,
 			Description: "Verify you are the owner of a Burgershot forum account.",
+			Settings:    types.CommandSettings{Private: true},
 		},
 		"/say": {
 			Function:    cm.commandSay,
@@ -112,12 +119,6 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIMARY,
 			Description: "What's the latest iOS unicode bug???",
 			Cooldown:    time.Minute,
-		},
-		"/quote": {
-			Function:    cm.commandQuote,
-			Source:      CommandSourcePRIMARY,
-			Description: "Get a random quote from one of the channels.",
-			Cooldown:    time.Minute * 2,
 		},
 	}
 	for k, v := range commands {

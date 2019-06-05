@@ -191,22 +191,36 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	}
 
 	var allowed bool
-	for _, ch := range settings.Channels {
-		if ch == message.ChannelID {
+	if source == CommandSourcePRIVATE {
+		if commandObject.Settings.Private {
 			allowed = true
-			break
 		}
-	}
-	for _, sr := range settings.Roles {
-		var u *discordgo.Member
-		u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
-		if err != nil {
-			return
-		}
-		for _, ur := range u.Roles {
-			if sr == ur {
+	} else {
+		for _, ch := range settings.Channels {
+			if ch == "all" {
 				allowed = true
 				break
+			}
+			if ch == message.ChannelID {
+				allowed = true
+				break
+			}
+		}
+		for _, sr := range settings.Roles {
+			if sr == "all" {
+				allowed = true
+				break
+			}
+			var u *discordgo.Member
+			u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
+			if err != nil {
+				return
+			}
+			for _, ur := range u.Roles {
+				if sr == ur {
+					allowed = true
+					break
+				}
 			}
 		}
 	}
