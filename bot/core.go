@@ -91,7 +91,7 @@ func Start(config *types.Config) {
 	}
 
 	_, err = app.discordClient.S.ChannelMessageSend(
-		config.PrimaryChannel,
+		config.DefaultChannel,
 		fmt.Sprintf("Hey, what's cracking now? CJ initialised with version %s", config.Version))
 	if err != nil {
 		zap.L().Fatal("failed to send initialisation message", zap.Error(err))
