@@ -22,7 +22,7 @@ type Config struct {
 	DebugUser       string        `split_words:"true" required:"false"` // when set, only accept commands from this user
 	NoInitSync      bool          `split_words:"true" required:"false"` // if set, does not run database role sync on init
 	NoDatabase      bool          `split_words:"true" required:"false"` // if set, does not connect to database
-	WikiURL         string        `split_words:"true" required:"false"` // wiki git url
+	WikiURL         string        `split_words:"true" required:"false" default:"https://github.com/openmultiplayer/wiki"` // wiki git url
 
 	AdministrativeChannel string `split_words:"true" required:"false"` // DEPRECATED
 	PrimaryChannel        string `split_words:"true" required:"false"` // DEPRECATED
