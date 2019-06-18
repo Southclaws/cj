@@ -95,7 +95,7 @@ func (cm *CommandManager) LoadCommands() {
 		"/wiki": {
 			Function:    cm.commandWiki,
 			Source:      CommandSourcePRIMARY,
-			Description: "Returns an article from SA:MP wiki.",
+			Description: "Returns an article from open.mp wiki.",
 		},
 		"/top": {
 			Function:    cm.commandTop,
