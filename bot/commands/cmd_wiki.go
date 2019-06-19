@@ -67,7 +67,8 @@ func (cm *CommandManager) commandWiki(
 		cm.Discord.ChannelMessageSend(message.ChannelID, errManyThreads.Error()+"\nThe most similar funcs/callbacks are:\n* __**"+strings.Join(wikiResult.Threads, "**__\n* __**")+"**__")
 		return
 	} else if wikiResult.Err == errNoThreadFound {
-		cm.Discord.ChannelMessageSend(message.ChannelID, errNoThreadFound.Error())
+		// TODO: url shouldn't be hardcoded
+		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: " + "<https://github.com/openmultiplayer/wiki>")
 		return
 	} else if wikiResult.Err == errCouldntReadThread {
 		cm.Discord.ChannelMessageSend(message.ChannelID, errCouldntReadThread.Error())
