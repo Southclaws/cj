@@ -36,7 +36,7 @@ password. If you don't have Docker, you'll need to
 
 #### Running without a database
 
-If you don't need a database for your feature, just add `NO_DATABSE=true` to `.env`.
+If you don't need a database for your feature, just add `NO_DATABASE=true` to `.env`.
 
 Finally, the application requires some configuration. Copy the `example.env` to `.env` and modify it to use your token
 and various IDs. Depending on what you're working on, some values won't be necessary. For example, unless you're
