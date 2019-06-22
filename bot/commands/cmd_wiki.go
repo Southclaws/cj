@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -68,7 +67,7 @@ func (cm *CommandManager) commandWiki(
 		return
 	} else if wikiResult.Err == errNoThreadFound {
 		// TODO: url shouldn't be hardcoded
-		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: " + "<https://github.com/openmultiplayer/wiki>")
+		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: "+"<https://github.com/openmultiplayer/wiki>")
 		return
 	} else if wikiResult.Err == errCouldntReadThread {
 		cm.Discord.ChannelMessageSend(message.ChannelID, errCouldntReadThread.Error())
@@ -121,14 +120,13 @@ func readThread(file string) (string, error) {
 
 	output := blackfriday.Run(wikiAsByte)
 	html := bluemonday.UGCPolicy().SanitizeBytes(output)
-	fmt.Println(string(html))
 
 	doc, docErr := goquery.NewDocumentFromReader(strings.NewReader(string(html)))
 	if docErr != nil {
 		log.Fatal(docErr)
 	}
 
-	header := "wiki.open.mp | __" + threadName(file) + "__\nhttps://wiki.open.mp/scripting/" + threadName(file) + ".html"
+	header := "wiki.open.mp | __" + threadName(file) + "__\n<https://wiki.open.mp/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ".html>")
 	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
 	parameters := "**Parameters**"
 	relatedFuncs := "**Related Functions**"
