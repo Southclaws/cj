@@ -4,7 +4,7 @@ services:
   - mongodb
 language: go
 go:
-  - "1.12"
+  - "1.11"
 env:
   - GO111MODULE=on
 script:
