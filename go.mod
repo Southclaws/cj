@@ -1,6 +1,6 @@
 module github.com/Southclaws/cj
 
-go 1.12
+go 1.11
 
 replace github.com/go-resty/resty => gopkg.in/resty.v1 v1.12.0
 
