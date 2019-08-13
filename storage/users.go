@@ -21,7 +21,6 @@ type User struct {
 
 // StoreVerifiedUser is for when a user finishes their verification.
 func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
-
 	legacy, err := m.IsUserLegacyVerified(verification.DiscordUser.ID)
 	if legacy {
 		err = m.accounts.Update(
@@ -75,7 +74,8 @@ func (m *MongoStorer) IsUserVerified(discordUserID string) (verified bool, err e
 			{"discord_user_id", discordUserID},
 			{"burgershot_verified", bson.D{
 				{"$exists", true},
-			}}}).Count()
+			}},
+		}).Count()
 	if err != nil {
 		return
 	}
@@ -93,9 +93,9 @@ func (m *MongoStorer) IsUserLegacyVerified(discordUserID string) (verified bool,
 			{"discord_user_id", discordUserID},
 			{"burgershot_verified", bson.D{
 				{"$exists", false},
-			}}}).Count()
+			}},
+		}).Count()
 	if err != nil {
-
 		return
 	}
 	if count > 0 {
@@ -172,5 +172,23 @@ func (m *MongoStorer) GetDiscordUserFromForumName(forumName string) (legacyUserI
 		err = errors.New("user not found")
 	}
 
+	return
+}
+
+// GetRandomUser returns a random Discord user ID
+func (m *MongoStorer) GetRandomUser() (discordUserID string, err error) {
+	var user User
+
+	err = m.accounts.Pipe([]bson.M{
+		{"$sample": bson.M{
+			"size": 1,
+		}},
+	}).One(&user)
+	if err != nil {
+		err = errors.Wrap(err, "failed to get random user")
+		return
+	}
+
+	discordUserID = user.DiscordUserID
 	return
 }

@@ -16,6 +16,9 @@ func (m *Memory) GetTopMessages(top int) (result TopMessages, err error) {
 func (m *Memory) GetRandomMessage() (result ChatLog, err error) {
 	return
 }
+func (m *Memory) GetRandomUser() (result string, err error) {
+	return
+}
 func (m *Memory) StoreVerifiedUser(verification types.Verification) (err error) {
 	return
 }

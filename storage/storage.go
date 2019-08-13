@@ -16,6 +16,7 @@ type Storer interface {
 	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
 	GetRandomMessage() (result ChatLog, err error)
+	GetRandomUser() (result string, err error)
 
 	StoreVerifiedUser(verification types.Verification) (err error)
 	UpdateUserUsername(discordUserID string, username string) (err error)

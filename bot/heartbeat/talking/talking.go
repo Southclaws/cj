@@ -5,14 +5,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
+	"github.com/mb-14/gomarkov"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	"github.com/Southclaws/cj/bot/heartbeat/common"
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
-	"github.com/bwmarrin/discordgo"
-	"github.com/mb-14/gomarkov"
-	"github.com/pkg/errors"
 )
 
 // Talk randomly sends messages
@@ -54,14 +56,19 @@ func (t *Talk) Register() (actions []common.Action) {
 }
 
 func (t *Talk) quote() (err error) {
-	var (
-		ok          bool
-		randmessage storage.ChatLog
-		restricted  bool
-		nick        string
-	)
-
-	restrictedChannels := [11]string{
+	randmessage, err := t.Storage.GetRandomMessage()
+	if err != nil {
+		return
+	}
+	if len(randmessage.Message) < 6 {
+		zap.L().Debug("dropping random quote because it's too short")
+		return
+	}
+	if strings.Index(randmessage.Message, "/") == 0 {
+		zap.L().Debug("dropping random quote because it's a command invocation")
+		return
+	}
+	for _, channel := range [11]string{
 		"457943077789892649",
 		"536617253286707210",
 		"376371371795546112",
@@ -73,57 +80,27 @@ func (t *Talk) quote() (err error) {
 		"282581078643048448",
 		"415801201960026122",
 		"548332120842698753",
-	}
-
-	for ok == false {
-		restricted = false
-		randmessage, err = t.Storage.GetRandomMessage()
-		if err != nil {
+	} {
+		if randmessage.DiscordChannel == channel {
+			zap.L().Debug("dropping random quote because it's from a restricted channel")
 			return
 		}
-
-		// Misses stuff like verify and doesn't allow commands to be sent either.
-		if len(randmessage.Message) > 6 && strings.Index(randmessage.Message, "/") != 0 {
-			// TODO: Do through the query.
-			for _, channel := range restrictedChannels {
-				if randmessage.DiscordChannel == channel {
-					restricted = true
-				}
-			}
-
-			if !restricted {
-				ok = true
-			}
-		}
 	}
 
-	user, err := t.Discord.S.GuildMember(t.Config.GuildID, randmessage.DiscordUserID)
-	if err != nil || len(user.Nick) == 0 {
-		// No longer on the server or has no nickname.
-		var user *discordgo.User
-		user, err = t.Discord.S.User(randmessage.DiscordUserID)
-		if err != nil {
-			return
-		}
-
-		nick = user.Username
-	} else {
-		nick = user.Nick
-	}
-
+	nick := t.getMostRecentNick(t.Config.GuildID, randmessage.DiscordUserID)
 	time := time.Unix(randmessage.Timestamp, 0)
+
 	t.Discord.ChannelMessageSend(t.Config.PrimaryChannel, fmt.Sprintf(
-		"\"%s\" ~ **%s**, **%s %d**",
+		"> %s\n - **%s** (%s, %d)",
 		randmessage.Message, nick, time.Month().String(), time.Year()))
 	return
 }
 
 func (t *Talk) impersonate() (err error) {
-	m, err := t.Storage.GetRandomMessage()
+	userID, err := t.Storage.GetRandomUser()
 	if err != nil {
 		return
 	}
-	userID := m.DiscordUserID
 
 	messages, err := t.Storage.GetMessagesForUser(userID)
 	if err != nil {
@@ -156,20 +133,7 @@ func (t *Talk) impersonate() (err error) {
 		tokens = append(tokens, next)
 	}
 
-	var nick string
-	user, err := t.Discord.S.GuildMember(t.Config.GuildID, userID)
-	if err != nil || len(user.Nick) == 0 {
-		// No longer on the server or has no nickname.
-		var user *discordgo.User
-		user, err = t.Discord.S.User(userID)
-		if err != nil {
-			return
-		}
-
-		nick = user.Username
-	} else {
-		nick = user.Nick
-	}
+	nick := t.getMostRecentNick(t.Config.GuildID, userID)
 
 	t.Discord.ChannelMessageSend(t.Config.PrimaryChannel, fmt.Sprintf(
 		"\"%s\" is what **%s** sounds like",
@@ -192,4 +156,22 @@ func isBadMessage(m string) bool {
 		return true
 	}
 	return false
+}
+
+func (t *Talk) getMostRecentNick(guildID, userID string) (nick string) {
+	user, err := t.Discord.S.GuildMember(guildID, userID)
+	if err != nil || len(user.Nick) == 0 {
+		// No longer on the server or has no nickname.
+		var user *discordgo.User
+		user, err = t.Discord.S.User(userID)
+		if err != nil {
+			zap.L().Warn("failed to get user name", zap.Error(err))
+			nick = userID
+		} else {
+			nick = user.Username
+		}
+	} else {
+		nick = user.Nick
+	}
+	return
 }
