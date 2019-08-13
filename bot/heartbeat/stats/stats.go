@@ -10,6 +10,7 @@ import (
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
+	"go.uber.org/zap"
 )
 
 // Aggregator collects statistics about messages and users
@@ -72,12 +73,16 @@ func FormatMessageRankings(r storage.TopMessages, s *discord.Session) (embed *di
 	embed = &discordgo.MessageEmbed{Color: 0x3498DB}
 	var user *discordgo.User
 	for i, tm := range r {
+		var username string
 		user, err = s.S.User(tm.User)
 		if err != nil {
-			return
+			zap.L().Warn("failed to get user", zap.Error(err), zap.String("user_id", tm.User))
+			username = tm.User
+		} else {
+			username = user.Username
 		}
 
-		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %d\n", i, user.Username, tm.Messages)) //nolint:errcheck
+		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %d\n", i, username, tm.Messages)) //nolint:errcheck
 	}
 
 	embed.Description = statsMessage.String()
