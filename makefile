@@ -9,7 +9,6 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 #-
 
 static:
-	go get
 	CGO_ENABLED=0 GOOS=linux go build -a $(LDFLAGS) -o $(SERVICE) .
 
 fast:
