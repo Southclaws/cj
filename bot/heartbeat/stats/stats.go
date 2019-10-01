@@ -82,7 +82,7 @@ func FormatMessageRankings(r storage.TopMessages, s *discord.Session) (embed *di
 			username = user.Username
 		}
 
-		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %d\n", i, username, tm.Messages)) //nolint:errcheck
+		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %d\n", i + 1, username, tm.Messages)) //nolint:errcheck
 	}
 
 	embed.Description = statsMessage.String()
