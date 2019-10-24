@@ -12,6 +12,8 @@ require (
 	github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b
 	github.com/bwmarrin/discordgo v0.20.1
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-github/v28 v28.1.1
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b
@@ -22,9 +24,9 @@ require (
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.3.0
 	github.com/texttheater/golang-levenshtein v0.0.0-20180516184445-d188e65d659e
-	go.uber.org/zap v1.11.0
+	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
 	golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872 // indirect
 	gopkg.in/resty.v1 v1.12.0

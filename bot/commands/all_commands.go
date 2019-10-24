@@ -27,6 +27,11 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIMARY,
 			Description: "Configure command settings.",
 		},
+		"/readme": {
+			Function:    cm.commandReadme,
+			Source:      CommandSourceADMINISTRATIVE,
+			Description: "Force fetches the readme message.",
+		},
 		"/roles": {
 			Function:    cm.commandRoles,
 			Description: "List of roles and their IDs.",
