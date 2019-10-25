@@ -17,7 +17,7 @@ type Readme struct {
 // GetReadmeMessage gets the readme message id from the database
 func (m *MongoStorer) GetReadmeMessage() (message string, err error) {
 	var readme Readme
-	err = m.chat.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
+	err = m.settings.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
 	if err != nil {
 		return
 	}
@@ -46,16 +46,16 @@ func (m *MongoStorer) UpdateReadmeMessage(session *discordgo.Session, original *
 		session.ChannelMessageEdit(original.ChannelID, original.ID, upstream)
 	} else {
 		var readme Readme
-		err = m.chat.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
+		err = m.settings.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
 		if err == mgo.ErrNotFound {
-			err = m.chat.Insert(bson.D{{Name: "readme_message_id", Value: original.ID}})
+			err = m.settings.Insert(bson.D{{Name: "readme_message_id", Value: original.ID}})
 			if err != nil {
 				return
 			}
 		} else if err != nil {
 			return
 		} else {
-			err = m.chat.Update(bson.M{}, bson.M{"$set": bson.M{"readme_message_id": original.ID}})
+			err = m.settings.Update(bson.M{}, bson.M{"$set": bson.M{"readme_message_id": original.ID}})
 			if err != nil {
 				return
 			}
