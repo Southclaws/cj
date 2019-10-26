@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/globalsign/mgo"
+	"github.com/google/go-github/v28/github"
 	"github.com/patrickmn/go-cache"
 
 	"github.com/Southclaws/cj/types"
@@ -30,6 +32,10 @@ type Storer interface {
 
 	SetCommandSettings(command string, settings types.CommandSettings) (err error)
 	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)
+
+	GetReadmeMessage() (message string, err error)
+	FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error)
+	UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error)
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot

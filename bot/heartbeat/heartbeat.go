@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/bot/heartbeat/common"
+	"github.com/Southclaws/cj/bot/heartbeat/readme"
 	"github.com/Southclaws/cj/bot/heartbeat/stats"
 	"github.com/Southclaws/cj/bot/heartbeat/talking"
 	"github.com/Southclaws/cj/discord"
@@ -54,6 +55,7 @@ func (a *Heartbeat) Init(
 		// &hello{}, // for testing lol
 		&stats.Aggregator{},
 		&talking.Talk{},
+		&readme.Readme{},
 	}
 
 	cr := cron.New()

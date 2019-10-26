@@ -1,6 +1,10 @@
 package storage
 
-import "github.com/Southclaws/cj/types"
+import (
+	"github.com/Southclaws/cj/types"
+	"github.com/bwmarrin/discordgo"
+	"github.com/google/go-github/v28/github"
+)
 
 type Memory struct{}
 
@@ -50,5 +54,14 @@ func (m *Memory) SetCommandSettings(command string, settings types.CommandSettin
 	return
 }
 func (m *Memory) GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error) {
+	return
+}
+func (m *Memory) GetReadmeMessage() (message string, err error) {
+	return
+}
+func (m *Memory) FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error) {
+	return
+}
+func (m *Memory) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
 	return
 }
