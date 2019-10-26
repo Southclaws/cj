@@ -32,6 +32,6 @@ require (
 	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/russross/blackfriday.v2 v2.0.0-00010101000000-000000000000
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
-	gopkg.in/src-d/go-git.v4 v4.12.0
+	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
 )
