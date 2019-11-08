@@ -191,7 +191,7 @@ func (cm *CommandManager) UserProvidesProfileURL(message discordgo.Message) (err
 	cm.SetVerificationState(&verification, types.VerificationStateAwaitConfirmation)
 
 	cm.Discord.ChannelMessageSend(message.ChannelID,
-		fmt.Sprintf(`Thanks! Now you just need to paste this ID in the "Discord ID" section of your profile: **%s**.
+		fmt.Sprintf(`Thanks! Now you just need to paste this ID in the "Discord ID" section of your forum profile: **%s**.
 		When you have done this, please reply with the message 'done'.`,
 			message.Author.ID))
 	return
