@@ -99,7 +99,7 @@ func (cm *CommandManager) commandStats(
 				Inline: true,
 			},
 			&discordgo.MessageEmbedField{
-				Name:   "💾 Password",
+				Name:   "🔒 Password",
 				Value:  password,
 				Inline: true,
 			},
