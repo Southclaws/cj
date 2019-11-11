@@ -36,6 +36,9 @@ type Storer interface {
 	GetReadmeMessage() (message string, err error)
 	FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error)
 	UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error)
+
+	PullWiki(wikiURL string) (err error)
+	WikiExists() (exists bool)
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot
