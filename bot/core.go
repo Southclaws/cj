@@ -84,7 +84,7 @@ func Start(config *types.Config) {
 	}
 
 	if config.WikiURL != "" {
-		err = storage.EnsureWiki(config.WikiURL)
+		err = app.storage.PullWiki(config.WikiURL)
 		if err != nil {
 			zap.L().Fatal("failed to ensure wiki", zap.Error(err))
 		}

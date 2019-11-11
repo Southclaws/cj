@@ -14,7 +14,6 @@ import (
 	"github.com/texttheater/golang-levenshtein/levenshtein"
 	"gopkg.in/russross/blackfriday.v2"
 
-	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
 )
 
@@ -56,7 +55,7 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
-	if !storage.WikiExists() {
+	if !cm.Storage.WikiExists() {
 		return
 	}
 
