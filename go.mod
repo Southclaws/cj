@@ -26,7 +26,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/texttheater/golang-levenshtein v0.0.0-20180516184445-d188e65d659e
-	go.uber.org/zap v1.11.0
+	go.uber.org/zap v1.13.0
 	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
 	golang.org/x/sys v0.0.0-20190429190828-d89cdac9e872 // indirect
 	gopkg.in/resty.v1 v1.12.0
