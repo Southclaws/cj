@@ -56,6 +56,14 @@ func (t *Talk) Register() (actions []common.Action) {
 }
 
 func (t *Talk) quote() (err error) {
+	f, err := t.Discord.GetCurrentChannelMessageFrequency(t.Config.PrimaryChannel)
+	if err != nil {
+		return
+	}
+	if f < 0.1 {
+		zap.L().Debug("dropping random quote because channel not active enough")
+		return
+	}
 	randmessage, err := t.Storage.GetRandomMessage()
 	if err != nil {
 		return

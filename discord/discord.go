@@ -30,6 +30,29 @@ func (s *Session) GetUserFromName(name string) (user discordgo.Member, exists bo
 	return
 }
 
+// GetCurrentChannelMessageFrequency returns messages-per-second
+func (s *Session) GetCurrentChannelMessageFrequency(channelID string) (freq float64, err error) {
+	messages, err := s.S.ChannelMessages(channelID, 20, "", "", "")
+	if err != nil {
+		return
+	}
+
+	start, err := messages[0].Timestamp.Parse()
+	if err != nil {
+		return
+	}
+	end, err := messages[len(messages)-1].Timestamp.Parse()
+	if err != nil {
+		return
+	}
+
+	windowSize := float64(start.Unix() - end.Unix())
+
+	freq = float64(len(messages)) / windowSize
+
+	return
+}
+
 func (s *Session) ready(session *discordgo.Session, event *discordgo.Ready) {
 	s.cacheUsernames()
 	c := cron.New()

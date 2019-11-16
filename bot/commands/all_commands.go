@@ -119,10 +119,10 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIMARY,
 			Description: "Query a server for information using the SA:MP servers API.",
 		},
-		"/breakthings": {
-			Function:    cm.commandBLNS,
+		"/mf": {
+			Function:    cm.commandMessageFreq,
 			Source:      CommandSourcePRIMARY,
-			Description: "What's the latest iOS unicode bug???",
+			Description: "Message frequency",
 			Cooldown:    time.Minute,
 		},
 	}
