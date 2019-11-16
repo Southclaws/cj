@@ -71,8 +71,8 @@ func (a *Heartbeat) Init(
 			zap.String("name", name),
 			zap.Int("actions", len(actions)))
 		for i := range actions {
-			zap.L().Debug("adding action call", zap.String("schedule", a.Schedule))
 			action := actions[i]
+			zap.L().Debug("adding action call", zap.String("schedule", action.Schedule))
 			if err = cr.AddFunc(action.Schedule, func() {
 				if rand.Float64() < action.Chance {
 					if e := action.Call(); e != nil {
