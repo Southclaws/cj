@@ -23,12 +23,12 @@ func (r *Readme) Init(
 	discord *discord.Session,
 	api storage.Storer,
 	fc *forum.ForumClient,
-) (err error) {
+) (name string, err error) {
 	r.Config = config
 	r.Storage = api
 	r.Discord = discord
 	r.Forum = fc
-	return
+	return "readme", nil
 }
 
 //nolint:golint

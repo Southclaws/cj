@@ -29,12 +29,12 @@ func (a *Aggregator) Init(
 	discord *discord.Session,
 	api storage.Storer,
 	fc *forum.ForumClient,
-) (err error) {
+) (name string, err error) {
 	a.Config = config
 	a.Storage = api
 	a.Discord = discord
 	a.Forum = fc
-	return
+	return "aggregator", nil
 }
 
 //nolint:golint
@@ -82,7 +82,7 @@ func FormatMessageRankings(r storage.TopMessages, s *discord.Session) (embed *di
 			username = user.Username
 		}
 
-		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %d\n", i + 1, username, tm.Messages)) //nolint:errcheck
+		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %d\n", i+1, username, tm.Messages)) //nolint:errcheck
 	}
 
 	embed.Description = statsMessage.String()

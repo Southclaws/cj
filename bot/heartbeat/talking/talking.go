@@ -31,12 +31,12 @@ func (t *Talk) Init(
 	discord *discord.Session,
 	api storage.Storer,
 	fc *forum.ForumClient,
-) (err error) {
+) (name string, err error) {
 	t.Config = config
 	t.Storage = api
 	t.Discord = discord
 	t.Forum = fc
-	return
+	return "talking", nil
 }
 
 //nolint:golint

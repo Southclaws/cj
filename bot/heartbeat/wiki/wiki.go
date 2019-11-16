@@ -22,12 +22,12 @@ func (w *Wiki) Init(
 	discord *discord.Session,
 	api storage.Storer,
 	fc *forum.ForumClient,
-) (err error) {
+) (name string, err error) {
 	w.Config = config
 	w.Storage = api
 	w.Discord = discord
 	w.Forum = fc
-	return
+	return "wiki", nil
 }
 
 //nolint:golint

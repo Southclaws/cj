@@ -26,7 +26,7 @@ import (
 // schedule. The `chance` parameter controls the probability the `call` function
 // is called each time a cron job specified by `schedule` occurs.
 type ActionProvider interface {
-	Init(*types.Config, *discord.Session, storage.Storer, *forum.ForumClient) error
+	Init(*types.Config, *discord.Session, storage.Storer, *forum.ForumClient) (string, error)
 	Register() []common.Action
 }
 
@@ -62,16 +62,20 @@ func (a *Heartbeat) Init(
 
 	cr := cron.New()
 	for _, ap := range aps {
-		if err = ap.Init(config, discord, api, fc); err != nil {
+		var name string
+		if name, err = ap.Init(config, discord, api, fc); err != nil {
 			return errors.Wrapf(err, "failed to initialise heatbeat extension %v", a)
 		}
 		actions := ap.Register()
-		zap.L().Debug("loading heartbeat action provider", zap.Int("actions", len(actions)))
-		for _, a := range actions {
+		zap.L().Debug("loading heartbeat action provider",
+			zap.String("name", name),
+			zap.Int("actions", len(actions)))
+		for i := range actions {
 			zap.L().Debug("adding action call", zap.String("schedule", a.Schedule))
-			if err = cr.AddFunc(a.Schedule, func() {
-				if rand.Float64() < a.Chance {
-					if e := a.Call(); e != nil {
+			action := actions[i]
+			if err = cr.AddFunc(action.Schedule, func() {
+				if rand.Float64() < action.Chance {
+					if e := action.Call(); e != nil {
 						zap.L().Error("action failed", zap.Error(e))
 					}
 				}
