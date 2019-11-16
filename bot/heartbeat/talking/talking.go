@@ -105,6 +105,15 @@ func (t *Talk) quote() (err error) {
 }
 
 func (t *Talk) impersonate() (err error) {
+	f, err := t.Discord.GetCurrentChannelMessageFrequency(t.Config.PrimaryChannel)
+	if err != nil {
+		return
+	}
+	if f < 0.1 {
+		zap.L().Debug("dropping impersonation because channel not active enough")
+		return
+	}
+
 	userID, err := t.Storage.GetRandomUser()
 	if err != nil {
 		return
