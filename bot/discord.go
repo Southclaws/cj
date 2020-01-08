@@ -2,6 +2,8 @@ package bot
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/Southclaws/cj/discord"
 	"github.com/bwmarrin/discordgo"
@@ -20,6 +22,11 @@ type ChannelDM struct {
 const greeting = `Hi! Welcome to the San Andreas Multiplayer unofficial Discord server!
 
 You can verify your forum account by typing %s below, this helps us ensure people aren't impersonating others.`
+
+var (
+	assistanceWords    = []string{"can anyone", "can someone", "I need help", "help me", "how do I", "how to", "I have a question"}
+	assistanceCooldown time.Time
+)
 
 // ConnectDiscord sets up the Discord API and event listeners
 func (app *App) ConnectDiscord() (err error) {
@@ -132,6 +139,74 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		zap.String("author", event.Message.Author.Username),
 		zap.String("message", event.Message.Content),
 	)
+
+	go func() {
+		if event.Message.ChannelID != app.config.ScriptingChannel {
+			return
+		}
+		assistanceAvailable := true
+		if time.Since(assistanceCooldown) < app.config.AssistanceCooldown {
+			assistanceAvailable = false
+		}
+
+		for _, sub := range assistanceWords {
+			if !strings.Contains(strings.ToLower(event.Message.Content), strings.ToLower(sub)) {
+				continue
+			}
+
+			if !assistanceAvailable {
+				s.MessageReactionAdd(event.Message.ChannelID, event.Message.ID, "❔")
+				return
+			}
+
+			guild, err := s.Guild(event.GuildID)
+			if err != nil {
+				zap.L().Debug("failed to find guild", zap.String("guild ID", event.GuildID))
+				return
+			}
+
+			var helperRole *discordgo.Role
+
+			for _, role := range guild.Roles {
+				if role.ID == app.config.HelperRole {
+					helperRole = role
+					break
+				}
+			}
+
+			var helpers []string
+
+			for _, guildMember := range guild.Members {
+				for _, guildMemberRole := range guildMember.Roles {
+					if guildMemberRole == helperRole.ID {
+						eligible := false
+						for _, presence := range guild.Presences {
+							if presence.User.ID == guildMember.User.ID {
+								if presence.Status == discordgo.StatusOnline {
+									eligible = true
+								}
+								break
+							}
+						}
+						if eligible {
+							helpers = append(helpers, guildMember.User.Username)
+						}
+						break
+					}
+				}
+			}
+
+			if len(helpers) == 0 {
+				s.ChannelMessageSend(event.Message.ChannelID, event.Author.Mention()+", you might be asking for assistance, but the registered helpers are not online, thus your question __may__ be unanswered")
+			} else {
+				s.ChannelMessageSend(event.Message.ChannelID, event.Author.Mention()+", you might be asking for assistance, here's the list of the available helpers:\n**"+strings.Join(helpers, "**; **")+"**")
+			}
+
+			assistanceCooldown = time.Now()
+			break
+		}
+	}()
+	time.Sleep(time.Second)
 }
 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
