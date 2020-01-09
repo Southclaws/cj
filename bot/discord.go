@@ -91,6 +91,8 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 			app.channels[ch.ID] = ch
 		}
 
+		app.discordClient.S.State.TrackPresences = true
+
 		return nil
 	}()
 }
@@ -180,14 +182,17 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 				for _, guildMemberRole := range guildMember.Roles {
 					if guildMemberRole == helperRole.ID {
 						eligible := false
-						for _, presence := range guild.Presences {
-							if presence.User.ID == guildMember.User.ID {
-								if presence.Status == discordgo.StatusOnline {
-									eligible = true
-								}
-								break
-							}
+
+						presence, err := s.State.Presence(guild.ID, guildMember.User.ID)
+						if err != nil {
+							zap.L().Debug("failed to get user presence", zap.String("guild ID", guild.ID), zap.String("user ID", guildMember.User.ID))
+							continue
 						}
+
+						if presence.Status == discordgo.StatusOnline {
+							eligible = true
+						}
+
 						if eligible {
 							helpers = append(helpers, guildMember.User.Username)
 						}
