@@ -11,6 +11,7 @@ import (
 
 	"github.com/Southclaws/cj/bot/commands"
 	"github.com/Southclaws/cj/bot/heartbeat"
+	"github.com/Southclaws/cj/bot/helper"
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
@@ -73,6 +74,7 @@ func Start(config *types.Config) {
 	app.extensions = []Extension{
 		&commands.CommandManager{},
 		&heartbeat.Heartbeat{},
+		&helper.Helper{},
 	}
 
 	for _, ex := range app.extensions {
