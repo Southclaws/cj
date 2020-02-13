@@ -1,0 +1,55 @@
+version: "3.5"
+networks:
+  default:
+    external:
+      name: gateway
+  mongodb:
+    driver: bridge
+    internal: true
+
+services:
+  mongodb:
+    image: "mongo:3.4"
+    restart: on-failure
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cj
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGODB_PASSWORD}"
+    volumes:
+      - "${DATA_DIR}/sampcj/mongodb:/data/db"
+    networks:
+      - mongodb
+    labels:
+      - traefik.enable=false
+  cj:
+    image: "southclaws/cj:latest"
+    restart: on-failure
+    environment:
+      CJ_MONGO_HOST: mongodb
+      CJ_MONGO_PORT: "27017"
+      CJ_MONGO_NAME: admin
+      CJ_MONGO_USER: cj
+      CJ_MONGO_PASS: "${MONGODB_PASSWORD}"
+      CJ_DISCORD_TOKEN: "${DISCORD_TOKEN}"
+      CJ_DEFAULT_CHANNEL: "282581181034135556"
+      CJ_DEFAULT_ROLE: "282353010192023552"
+      CJ_DEFAULT_COOLDOWN: "10m"
+      CJ_ADMINISTRATIVE_CHANNEL: "282581181034135556"
+      CJ_PRIMARY_CHANNEL: "465142687985696788"
+      CJ_HEARTBEAT: "190"
+      CJ_BOT_ID: "285421343594512384"
+      CJ_GUILD_ID: "231799104731217931"
+      CJ_VERIFIED_ROLE: "572008105487892480"
+      CJ_ADMIN: "86435690711093248"
+      CJ_WIKI_URL: https://github.com/openmultiplayer/wiki.git
+      CJ_README_CHANNEL: "288423556721672192"
+      CJ_README_GIST_ID: 37f3548342e51365a7291132502b71b8
+      CJ_README_GIST_FILE_NAME: samp-discord-rules.md
+      DEBUG: "1"
+    networks:
+      - default
+      - mongodb
+    depends_on:
+      - mongodb
+    labels:
+      - traefik.enable=false
+      - com.centurylinklabs.watchtower.enable=true
