@@ -10,7 +10,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.0
 	github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d
 	github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b
-	github.com/bwmarrin/discordgo v0.20.1
+	github.com/bwmarrin/discordgo v0.20.2
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/google/go-github/v28 v28.1.1
 	github.com/joho/godotenv v1.3.0
@@ -19,7 +19,7 @@ require (
 	github.com/mb-14/gomarkov v0.0.0-20190125094512-044dd0dcb5e7
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
