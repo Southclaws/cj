@@ -190,7 +190,7 @@ func makeDynamic() string {
 	case 2:
 		buf.WriteString("SYSTEM")
 	case 3:
-		buf.WriteString("System")
+		buf.WriteString("[SYSTEM]")
 	}
 
 	tagCount := rand.Intn(3)
