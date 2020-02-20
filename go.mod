@@ -23,7 +23,7 @@ require (
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/texttheater/golang-levenshtein v0.0.0-20180516184445-d188e65d659e
 	go.uber.org/zap v1.13.0
 	gopkg.in/resty.v1 v1.12.0
