@@ -64,7 +64,7 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: cj
       ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASSWORD}"
       ME_CONFIG_BASICAUTH_USERNAME: cj
-      ME_CONFIG_BASICAUTH_PASSWORD: "${MONGODB_PASSWORD}"
+      ME_CONFIG_BASICAUTH_PASSWORD: "${MONGO_EXPRESS_PASSWORD}"
     labels:
       traefik.enable: true
       traefik.http.routers.cjdb.rule: Host(`cjdb.southcla.ws`)
