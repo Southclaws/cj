@@ -61,6 +61,7 @@ services:
     image: mongo-express
     restart: always
     environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_ADMINUSERNAME: cj
       ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASSWORD}"
       ME_CONFIG_BASICAUTH_USERNAME: cj
