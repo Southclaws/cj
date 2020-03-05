@@ -66,8 +66,12 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASSWORD}"
       ME_CONFIG_BASICAUTH_USERNAME: cj
       ME_CONFIG_BASICAUTH_PASSWORD: "${MONGO_EXPRESS_PASSWORD}"
+    networks:
+      - default
+      - mongodb
     labels:
       traefik.enable: true
+      traefik.docker.network: gateway
       traefik.http.routers.cjdb.rule: Host(`cjdb.southcla.ws`)
       traefik.http.routers.cjdb.entrypoints: https
       traefik.http.routers.cjdb.tls.certresolver: default
