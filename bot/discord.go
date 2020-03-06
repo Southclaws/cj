@@ -84,8 +84,6 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 			app.channels[ch.ID] = ch
 		}
 
-		app.discordClient.S.State.TrackPresences = true
-
 		return nil
 	}()
 }
