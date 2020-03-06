@@ -16,12 +16,9 @@ type Config struct {
 	MongoUser          string              `split_words:"true" required:"false"`
 	MongoPass          string              `split_words:"true" required:"false"`
 	DiscordToken       string              `split_words:"true" required:"true"`                                                    // discord API token
-	ScriptingChannel   string              `split_words:"true" required:"true"`                                                    // the default scripting channel if not set in DB
 	ReadmeChannel      string              `split_words:"true" required:"true"`                                                    // the default readme channel if not set in DB
 	DefaultChannel     string              `split_words:"true" required:"true"`                                                    // the default command channel if not set in DB
-	HelperRole         string              `split_words:"true" required:"true"`                                                    // the default helper role if not set in DB
 	DefaultRole        string              `split_words:"true" required:"true"`                                                    // the default command role if not set in DB
-	AssistanceCooldown time.Duration       `split_words:"true" required:"true"`                                                    // the default assistance cooldown if not set in DB
 	DefaultCooldown    time.Duration       `split_words:"true" required:"true"`                                                    // the default command cooldown if not set in DB
 	Heartbeat          int                 `split_words:"true" required:"true"`                                                    // Heartbeat time in minutes, a heartbeat is when the bot chimes in to the server, sometimes with a random message
 	BotID              string              `split_words:"true" required:"true"`                                                    // the bot's client ID
