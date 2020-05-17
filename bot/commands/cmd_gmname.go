@@ -186,7 +186,7 @@ func generateGmName() (result string) {
 		buf.WriteString(strings.ToTitle(gamemodes))
 	case 2:
 		buf.WriteString(strings.ToUpper(gamemodes))
-	case 4:
+	case 3:
 		buf.WriteString("[" + strings.ToUpper(gamemodes) + "]")
 	}
 
