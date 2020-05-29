@@ -106,7 +106,7 @@ func readWiki(article string) *WikiReturns {
 }
 
 func readThread(file string) (string, error) {
-	wikiFile, openErr := os.Open(filepath.Join(".", "wiki", "scripting", file))
+	wikiFile, openErr := os.Open(filepath.Join(".", "wiki", "docs", "scripting", file))
 	if openErr != nil {
 		return "", errCouldntReadThread
 	}
@@ -188,12 +188,12 @@ func getWikiFiles() (files []string, err error) {
 		fn  *os.File
 		tmp []string
 	)
-	cb, err = os.Open(filepath.Join(".", "wiki", "scripting", "callbacks"))
+	cb, err = os.Open(filepath.Join(".", "wiki", "docs", "scripting", "callbacks"))
 	if err != nil {
 		return
 	}
 
-	fn, err = os.Open(filepath.Join(".", "wiki", "scripting", "functions"))
+	fn, err = os.Open(filepath.Join(".", "wiki", "docs", "scripting", "functions"))
 	if err != nil {
 		cb.Close()
 		return
