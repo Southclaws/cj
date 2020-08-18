@@ -9,11 +9,11 @@ networks:
 
 services:
   mongodb:
-    image: "mongo:3.4"
+    image: "mongo:${MONGODB_IMAGE_TAG:-3.4}"
     restart: on-failure
     environment:
-      MONGO_INITDB_ROOT_USERNAME: cj
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGODB_PASSWORD}"
+      MONGO_INITDB_ROOT_USERNAME: ${CJ_MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: "${CJ_MONGO_PASS}"
     volumes:
       - "${DATA_DIR}/sampcj/mongodb:/data/db"
     networks:
@@ -21,33 +21,28 @@ services:
     labels:
       - traefik.enable=false
   cj:
-    image: "southclaws/cj:latest"
+    image: "southclaws/cj:${CJ_IMAGE_TAG:-latest}"
     restart: on-failure
     environment:
-      CJ_MONGO_HOST: mongodb
-      CJ_MONGO_PORT: "27017"
-      CJ_MONGO_NAME: admin
-      CJ_MONGO_USER: cj
-      CJ_MONGO_PASS: "${MONGODB_PASSWORD}"
-      CJ_DISCORD_TOKEN: "${DISCORD_TOKEN}"
-      CJ_DEFAULT_CHANNEL: "282581181034135556"
-      CJ_DEFAULT_ROLE: "282353010192023552"
-      CJ_DEFAULT_COOLDOWN: "10m"
-      CJ_ADMINISTRATIVE_CHANNEL: "282581181034135556"
-      CJ_PRIMARY_CHANNEL: "465142687985696788"
-      CJ_HEARTBEAT: "190"
-      CJ_BOT_ID: "285421343594512384"
-      CJ_GUILD_ID: "231799104731217931"
-      CJ_VERIFIED_ROLE: "572008105487892480"
-      CJ_ADMIN: "86435690711093248"
-      CJ_WIKI_URL: https://github.com/openmultiplayer/wiki.git
-      CJ_README_CHANNEL: "288423556721672192"
-      CJ_README_GIST_ID: 37f3548342e51365a7291132502b71b8
-      CJ_README_GIST_FILE_NAME: samp-discord-rules.md
-      CJ_SCRIPTING_CHANNEL: "231799180127895553"
-      CJ_HELPER_ROLE: "677505808551903266"
-      CJ_ASSISTANCE_COOLDOWN: "5m"
-      DEBUG: "1"
+      CJ_MONGO_HOST: ${CJ_MONGO_HOST}
+      CJ_MONGO_PORT: ${CJ_MONGO_PORT}
+      CJ_MONGO_NAME: ${CJ_MONGO_NAME}
+      CJ_MONGO_USER: ${CJ_MONGO_USER}
+      CJ_MONGO_PASS: ${CJ_MONGO_PASS}
+      CJ_DISCORD_TOKEN: ${CJ_DISCORD_TOKEN:?required}
+      CJ_DEFAULT_CHANNEL: ${CJ_DEFAULT_CHANNEL:?required}
+      CJ_DEFAULT_ROLE: ${CJ_DEFAULT_ROLE:?required}
+      CJ_DEFAULT_COOLDOWN: ${CJ_DEFAULT_COOLDOWN:-180}
+      CJ_HEARTBEAT: ${CJ_HEARTBEAT:-60}
+      CJ_BOT_ID: ${CJ_BOT_ID:?required}
+      CJ_GUILD_ID: ${CJ_GUILD_ID:?required}
+      CJ_VERIFIED_ROLE: ${CJ_VERIFIED_ROLE:?required}
+      CJ_WIKI_URL: ${CJ_WIKI_URL:-https://github.com/openmultiplayer/wiki.git}
+      CJ_README_CHANNEL: ${CJ_README_CHANNEL:?required}
+      CJ_README_GIST_ID: ${CJ_README_GIST_ID:?required}
+      CJ_README_GIST_FILE_NAME: ${CJ_README_GIST_FILE_NAME:-samp-discord-rules.md}
+      CJ_NO_DATABASE: ${CJ_NO_DATABASE:-false}
+      DEBUG: ${DEBUG:-0}
     networks:
       - default
       - mongodb
@@ -56,22 +51,3 @@ services:
     labels:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=true
-
-  express:
-    image: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_ADMINUSERNAME: cj
-      ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGODB_PASSWORD}"
-      ME_CONFIG_BASICAUTH_USERNAME: cj
-      ME_CONFIG_BASICAUTH_PASSWORD: "${MONGO_EXPRESS_PASSWORD}"
-    networks:
-      - default
-      - mongodb
-    labels:
-      traefik.enable: true
-      traefik.docker.network: gateway
-      traefik.http.routers.cjdb.rule: Host(`cjdb.southcla.ws`)
-      traefik.http.routers.cjdb.entrypoints: https
-      traefik.http.routers.cjdb.tls.certresolver: default
