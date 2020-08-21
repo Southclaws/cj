@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	scraper "github.com/Southclaws/go-cloudflare-scraper"
 	"github.com/pkg/errors"
 	"gopkg.in/xmlpath.v2"
 )
@@ -29,11 +28,7 @@ type UserProfile struct {
 // NewForumClient creates a new forum clienta
 func NewForumClient() (fc *ForumClient, err error) {
 	fc = new(ForumClient)
-	scrpr, err := scraper.NewTransport(http.DefaultTransport)
-	if err != nil {
-		return
-	}
-	fc.httpClient = &http.Client{Transport: scrpr}
+	fc.httpClient = &http.Client{}
 	return
 }
 

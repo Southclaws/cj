@@ -2,8 +2,6 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/PuerkitoBio/goquery v1.5.0 h1:uGvmFXOA73IKluu/F84Xd1tt/z07GYm8X49XKHP7EJk=
 github.com/PuerkitoBio/goquery v1.5.0/go.mod h1:qD2PgZ9lccMbQlc7eEOjaeRlFQON7xY8kdmcsrnKqMg=
-github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d h1:ffVejUAmkVQFCv6qihKynFycn326rbRcboioMVgCIhE=
-github.com/Southclaws/go-cloudflare-scraper v0.0.0-20171030160446-76acfe58205d/go.mod h1:cWIFYwYx1ZVfEoywlnsOuxR4NIQ3NRe2ub2fbFv4n7A=
 github.com/Southclaws/go-samp-query v1.1.2/go.mod h1:veYZpOaPw6PXwvTGo9Rg3INKQV/2PR8Bn8p+bQedFNM=
 github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b h1:ld4yYcqMtGY4Jq9cQ2+wYi1rzR4oHUbkJM/mf/HoC+w=
 github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b/go.mod h1:sgFIJctbr3ZY6nyOzY35z4AOJ4Ime4D501r9aYTGcvU=
