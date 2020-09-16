@@ -107,6 +107,7 @@ func (cm *CommandManager) commandWhois(
 					"243718819573399562", // maddinat0r
 					"253685655471783936", // Graber
 					"149359093348433921", // Kar
+					"197959369646669824", //cuddlypanda
 				}
 
 				for _, soldier := range soldiers {

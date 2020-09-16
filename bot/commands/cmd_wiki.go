@@ -129,7 +129,14 @@ func readThread(file string) (string, error) {
 	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
 	parameters := "**Parameters**"
 	relatedFuncs := "**Related Functions**"
-	example := "**Example Usage**\n```c\n" + doc.Find("pre code").Text() + "\n```"
+
+	example := "**Example Usage**\n"
+	exampleText := doc.Find("pre code").Text()
+	if exampleText != "" {
+		example = example + "```c\n" + exampleText + "\n```"
+	} else {
+		example = example + "\tThis page doesn't have an example!"
+	}
 
 	var (
 		selectionCache       *goquery.Selection

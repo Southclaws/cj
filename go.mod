@@ -9,7 +9,7 @@ replace gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v
 require (
 	github.com/PuerkitoBio/goquery v1.5.0
 	github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b
-	github.com/bwmarrin/discordgo v0.20.2
+	github.com/bwmarrin/discordgo v0.22.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/google/go-github/v28 v28.1.1
 	github.com/joho/godotenv v1.3.0
@@ -24,7 +24,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/stretchr/testify v1.6.0
 	github.com/texttheater/golang-levenshtein v0.0.0-20180516184445-d188e65d659e
-	go.uber.org/zap v1.14.1
+	go.uber.org/zap v1.15.0
 	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/russross/blackfriday.v2 v2.0.0-00010101000000-000000000000
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
