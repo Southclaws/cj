@@ -19,7 +19,6 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d // indirect
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/stretchr/testify v1.6.0
@@ -27,7 +26,6 @@ require (
 	go.uber.org/zap v1.15.0
 	gopkg.in/resty.v1 v1.12.0
 	gopkg.in/russross/blackfriday.v2 v2.0.0-00010101000000-000000000000
-	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
 )
