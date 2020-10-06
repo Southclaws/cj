@@ -17,7 +17,7 @@ type Config struct {
 	MongoPass          string              `split_words:"true" required:"false"`
 	DiscordToken       string              `split_words:"true" required:"true"`                                                    // discord API token
 	ReadmeChannel      string              `split_words:"true" required:"true"`                                                    // the default readme channel if not set in DB
-	AdsChannel         string              `split_words:"true" required:"true" default:"763069609712025641"`                       // the default server ads channel if not set in DB
+	AdsChannel         string              `split_words:"true" required:"false" default:"763069609712025641"`                      // the default server ads channel if not set in DB
 	DefaultChannel     string              `split_words:"true" required:"true"`                                                    // the default command channel if not set in DB
 	DefaultRole        string              `split_words:"true" required:"true"`                                                    // the default command role if not set in DB
 	DefaultCooldown    time.Duration       `split_words:"true" required:"true"`                                                    // the default command cooldown if not set in DB
