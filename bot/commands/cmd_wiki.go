@@ -125,18 +125,9 @@ func readThread(file string) (string, error) {
 		log.Fatal(docErr)
 	}
 
-	header := "wiki.open.mp | __" + threadName(file) + "__\n<https://wiki.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">")
+	header := "wiki.open.mp | __" + threadName(file) + "__\n<https://www.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">")
 	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
 	parameters := "**Parameters**"
-	relatedFuncs := "**Related Functions**"
-
-	example := "**Example Usage**\n"
-	exampleText := doc.Find("pre code").Text()
-	if exampleText != "" {
-		example = example + "```c\n" + exampleText + "\n```"
-	} else {
-		example = example + "\tThis page doesn't have an example!"
-	}
 
 	var (
 		selectionCache       *goquery.Selection
@@ -161,11 +152,7 @@ func readThread(file string) (string, error) {
 		formatedText = formatedText + "\n\n" + parameters + parametersAddition
 	}
 
-	if len(relatedFuncsAddition) > 0 {
-		formatedText = formatedText + "\n\n" + relatedFuncs + relatedFuncsAddition
-	}
-
-	formatedText = formatedText + "\n\n" + example
+	formatedText = formatedText + "\n\n"
 
 	return formatedText, nil
 }
