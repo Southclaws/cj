@@ -43,8 +43,12 @@ func (w *Watcher) OnMessage(m discordgo.Message) error {
 		return nil
 	}
 
-	message := http.ReplaceAllString(m.Content, "https://www.open.mp/l/$1")
-	w.discord.ChannelMessageSend(w.channel, message)
+	message := http.ReplaceAllString(m.Content, "https://r.open.mp/$1")
+	w.discord.ChannelMessageSendEmbed(w.channel, &discordgo.MessageEmbed{
+		Type:        discordgo.EmbedTypeArticle,
+		Title:       "Server",
+		Description: message,
+	})
 	if err := w.discord.S.ChannelMessageDelete(w.channel, m.ID); err != nil {
 		return err
 	}
