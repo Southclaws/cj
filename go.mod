@@ -16,7 +16,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kristoisberg/gonesyntees v0.0.0-20190301122441-7d230b161c5b
 	github.com/mb-14/gomarkov v0.0.0-20190125094512-044dd0dcb5e7
-	github.com/microcosm-cc/bluemonday v1.0.2
+	github.com/microcosm-cc/bluemonday v1.0.4
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
