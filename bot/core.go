@@ -9,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 
+	"github.com/Southclaws/cj/bot/admod"
 	"github.com/Southclaws/cj/bot/commands"
 	"github.com/Southclaws/cj/bot/heartbeat"
 	"github.com/Southclaws/cj/discord"
@@ -73,6 +74,7 @@ func Start(config *types.Config) {
 	app.extensions = []Extension{
 		&commands.CommandManager{},
 		&heartbeat.Heartbeat{},
+		&admod.Watcher{},
 	}
 
 	for _, ex := range app.extensions {
