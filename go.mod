@@ -21,7 +21,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/stretchr/testify v1.6.0
+	github.com/stretchr/testify v1.6.1
 	github.com/texttheater/golang-levenshtein v0.0.0-20180516184445-d188e65d659e
 	go.uber.org/zap v1.15.0
 	gopkg.in/resty.v1 v1.12.0
