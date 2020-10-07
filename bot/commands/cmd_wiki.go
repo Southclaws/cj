@@ -232,5 +232,5 @@ func buildhelpstring(file string) string {
 	
 **Help open.mp out!** Click this search link and find the page to help improve the rankings!
 	
-https://www.google.com/search?client=firefox-b-d&q=open+mp+%s`, strings.ToLower(file))
+https://www.google.com/search?q=open+mp+%s`, strings.ToLower(file))
 }
