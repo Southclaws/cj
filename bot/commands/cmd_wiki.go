@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -66,7 +67,7 @@ func (cm *CommandManager) commandWiki(
 		return
 	} else if wikiResult.Err == errNoThreadFound {
 		// TODO: url shouldn't be hardcoded
-		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: "+"<https://github.com/openmultiplayer/wiki>")
+		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: "+"<https://github.com/openmultiplayer/wiki>"+buildhelpstring(args))
 		return
 	} else if wikiResult.Err == errCouldntReadThread {
 		cm.Discord.ChannelMessageSend(message.ChannelID, errCouldntReadThread.Error())
@@ -127,7 +128,8 @@ func readThread(file string) (string, error) {
 
 	header := "wiki.open.mp | __" + threadName(file) + "__\n<https://www.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">")
 	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
-	parameters := "**Parameters**"
+	// parameters := "**Parameters**"
+	rankings := buildhelpstring(file)
 
 	var (
 		selectionCache       *goquery.Selection
@@ -146,11 +148,11 @@ func readThread(file string) (string, error) {
 		parametersAddition = parametersAddition + "\n\t`" + selectionCache.Text() + "`\t_*" + selectionCache.Next().Text() + "*_"
 	})
 
-	formatedText := header + "\n\n" + description
+	formatedText := header + "\n\n" + description + rankings
 
-	if len(parametersAddition) > 0 {
-		formatedText = formatedText + "\n\n" + parameters + parametersAddition
-	}
+	// if len(parametersAddition) > 0 {
+	// 	formatedText = formatedText + "\n\n" + parameters + parametersAddition
+	// }
 
 	formatedText = formatedText + "\n\n"
 
@@ -223,4 +225,12 @@ func getWikiFiles() (files []string, err error) {
 
 func threadName(threadPath string) string {
 	return strings.TrimSuffix(filepath.Base(threadPath), filepath.Ext(threadPath))
+}
+
+func buildhelpstring(file string) string {
+	return fmt.Sprintf(`
+	
+**Help open.mp out!** Click this search link and find the page to help improve the rankings!
+	
+https://www.google.com/search?client=firefox-b-d&q=open+mp+%s`, file)
 }
