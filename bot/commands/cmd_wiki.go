@@ -126,7 +126,7 @@ func readThread(file string) (string, error) {
 		log.Fatal(docErr)
 	}
 
-	header := "wiki.open.mp | __" + threadName(file) + "__\n<https://www.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">")
+	header := "wiki.open.mp | __" + threadName(file) + "__\n||<https://www.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">||")
 	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
 	// parameters := "**Parameters**"
 	rankings := buildhelpstring(threadName(file))
