@@ -129,7 +129,7 @@ func readThread(file string) (string, error) {
 	header := "wiki.open.mp | __" + threadName(file) + "__\n<https://www.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">")
 	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
 	// parameters := "**Parameters**"
-	rankings := buildhelpstring(file)
+	rankings := buildhelpstring(threadName(file))
 
 	var (
 		selectionCache       *goquery.Selection
@@ -232,5 +232,5 @@ func buildhelpstring(file string) string {
 	
 **Help open.mp out!** Click this search link and find the page to help improve the rankings!
 	
-https://www.google.com/search?client=firefox-b-d&q=open+mp+%s`, file)
+https://www.google.com/search?client=firefox-b-d&q=open+mp+%s`, strings.ToLower(file))
 }
