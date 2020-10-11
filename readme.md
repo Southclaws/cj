@@ -6,8 +6,6 @@
 
 ![CJ](cj.png)
 
-CJ verifies Burgershot (formerly SA:MP) forum accounts and performs other tasks if you ask nicely.
-
 ## Development
 
 This project is open to anyone who wants to contribute, large or small! Whether you noticed a typo or want to add a
@@ -38,8 +36,7 @@ password. If you don't have Docker, you'll need to
 If you don't need a database for your feature, just add `NO_DATABASE=true` to `.env`.
 
 Finally, the application requires some configuration. Copy the `example.env` to `.env` and modify it to use your token
-and various IDs. Depending on what you're working on, some values won't be necessary. For example, unless you're
-actually working on the verification system, you don't need to set the verified role ID.
+and various IDs. Depending on what you're working on, some values won't be necessary.
 
 Now you can build and run the application with `make local`.
 

@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-
-	"github.com/Southclaws/cj/types"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
@@ -36,12 +34,6 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandRoles,
 			Description: "List of roles and their IDs.",
 		},
-		"verify": {
-			Function:    cm.commandVerify,
-			Source:      CommandSourcePRIVATE,
-			Description: "Verify you are the owner of a Burgershot forum account.",
-			Settings:    types.CommandSettings{Private: true},
-		},
 		"/say": {
 			Function:    cm.commandSay,
 			Source:      CommandSourceADMINISTRATIVE,
@@ -56,16 +48,6 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandWhois,
 			Source:      CommandSourcePRIMARY,
 			Description: "Display a Discord user's forum account name.",
-		},
-		"/setverify": {
-			Function:    cm.commandSetVerify,
-			Source:      CommandSourceADMINISTRATIVE,
-			Description: "Manually verify a user.",
-		},
-		"/unverify": {
-			Function:    cm.commandUnVerify,
-			Source:      CommandSourceADMINISTRATIVE,
-			Description: "Manually unverify a user.",
 		},
 		"cj": {
 			Function:    cm.commandCJQuote,

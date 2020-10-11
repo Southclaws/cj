@@ -5,8 +5,6 @@ import (
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
-
-	"github.com/Southclaws/cj/types"
 )
 
 // User is a recorded and verified burgershot forum user.
@@ -17,33 +15,6 @@ type User struct {
 	ForumUserName  string `json:"forum_user_name" bson:"forum_user_name"`
 	BurgerUserName string `json:"burger_user_name" bson:"burger_user_name"`
 	BurgerVerify   bool   `json:"burgershot_verified" bson:"burgershot_verified"`
-}
-
-// StoreVerifiedUser is for when a user finishes their verification.
-func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
-	legacy, err := m.IsUserLegacyVerified(verification.DiscordUser.ID)
-	if legacy {
-		err = m.accounts.Update(
-			bson.D{
-				{"discord_user_id", verification.DiscordUser.ID},
-			},
-			bson.D{
-				{"$set", bson.D{
-					{"burger_user_id", verification.ForumUser},
-					{"burger_user_name", verification.UserProfile.UserName},
-					{"burgershot_verified", true},
-				}},
-			})
-	} else {
-		err = m.accounts.Insert(&User{
-			DiscordUserID:  verification.DiscordUser.ID,
-			BurgerUserID:   verification.ForumUser,
-			BurgerUserName: verification.UserProfile.UserName,
-			BurgerVerify:   true,
-		})
-	}
-
-	return
 }
 
 // UpdateUserName updates a person's Burgershot forum name in the database. In case they have their name changed.

@@ -21,7 +21,6 @@ func (cm *CommandManager) commandUserInfo(
 ) {
 	var (
 		profile       forum.UserProfile
-		verified      bool
 		link          string
 		cachedProfile interface{}
 		found         bool
@@ -34,46 +33,26 @@ func (cm *CommandManager) commandUserInfo(
 	}
 
 	for _, user := range message.Mentions {
-		verified, err = cm.Storage.IsUserVerified(user.ID)
+		_, link, err = cm.Storage.GetForumUserFromDiscordUser(user.ID)
 		if err != nil {
-			result += err.Error() + " "
-			continue
+			err = errors.Wrap(err, "failed to get forum user from discord user")
+			return
 		}
 
-		if !verified {
-			verified, err = cm.Storage.IsUserLegacyVerified(user.ID)
-			if err != nil {
-				result += err.Error() + " "
-				continue
-			}
-
-			if verified {
-				result += fmt.Sprintf("The user <@%s> is not verified on Burgershot, they need to message CJ with `verify`.", user.ID)
-			} else {
-				result += fmt.Sprintf("<@%s> is not verified. ", user.ID)
-			}
+		cachedProfile, found = cm.Cache.Get(link)
+		if found {
+			profile = *(cachedProfile.(*forum.UserProfile))
 		} else {
-			_, link, err = cm.Storage.GetForumUserFromDiscordUser(user.ID)
+			profile, err = cm.Forum.GetUserProfilePage(link)
 			if err != nil {
-				err = errors.Wrap(err, "failed to get forum user from discord user")
+				err = errors.Wrap(err, "failed to get user profile page")
 				return
 			}
-
-			cachedProfile, found = cm.Cache.Get(link)
-			if found {
-				profile = *(cachedProfile.(*forum.UserProfile))
-			} else {
-				profile, err = cm.Forum.GetUserProfilePage(link)
-				if err != nil {
-					err = errors.Wrap(err, "failed to get user profile page")
-					return
-				}
-			}
-
-			result += fmt.Sprintf(
-				"*Username:* %s *Member since:* %s *Total posts:* %d *Reputation:* %d ",
-				profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation)
 		}
+
+		result += fmt.Sprintf(
+			"*Username:* %s *Member since:* %s *Total posts:* %d *Reputation:* %d ",
+			profile.UserName, profile.JoinDate, profile.TotalPosts, profile.Reputation)
 	}
 
 	cm.Discord.ChannelMessageSend(message.ChannelID, result)

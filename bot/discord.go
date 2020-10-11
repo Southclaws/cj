@@ -1,8 +1,6 @@
 package bot
 
 import (
-	"fmt"
-
 	"github.com/Southclaws/cj/discord"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -19,7 +17,7 @@ type ChannelDM struct {
 
 const greeting = `Hi! Welcome to the San Andreas Multiplayer unofficial Discord server!
 
-You can verify your forum account by typing %s below, this helps us ensure people aren't impersonating others.`
+Please read the rules and be respectful.`
 
 // ConnectDiscord sets up the Discord API and event listeners
 func (app *App) ConnectDiscord() (err error) {
@@ -53,29 +51,6 @@ func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
 	zap.L().Debug("connected to Discord gateway")
 
 	app.ready <- func() error {
-		roles, err := s.GuildRoles(app.config.GuildID)
-		if err != nil {
-			return errors.Wrap(err, "failed to get guild roles")
-		}
-
-		found := false
-		for _, role := range roles {
-			if role.ID == app.config.VerifiedRole {
-				found = true
-				break
-			}
-		}
-		if !found {
-			zap.L().Error("verified role not found",
-				zap.String("id", app.config.VerifiedRole),
-				zap.Any("roles", roles))
-			return errors.New("verified role not found")
-		}
-
-		if !app.config.NoInitSync {
-			// go app.doSync()
-		}
-
 		channels, err := app.discordClient.S.GuildChannels(app.config.GuildID)
 		if err != nil {
 			return errors.Wrap(err, "failed to get channels")
@@ -135,25 +110,13 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 }
 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
-	verified, err := app.storage.IsUserVerified(event.Member.User.ID)
+	ch, err := s.UserChannelCreate(event.Member.User.ID)
 	if err != nil {
-		zap.L().Error("failed to check if user verified", zap.Error(err))
+		zap.L().Error("failed to create user channel", zap.Error(err))
+		return
 	}
-
-	if verified {
-		err = app.discordClient.S.GuildMemberRoleAdd(app.config.GuildID, event.Member.User.ID, app.config.VerifiedRole)
-		if err != nil {
-			zap.L().Error("failed to add verified role to member", zap.Error(err))
-		}
-	} else {
-		ch, err := s.UserChannelCreate(event.Member.User.ID)
-		if err != nil {
-			zap.L().Error("failed to create user channel", zap.Error(err))
-			return
-		}
-		_, err = app.discordClient.S.ChannelMessageSend(ch.ID, fmt.Sprintf(greeting, "`verify`"))
-		if err != nil {
-			zap.L().Error("failed to send message", zap.Error(err))
-		}
+	_, err = app.discordClient.S.ChannelMessageSend(ch.ID, greeting)
+	if err != nil {
+		zap.L().Error("failed to send message", zap.Error(err))
 	}
 }

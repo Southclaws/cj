@@ -20,7 +20,6 @@ type Storer interface {
 	GetRandomMessage() (result ChatLog, err error)
 	GetRandomUser() (result string, err error)
 
-	StoreVerifiedUser(verification types.Verification) (err error)
 	UpdateUserUsername(discordUserID string, username string) (err error)
 	RemoveUser(id string) (err error)
 	IsUserVerified(discordUserID string) (verified bool, err error)
