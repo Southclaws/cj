@@ -82,30 +82,3 @@ func TestApp_GetForumUserFromDiscordUser(t *testing.T) {
 		})
 	}
 }
-
-func TestApp_GetForumNameFromDiscordUser(t *testing.T) {
-	type args struct {
-		discordUserID string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{"valid", args{"86435690711093248"}, "[HLF]Southclaw", false},
-		{"invalid", args{"86435690711099948"}, "", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, got, err := api.GetForumNameFromDiscordUser(tt.args.discordUserID)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("App.GetForumNameFromDiscordUser() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("App.GetForumNameFromDiscordUser() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
