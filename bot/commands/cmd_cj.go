@@ -1007,6 +1007,6 @@ func (cm *CommandManager) commandCJQuote(
 ) {
 	rand.Seed(time.Now().UnixNano())
 	quote := quotes[rand.Intn(len(quotes))]
-	cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, quote)
+	cm.Discord.ChannelMessageSend(message.ChannelID, quote)
 	return
 }
