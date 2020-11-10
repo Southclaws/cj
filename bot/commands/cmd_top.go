@@ -27,6 +27,6 @@ func (cm *CommandManager) commandTop(
 		return
 	}
 
-	_, err = cm.Discord.S.ChannelMessageSendEmbed(cm.Config.PrimaryChannel, rankings)
+	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, rankings)
 	return
 }
