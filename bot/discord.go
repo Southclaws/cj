@@ -98,7 +98,10 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		}
 	}
 
-	err = app.storage.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
+	err = app.storage.RecordChatLog(event.Message.Author.ID,
+		event.Message.ChannelID,
+		event.Message.Content,
+		event.Message.ID)
 	if err != nil {
 		zap.L().Error("failed to record chat log", zap.Error(err))
 	}
