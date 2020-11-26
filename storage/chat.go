@@ -9,19 +9,21 @@ import (
 
 // ChatLog represents a single logged chat message from Discord
 type ChatLog struct {
-	Timestamp      int64
-	DiscordUserID  string
-	DiscordChannel string
-	Message        string
+	Timestamp      		int64
+	DiscordUserID  		string
+	DiscordChannel 		string
+	Message        		string
+	DiscordMessageID	string
 }
 
 // RecordChatLog records a chat message from a user in a channel
-func (m *MongoStorer) RecordChatLog(discordUserID string, discordChannel string, message string) (err error) {
+func (m *MongoStorer) RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error) {
 	record := ChatLog{
 		time.Now().Unix(),
 		discordUserID,
 		discordChannel,
 		message,
+		messageID,
 	}
 
 	err = m.chat.Insert(record)

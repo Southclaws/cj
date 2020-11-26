@@ -14,7 +14,7 @@ import (
 
 // Storer describes a type that is capable of persisting data
 type Storer interface {
-	RecordChatLog(discordUserID string, discordChannel string, message string) (err error)
+	RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error)
 	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
 	GetRandomMessage() (result ChatLog, err error)
