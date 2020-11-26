@@ -69,7 +69,6 @@ func New(config Config) (m *MongoStorer, err error) {
 
 	if config.MongoPass != "" {
 		err = m.mongo.Login(&mgo.Credential{
-			Source:   config.MongoName,
 			Username: config.MongoUser,
 			Password: config.MongoPass,
 		})
