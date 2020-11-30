@@ -8,6 +8,9 @@ import (
 
 type Memory struct{}
 
+func (m *Memory) GetUserOrCreate(discordUserID string) (result User) {
+	return
+}
 func (m *Memory) RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error) {
 	return
 }
@@ -21,6 +24,12 @@ func (m *Memory) GetRandomMessage() (result ChatLog, err error) {
 	return
 }
 func (m *Memory) GetRandomUser() (result string, err error) {
+	return
+}
+func (m *Memory) GetMessageByID(messageID string) (message ChatLog, err error) {
+	return
+}
+func (m *Memory) StoreVerifiedUser(verification types.Verification) (err error) {
 	return
 }
 func (m *Memory) UpdateUserUsername(discordUserID string, username string) (err error) {

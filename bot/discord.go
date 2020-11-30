@@ -30,6 +30,7 @@ func (app *App) ConnectDiscord() (err error) {
 	app.discordClient.S.AddHandler(app.onReady)
 	app.discordClient.S.AddHandler(app.onMessage)
 	app.discordClient.S.AddHandler(app.onJoin)
+	app.discordClient.S.AddHandler(app.onReactionAdd)
 
 	err = app.discordClient.S.Open()
 	if err != nil {
@@ -110,6 +111,19 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		zap.String("author", event.Message.Author.Username),
 		zap.String("message", event.Message.Content),
 	)
+}
+
+func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReactionAdd) {
+	//	message, err := app.storage.GetMessageByID(event.MessageID)
+	//if err != nil || message.DiscordUserID == "" {
+		// Message likely just not exists in the DB, don't count.
+	//	return
+	//}
+
+	//var user = app.storage.GetUserOrCreate(message.DiscordUserID)
+	zap.L().Debug("Got a new reaction: ", zap.String("msg", event.Emoji.APIName()))
+	app.discordClient.S.ChannelMessageSend(event.ChannelID,
+		fmt.Sprintf("<:%s>", event.Emoji.APIName()))
 }
 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {

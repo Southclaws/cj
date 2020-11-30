@@ -9,12 +9,57 @@ import (
 
 // User is a recorded and verified burgershot forum user.
 type User struct {
-	DiscordUserID  string `json:"discord_user_id" bson:"discord_user_id"`
-	ForumUserID    string `json:"forum_user_id" bson:"forum_user_id"`
-	BurgerUserID   string `json:"burger_user_id" bson:"burger_user_id"`
-	ForumUserName  string `json:"forum_user_name" bson:"forum_user_name"`
-	BurgerUserName string `json:"burger_user_name" bson:"burger_user_name"`
-	BurgerVerify   bool   `json:"burgershot_verified" bson:"burgershot_verified"`
+	DiscordUserID  		string 				`json:"discord_user_id" bson:"discord_user_id"`
+	ForumUserID    		string 				`json:"forum_user_id" bson:"forum_user_id"`
+	BurgerUserID   		string 				`json:"burger_user_id" bson:"burger_user_id"`
+	ForumUserName  		string 				`json:"forum_user_name" bson:"forum_user_name"`
+	BurgerUserName 		string 				`json:"burger_user_name" bson:"burger_user_name"`
+	BurgerVerify   		bool   				`json:"burgershot_verified" bson:"burgershot_verified"`
+	ReceivedReactions	[]ReactionCounter	`json:"received_reactions" bson:"received_reactions,omitempty"`
+}
+
+type ReactionCounter struct {
+	ReactionId	string
+	Count		int
+}
+
+// StoreVerifiedUser is for when a user finishes their verification.
+func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
+	legacy, err := m.IsUserLegacyVerified(verification.DiscordUser.ID)
+	if legacy {
+		err = m.accounts.Update(
+			bson.D{
+				{"discord_user_id", verification.DiscordUser.ID},
+			},
+			bson.D{
+				{"$set", bson.D{
+					{"burger_user_id", verification.ForumUser},
+					{"burger_user_name", verification.UserProfile.UserName},
+					{"burgershot_verified", true},
+				}},
+			})
+	} else {
+		err = m.accounts.Insert(&User{
+			DiscordUserID:  verification.DiscordUser.ID,
+			BurgerUserID:   verification.ForumUser,
+			BurgerUserName: verification.UserProfile.UserName,
+			BurgerVerify:   true,
+		})
+	}
+
+	return
+}
+
+func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User) {
+	err := m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
+	if err != nil {
+		user.DiscordUserID = discordUserID
+		err = m.accounts.Insert(&User{
+			DiscordUserID:  discordUserID,
+			BurgerVerify: false,
+		})
+	}
+	return user
 }
 
 // UpdateUserName updates a person's Burgershot forum name in the database. In case they have their name changed.
