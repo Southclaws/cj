@@ -5,6 +5,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	"fmt"
 )
 
 // ChannelDM is a direct message channel

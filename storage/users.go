@@ -23,33 +23,6 @@ type ReactionCounter struct {
 	Count		int
 }
 
-// StoreVerifiedUser is for when a user finishes their verification.
-func (m *MongoStorer) StoreVerifiedUser(verification types.Verification) (err error) {
-	legacy, err := m.IsUserLegacyVerified(verification.DiscordUser.ID)
-	if legacy {
-		err = m.accounts.Update(
-			bson.D{
-				{"discord_user_id", verification.DiscordUser.ID},
-			},
-			bson.D{
-				{"$set", bson.D{
-					{"burger_user_id", verification.ForumUser},
-					{"burger_user_name", verification.UserProfile.UserName},
-					{"burgershot_verified", true},
-				}},
-			})
-	} else {
-		err = m.accounts.Insert(&User{
-			DiscordUserID:  verification.DiscordUser.ID,
-			BurgerUserID:   verification.ForumUser,
-			BurgerUserName: verification.UserProfile.UserName,
-			BurgerVerify:   true,
-		})
-	}
-
-	return
-}
-
 func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User) {
 	err := m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
 	if err != nil {

@@ -29,9 +29,6 @@ func (m *Memory) GetRandomUser() (result string, err error) {
 func (m *Memory) GetMessageByID(messageID string) (message ChatLog, err error) {
 	return
 }
-func (m *Memory) StoreVerifiedUser(verification types.Verification) (err error) {
-	return
-}
 func (m *Memory) UpdateUserUsername(discordUserID string, username string) (err error) {
 	return
 }
