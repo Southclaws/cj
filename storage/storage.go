@@ -23,6 +23,7 @@ type Storer interface {
 
 	GetUserOrCreate(discordUserID string) (result User)
 	UpdateUserUsername(discordUserID string, username string) (err error)
+	UpdateUser(user User) (err error)
 	RemoveUser(id string) (err error)
 	IsUserVerified(discordUserID string) (verified bool, err error)
 	IsUserLegacyVerified(discordUserID string) (verified bool, err error)
@@ -30,6 +31,8 @@ type Storer interface {
 	GetForumUserFromDiscordUser(discordUserID string) (legacyUserID string, burgerUserID string, err error)
 	GetForumNameFromDiscordUser(discordUserID string) (legacyUserName string, burgerUserName string, err error)
 	GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error)
+	AddEmojiReactionToUser(discordUserID string, emoji string) (err error)
+	RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error)
 
 	SetCommandSettings(command string, settings types.CommandSettings) (err error)
 	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)

@@ -18,11 +18,12 @@ type User struct {
 	ReceivedReactions	[]ReactionCounter	`json:"received_reactions" bson:"received_reactions,omitempty"`
 }
 
-type ReactionCounter struct {
-	ReactionId	string
-	Count		int
+type ReactionCounter struct{
+	Counter 	int
+	Reaction	string
 }
 
+// GetUserOrCreate gets a user or creates one and returns it
 func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User) {
 	err := m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
 	if err != nil {
@@ -35,7 +36,48 @@ func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User) {
 	return user
 }
 
-// UpdateUserName updates a person's Burgershot forum name in the database. In case they have their name changed.
+// UpdateUser aims to update a full document of a user
+func (m* MongoStorer) UpdateUser(user User) (err error) {
+	err = m.accounts.Update(bson.M{"discord_user_id": user.DiscordUserID},
+		bson.M{"$set": user})
+	return err
+}
+
+
+// AddEmojiReactionToUser records an emoji reaction to a message of a discordUser.
+func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string) (err error) {
+	user := m.GetUserOrCreate(discordUserID)
+	var found = false
+	for i, v := range user.ReceivedReactions {
+		if v.Reaction == emoji {
+			found = true
+			user.ReceivedReactions[i].Counter++
+		}
+	}
+	if found == false {
+		entry := ReactionCounter{
+			Counter: 1,
+			Reaction: emoji,
+		}
+		user.ReceivedReactions =  append(user.ReceivedReactions, entry)
+	}
+	err = m.UpdateUser(user)
+	return err
+}
+
+// RemoveEmojiReactionFromUser records an emoji reaction to a message of a discordUser.
+func (m *MongoStorer) RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error) {
+	user := m.GetUserOrCreate(discordUserID)
+	for i, v := range user.ReceivedReactions {
+		if v.Reaction == emoji {
+			user.ReceivedReactions[i].Counter--
+		}
+	}
+	err = m.UpdateUser(user)
+	return
+}
+
+// UpdateUserUsername updates a person's Burgershot forum name in the database. In case they have their name changed.
 func (m *MongoStorer) UpdateUserUsername(discordUserID string, username string) (err error) {
 	err = m.accounts.Update(
 		bson.D{

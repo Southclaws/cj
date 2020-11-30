@@ -32,6 +32,9 @@ func (m *Memory) GetMessageByID(messageID string) (message ChatLog, err error) {
 func (m *Memory) UpdateUserUsername(discordUserID string, username string) (err error) {
 	return
 }
+func (m *Memory) UpdateUser(user User) (err error) {
+	return
+}
 func (m *Memory) RemoveUser(id string) (err error) {
 	return
 }
@@ -51,6 +54,12 @@ func (m *Memory) GetForumNameFromDiscordUser(discordUserID string) (legacyUserNa
 	return
 }
 func (m *Memory) GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error) {
+	return
+}
+func (m *Memory) AddEmojiReactionToUser(discordUserID string, emoji string) (err error) {
+	return
+}
+func (m *Memory) RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error) {
 	return
 }
 func (m *Memory) SetCommandSettings(command string, settings types.CommandSettings) (err error) {

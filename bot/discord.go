@@ -5,8 +5,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
-	"fmt"
 )
 
 // ChannelDM is a direct message channel
@@ -33,6 +31,7 @@ func (app *App) ConnectDiscord() (err error) {
 	app.discordClient.S.AddHandler(app.onMessage)
 	app.discordClient.S.AddHandler(app.onJoin)
 	app.discordClient.S.AddHandler(app.onReactionAdd)
+	app.discordClient.S.AddHandler(app.onReactionRemove)
 
 	err = app.discordClient.S.Open()
 	if err != nil {
@@ -116,16 +115,31 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 }
 
 func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReactionAdd) {
-	//	message, err := app.storage.GetMessageByID(event.MessageID)
-	//if err != nil || message.DiscordUserID == "" {
-		// Message likely just not exists in the DB, don't count.
-	//	return
-	//}
+	message, err := app.storage.GetMessageByID(event.MessageID)
+	if err != nil || message.DiscordUserID == "" {
+		// Message likely just doesn't exists in the DB
+		return
+	}
 
-	//var user = app.storage.GetUserOrCreate(message.DiscordUserID)
-	zap.L().Debug("Got a new reaction: ", zap.String("msg", event.Emoji.APIName()))
-	app.discordClient.S.ChannelMessageSend(event.ChannelID,
-		fmt.Sprintf("<:%s>", event.Emoji.APIName()))
+	emoji := event.Emoji.APIName()
+	err = app.storage.AddEmojiReactionToUser(message.DiscordUserID, emoji)
+	if err != nil {
+		zap.L().Debug("Error: ", zap.Error(err))
+	}
+}
+
+func (app *App) onReactionRemove(s *discordgo.Session, event *discordgo.MessageReactionRemove) {
+	message, err := app.storage.GetMessageByID(event.MessageID)
+	if err != nil || message.DiscordUserID == "" {
+		// Message likely just doesn't exists in the DB
+		return
+	}
+
+	emoji := event.Emoji.APIName()
+	err = app.storage.RemoveEmojiReactionFromUser(message.DiscordUserID, emoji)
+	if err != nil {
+		zap.L().Debug("Error: ", zap.Error(err))
+	}
 }
 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
