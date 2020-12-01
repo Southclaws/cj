@@ -107,6 +107,12 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Message frequency",
 			Cooldown:    time.Minute,
 		},
+		"/rep": {
+			Function:    cm.commandRep,
+			Source:      CommandSourcePRIMARY,
+			Description: "Know how many reactions your messages have gotten",
+			Cooldown:    time.Second * 2,
+		},
 	}
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown

@@ -86,3 +86,8 @@ func (m *MongoStorer) GetRandomMessage() (log ChatLog, err error) {
 	}).One(&log)
 	return
 }
+
+func (m *MongoStorer) GetMessageByID(messageID string) (message ChatLog, err error) {
+	err = m.chat.Find(bson.M{"discordmessageid": messageID}).One(&message)
+	return message, err
+}
