@@ -1,6 +1,9 @@
 package bot
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Southclaws/cj/discord"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -122,6 +125,9 @@ func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReac
 	}
 
 	emoji := event.Emoji.APIName()
+	if strings.Index(emoji, ":") != -1 {
+		emoji = fmt.Sprintf("<:%s>", emoji)
+	}
 	err = app.storage.AddEmojiReactionToUser(message.DiscordUserID, emoji)
 	if err != nil {
 		zap.L().Debug("Error: ", zap.Error(err))
@@ -136,6 +142,9 @@ func (app *App) onReactionRemove(s *discordgo.Session, event *discordgo.MessageR
 	}
 
 	emoji := event.Emoji.APIName()
+	if strings.Index(emoji, ":") != -1 {
+		emoji = fmt.Sprintf("<:%s>", emoji)
+	}
 	err = app.storage.RemoveEmojiReactionFromUser(message.DiscordUserID, emoji)
 	if err != nil {
 		zap.L().Debug("Error: ", zap.Error(err))
