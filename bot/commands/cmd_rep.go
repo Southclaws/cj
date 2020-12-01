@@ -32,7 +32,7 @@ func (cm *CommandManager) commandRep(
 	user := cm.Storage.GetUserOrCreate(message.Author.ID)
 
 	count := 0
-	for i, v := range user.ReceivedReactions {
+	for _, v := range user.ReceivedReactions {
 		if v.Reaction == reaction {
 			count = v.Counter
 			break
