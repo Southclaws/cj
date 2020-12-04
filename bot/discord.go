@@ -1,6 +1,9 @@
 package bot
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Southclaws/cj/discord"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -30,6 +33,8 @@ func (app *App) ConnectDiscord() (err error) {
 	app.discordClient.S.AddHandler(app.onReady)
 	app.discordClient.S.AddHandler(app.onMessage)
 	app.discordClient.S.AddHandler(app.onJoin)
+	app.discordClient.S.AddHandler(app.onReactionAdd)
+	app.discordClient.S.AddHandler(app.onReactionRemove)
 
 	err = app.discordClient.S.Open()
 	if err != nil {
@@ -98,7 +103,10 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		}
 	}
 
-	err = app.storage.RecordChatLog(event.Message.Author.ID, event.Message.ChannelID, event.Message.Content)
+	err = app.storage.RecordChatLog(event.Message.Author.ID,
+		event.Message.ChannelID,
+		event.Message.Content,
+		event.Message.ID)
 	if err != nil {
 		zap.L().Error("failed to record chat log", zap.Error(err))
 	}
@@ -107,6 +115,40 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		zap.String("author", event.Message.Author.Username),
 		zap.String("message", event.Message.Content),
 	)
+}
+
+func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReactionAdd) {
+	message, err := app.storage.GetMessageByID(event.MessageID)
+	if err != nil || message.DiscordUserID == "" {
+		// Message likely just doesn't exists in the DB
+		return
+	}
+
+	emoji := event.Emoji.APIName()
+	if strings.Index(emoji, ":") != -1 {
+		emoji = fmt.Sprintf("<:%s>", emoji)
+	}
+	err = app.storage.AddEmojiReactionToUser(message.DiscordUserID, emoji)
+	if err != nil {
+		zap.L().Debug("Error: ", zap.Error(err))
+	}
+}
+
+func (app *App) onReactionRemove(s *discordgo.Session, event *discordgo.MessageReactionRemove) {
+	message, err := app.storage.GetMessageByID(event.MessageID)
+	if err != nil || message.DiscordUserID == "" {
+		// Message likely just doesn't exists in the DB
+		return
+	}
+
+	emoji := event.Emoji.APIName()
+	if strings.Index(emoji, ":") != -1 {
+		emoji = fmt.Sprintf("<:%s>", emoji)
+	}
+	err = app.storage.RemoveEmojiReactionFromUser(message.DiscordUserID, emoji)
+	if err != nil {
+		zap.L().Debug("Error: ", zap.Error(err))
+	}
 }
 
 func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {

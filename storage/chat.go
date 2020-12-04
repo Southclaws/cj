@@ -9,19 +9,21 @@ import (
 
 // ChatLog represents a single logged chat message from Discord
 type ChatLog struct {
-	Timestamp      int64
-	DiscordUserID  string
-	DiscordChannel string
-	Message        string
+	Timestamp      		int64
+	DiscordUserID  		string
+	DiscordChannel 		string
+	Message        		string
+	DiscordMessageID	string
 }
 
 // RecordChatLog records a chat message from a user in a channel
-func (m *MongoStorer) RecordChatLog(discordUserID string, discordChannel string, message string) (err error) {
+func (m *MongoStorer) RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error) {
 	record := ChatLog{
 		time.Now().Unix(),
 		discordUserID,
 		discordChannel,
 		message,
+		messageID,
 	}
 
 	err = m.chat.Insert(record)
@@ -83,4 +85,9 @@ func (m *MongoStorer) GetRandomMessage() (log ChatLog, err error) {
 		}},
 	}).One(&log)
 	return
+}
+
+func (m *MongoStorer) GetMessageByID(messageID string) (message ChatLog, err error) {
+	err = m.chat.Find(bson.M{"discordmessageid": messageID}).One(&message)
+	return message, err
 }

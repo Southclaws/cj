@@ -14,13 +14,16 @@ import (
 
 // Storer describes a type that is capable of persisting data
 type Storer interface {
-	RecordChatLog(discordUserID string, discordChannel string, message string) (err error)
+	RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error)
 	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
 	GetRandomMessage() (result ChatLog, err error)
 	GetRandomUser() (result string, err error)
+	GetMessageByID(messageID string) (message ChatLog, err error)
 
+	GetUserOrCreate(discordUserID string) (result User)
 	UpdateUserUsername(discordUserID string, username string) (err error)
+	UpdateUser(user User) (err error)
 	RemoveUser(id string) (err error)
 	IsUserVerified(discordUserID string) (verified bool, err error)
 	IsUserLegacyVerified(discordUserID string) (verified bool, err error)
@@ -28,6 +31,8 @@ type Storer interface {
 	GetForumUserFromDiscordUser(discordUserID string) (legacyUserID string, burgerUserID string, err error)
 	GetForumNameFromDiscordUser(discordUserID string) (legacyUserName string, burgerUserName string, err error)
 	GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error)
+	AddEmojiReactionToUser(discordUserID string, emoji string) (err error)
+	RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error)
 
 	SetCommandSettings(command string, settings types.CommandSettings) (err error)
 	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)
@@ -68,7 +73,6 @@ func New(config Config) (m *MongoStorer, err error) {
 
 	if config.MongoPass != "" {
 		err = m.mongo.Login(&mgo.Credential{
-			Source:   config.MongoName,
 			Username: config.MongoUser,
 			Password: config.MongoPass,
 		})
