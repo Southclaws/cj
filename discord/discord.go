@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"math/rand"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron"
 
@@ -28,6 +30,22 @@ func New(s *discordgo.Session, c types.Config) (d *Session) {
 func (s *Session) GetUserFromName(name string) (user discordgo.Member, exists bool) {
 	user, exists = s.UserIndex[name]
 	return
+}
+
+func (s *Session) GetRandomChannel() (channel string, err error) {
+	channels, err := s.S.GuildChannels(s.Config.GuildID)
+	if err != nil {
+		return "", err
+	}
+
+	active := []string{}
+	for _, ch := range channels {
+		if ch.ParentID == "375285284079665153" || ch.ParentID == "761517355107876864" {
+			active = append(active, ch.ID)
+		}
+	}
+
+	return active[rand.Intn(len(active))], nil
 }
 
 // GetCurrentChannelMessageFrequency returns messages-per-second

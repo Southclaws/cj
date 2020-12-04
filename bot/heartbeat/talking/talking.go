@@ -43,12 +43,12 @@ func (t *Talk) Init(
 func (t *Talk) Register() (actions []common.Action) {
 	return []common.Action{
 		{
-			Schedule: "@every 30m",
+			Schedule: "@every 20m",
 			Chance:   0.8,
 			Call:     t.quote,
 		},
 		{
-			Schedule: "@every 60m",
+			Schedule: "@every 30m",
 			Chance:   0.5,
 			Call:     t.impersonate,
 		},
@@ -56,7 +56,12 @@ func (t *Talk) Register() (actions []common.Action) {
 }
 
 func (t *Talk) quote() (err error) {
-	f, err := t.Discord.GetCurrentChannelMessageFrequency(t.Config.PrimaryChannel)
+	channelID, err := t.Discord.GetRandomChannel()
+	if err != nil {
+		return
+	}
+
+	f, err := t.Discord.GetCurrentChannelMessageFrequency(channelID)
 	if err != nil {
 		return
 	}
@@ -98,14 +103,19 @@ func (t *Talk) quote() (err error) {
 	nick := t.getMostRecentNick(t.Config.GuildID, randmessage.DiscordUserID)
 	time := time.Unix(randmessage.Timestamp, 0)
 
-	t.Discord.ChannelMessageSend(t.Config.PrimaryChannel, fmt.Sprintf(
+	t.Discord.ChannelMessageSend(channelID, fmt.Sprintf(
 		"> %s\n - **%s** (%s, %d)",
 		randmessage.Message, nick, time.Month().String(), time.Year()))
 	return
 }
 
 func (t *Talk) impersonate() (err error) {
-	f, err := t.Discord.GetCurrentChannelMessageFrequency(t.Config.PrimaryChannel)
+	channelID, err := t.Discord.GetRandomChannel()
+	if err != nil {
+		return
+	}
+
+	f, err := t.Discord.GetCurrentChannelMessageFrequency(channelID)
 	if err != nil {
 		return
 	}
@@ -152,7 +162,7 @@ func (t *Talk) impersonate() (err error) {
 
 	nick := t.getMostRecentNick(t.Config.GuildID, userID)
 
-	t.Discord.ChannelMessageSend(t.Config.PrimaryChannel, fmt.Sprintf(
+	t.Discord.ChannelMessageSend(channelID, fmt.Sprintf(
 		"\"%s\" is what **%s** sounds like",
 		strings.Join(tokens[1:len(tokens)-1], " "), nick))
 
