@@ -119,8 +119,8 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 
 func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReactionAdd) {
 	message, err := app.storage.GetMessageByID(event.MessageID)
-	if err != nil || message.DiscordUserID == "" {
-		// Message likely just doesn't exists in the DB
+	if err != nil || message.DiscordUserID == "" || message.DiscordUserID == event.UserID {
+		// Message likely just doesn't exists in the DB, or is from the user themselves
 		return
 	}
 
@@ -136,8 +136,8 @@ func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReac
 
 func (app *App) onReactionRemove(s *discordgo.Session, event *discordgo.MessageReactionRemove) {
 	message, err := app.storage.GetMessageByID(event.MessageID)
-	if err != nil || message.DiscordUserID == "" {
-		// Message likely just doesn't exists in the DB
+	if err != nil || message.DiscordUserID == "" || message.DiscordUserID == event.UserID {
+		// Message likely just doesn't exists in the DB, or is from the user themselves
 		return
 	}
 
