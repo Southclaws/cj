@@ -43,12 +43,12 @@ func (t *Talk) Init(
 func (t *Talk) Register() (actions []common.Action) {
 	return []common.Action{
 		{
-			Schedule: "@every 1m",
+			Schedule: "@every 1h",
 			Chance:   0.8,
 			Call:     t.quote,
 		},
 		{
-			Schedule: "@every 1m",
+			Schedule: "@every 1h",
 			Chance:   0.5,
 			Call:     t.impersonate,
 		},
