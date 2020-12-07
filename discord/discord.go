@@ -40,7 +40,7 @@ func (s *Session) GetRandomChannel() (channel string, err error) {
 
 	active := []string{}
 	for _, ch := range channels {
-		if ch.ParentID == "375285284079665153" || ch.ParentID == "761517355107876864" {
+		if ch.ParentID == "375285284079665153" {
 			active = append(active, ch.ID)
 		}
 	}
