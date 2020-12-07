@@ -55,6 +55,10 @@ func (s *Session) GetCurrentChannelMessageFrequency(channelID string) (freq floa
 		return
 	}
 
+	if len(messages) == 0 {
+		return 0.0, nil
+	}
+
 	start, err := messages[0].Timestamp.Parse()
 	if err != nil {
 		return
