@@ -65,8 +65,8 @@ func (t *Talk) quote() (err error) {
 	if err != nil {
 		return
 	}
-	if f < 0.5 {
-		zap.L().Debug("dropping random quote because channel not active enough")
+	if f < 0.0001 {
+		zap.L().Debug("dropping random quote because channel not active enough", zap.Float64("frequency", f))
 		return
 	}
 	randmessage, err := t.Storage.GetRandomMessage()
@@ -119,8 +119,8 @@ func (t *Talk) impersonate() (err error) {
 	if err != nil {
 		return
 	}
-	if f < 0.5 {
-		zap.L().Debug("dropping impersonation because channel not active enough")
+	if f < 0.0001 {
+		zap.L().Debug("dropping impersonation because channel not active enough", zap.Float64("frequency", f))
 		return
 	}
 
