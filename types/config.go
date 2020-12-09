@@ -27,7 +27,7 @@ type Config struct {
 	DebugUser          string              `split_words:"true" required:"false"`                                                   // when set, only accept commands from this user
 	NoInitSync         bool                `split_words:"true" required:"false"`                                                   // if set, does not run database role sync on init
 	NoDatabase         bool                `split_words:"true" required:"false"`                                                   // if set, does not connect to database
-	WikiURL            string              `split_words:"true" required:"false" default:"https://github.com/openmultiplayer/wiki"` // wiki git url
+	WikiURL            string              `split_words:"true" required:"false" default:"https://github.com/openmultiplayer/web"` // wiki git url (updated)
 	ReadmeGistID       string              `split_words:"true" required:"true" default:"37f3548342e51365a7291132502b71b8"`         // the gist id for the readme
 	ReadmeGistFileName github.GistFilename `split_words:"true" required:"true" default:"samp-discord-rules.md"`                    // the file name which contains the readme in the gist
 

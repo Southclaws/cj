@@ -67,7 +67,7 @@ func (cm *CommandManager) commandWiki(
 		return
 	} else if wikiResult.Err == errNoThreadFound {
 		// TODO: url shouldn't be hardcoded
-		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: "+"<https://github.com/openmultiplayer/wiki>"+buildhelpstring(args))
+		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: "+"<https://github.com/openmultiplayer/web>"+buildhelpstring(args))
 		return
 	} else if wikiResult.Err == errCouldntReadThread {
 		cm.Discord.ChannelMessageSend(message.ChannelID, errCouldntReadThread.Error())
