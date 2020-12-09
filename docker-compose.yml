@@ -37,7 +37,7 @@ services:
       CJ_BOT_ID: ${CJ_BOT_ID:?required}
       CJ_GUILD_ID: ${CJ_GUILD_ID:?required}
       CJ_VERIFIED_ROLE: ${CJ_VERIFIED_ROLE:?required}
-      CJ_WIKI_URL: ${CJ_WIKI_URL:-https://github.com/openmultiplayer/wiki.git}
+      CJ_WIKI_URL: ${CJ_WIKI_URL:-https://github.com/openmultiplayer/web.git}
       CJ_README_CHANNEL: ${CJ_README_CHANNEL:?required}
       CJ_README_GIST_ID: ${CJ_README_GIST_ID:?required}
       CJ_README_GIST_FILE_NAME: ${CJ_README_GIST_FILE_NAME:-samp-discord-rules.md}
