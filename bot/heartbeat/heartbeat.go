@@ -14,7 +14,6 @@ import (
 	"github.com/Southclaws/cj/bot/heartbeat/readme"
 	"github.com/Southclaws/cj/bot/heartbeat/stats"
 	"github.com/Southclaws/cj/bot/heartbeat/talking"
-	"github.com/Southclaws/cj/bot/heartbeat/wiki"
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
@@ -57,7 +56,6 @@ func (a *Heartbeat) Init(
 		&stats.Aggregator{},
 		&talking.Talk{},
 		&readme.Readme{},
-		&wiki.Wiki{},
 	}
 
 	cr := cron.New()

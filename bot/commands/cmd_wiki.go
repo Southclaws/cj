@@ -1,35 +1,68 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
+	"net/http"
 	"path/filepath"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/bwmarrin/discordgo"
-	"github.com/microcosm-cc/bluemonday"
-	"github.com/pkg/errors"
-	"github.com/texttheater/golang-levenshtein/levenshtein"
-	"gopkg.in/russross/blackfriday.v2"
 
 	"github.com/Southclaws/cj/types"
 )
 
-var (
-	cmdUsage             = "USAGE : /wiki [function/callback]"
-	errManyThreads       = errors.New("more than one thread could be meant")
-	errNoThreadFound     = errors.New("no thread found")
-	errCouldntReadThread = errors.New("couldn't read wiki file")
-)
+const cmdUsage = "USAGE: /wiki [function/callback]"
 
-// WikiReturns holds structure of expected results from @readWiki
-type WikiReturns struct {
-	Err     error
-	Threads []string
-	Thread  string
+type Results struct {
+	Status struct {
+		Total      int `json:"total"`
+		Failed     int `json:"failed"`
+		Successful int `json:"successful"`
+	} `json:"status"`
+	Request struct {
+		Query struct {
+			Query string `json:"query"`
+		} `json:"query"`
+		Size      int `json:"size"`
+		From      int `json:"from"`
+		Highlight struct {
+			Style  interface{} `json:"style"`
+			Fields interface{} `json:"fields"`
+		} `json:"highlight"`
+		Fields           interface{} `json:"fields"`
+		Facets           interface{} `json:"facets"`
+		Explain          bool        `json:"explain"`
+		Sort             []string    `json:"sort"`
+		IncludeLocations bool        `json:"includeLocations"`
+		SearchAfter      interface{} `json:"search_after"`
+		SearchBefore     interface{} `json:"search_before"`
+	} `json:"request"`
+	Hits      []Hit       `json:"hits"`
+	TotalHits int         `json:"total_hits"`
+	MaxScore  float64     `json:"max_score"`
+	Took      int64       `json:"took"`
+	Facets    interface{} `json:"facets"`
+}
+
+type Hit struct {
+	Index     string  `json:"index"`
+	ID        string  `json:"id"`
+	Score     float64 `json:"score"`
+	Locations struct {
+		Description struct {
+			Position []struct {
+				Pos            int         `json:"pos"`
+				Start          int         `json:"start"`
+				End            int         `json:"end"`
+				ArrayPositions interface{} `json:"array_positions"`
+			} `json:"position"`
+		} `json:"Description"`
+	} `json:"locations"`
+	Fragments struct {
+		Description []string `json:"Description"`
+	} `json:"fragments"`
+	Sort []string `json:"sort"`
 }
 
 func (cm *CommandManager) commandWiki(
@@ -49,188 +82,67 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
-	if len(message.Mentions) > 0 ||
-		strings.Contains(message.Content, "everyone") ||
-		strings.Contains(message.Content, "here") ||
-		args[0] == '?' {
+	r, err := http.Get(fmt.Sprintf("https://api.open.mp/docs/search?q=%s", strings.ReplaceAll(args, " ", "%20")))
+	if err != nil {
+		return false, err
+	}
+
+	var results Results
+	if err := json.NewDecoder(r.Body).Decode(&results); err != nil {
+		return false, err
+	}
+
+	if results.TotalHits == 0 {
+		cm.Discord.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+			Type:        discordgo.EmbedTypeRich,
+			Title:       "No results",
+			Description: "There were no results for that query.",
+		})
 		return
 	}
 
-	if !cm.Storage.WikiExists() {
-		return
+	desc := strings.Builder{}
+
+	rendered := 0
+	for _, hit := range results.Hits {
+		if rendered == 3 {
+			break
+		}
+
+		// Skip searching translations
+		if strings.Contains(hit.ID, "translations") {
+			continue
+		}
+
+		desc.WriteString(fmt.Sprintf(
+			"[%s](https://open.mp/%s): %s\n",
+			nameFromPath(hit.ID),
+			strings.TrimSuffix(hit.ID, ".md"),
+			formatDescription(hit)))
+		rendered++
 	}
 
-	wikiResult := readWiki(args)
-
-	if wikiResult.Err == errManyThreads {
-		cm.Discord.ChannelMessageSend(message.ChannelID, errManyThreads.Error()+"\nThe most similar funcs/callbacks are:\n* __**"+strings.Join(wikiResult.Threads, "**__\n* __**")+"**__")
-		return
-	} else if wikiResult.Err == errNoThreadFound {
-		// TODO: url shouldn't be hardcoded
-		cm.Discord.ChannelMessageSend(message.ChannelID, "If you think this page should exist, please open a pull request or issue here: "+"<https://github.com/openmultiplayer/web>"+buildhelpstring(args))
-		return
-	} else if wikiResult.Err == errCouldntReadThread {
-		cm.Discord.ChannelMessageSend(message.ChannelID, errCouldntReadThread.Error())
-	} else if wikiResult.Err == nil {
-		cm.Discord.ChannelMessageSend(message.ChannelID, wikiResult.Thread)
-	} else {
-		err = wikiResult.Err
-	}
+	cm.Discord.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+		Type:        discordgo.EmbedTypeRich,
+		Title:       "Documentation Search Results",
+		Description: desc.String(),
+	})
 
 	return false, err
 }
 
-func readWiki(article string) *WikiReturns {
-	files, err := getWikiFiles()
-	if err != nil {
-		return &WikiReturns{Err: err}
-	}
-
-	threadToRead := searchThread(files, article)
-
-	switch len(threadToRead) {
-	case 0:
-		return &WikiReturns{Err: errNoThreadFound}
-	case 1:
-		formatedInfo, readErr := readThread(threadToRead[0])
-		if readErr == errCouldntReadThread {
-			return &WikiReturns{Err: errCouldntReadThread}
-		}
-		return &WikiReturns{Err: nil, Thread: formatedInfo}
-	default:
-		var threads []string
-		for foo := range threadToRead {
-			threads = append(threads, threadName(threadToRead[foo]))
-		}
-		return &WikiReturns{Err: errManyThreads, Threads: threads}
-	}
+func nameFromPath(p string) string {
+	return strings.TrimSuffix(filepath.Base(p), filepath.Ext(p))
 }
 
-func readThread(file string) (string, error) {
-	wikiFile, openErr := os.Open(filepath.Join(".", "wiki", "docs", "scripting", file))
-	if openErr != nil {
-		return "", errCouldntReadThread
-	}
-	defer wikiFile.Close()
-
-	wikiAsByte, readErr := ioutil.ReadAll(wikiFile)
-	if readErr != nil {
-		return "", errCouldntReadThread
+func formatDescription(hit Hit) string {
+	if len(hit.Fragments.Description) == 0 {
+		return "(No description found)"
 	}
 
-	output := blackfriday.Run(wikiAsByte)
-	html := bluemonday.UGCPolicy().SanitizeBytes(output)
-
-	doc, docErr := goquery.NewDocumentFromReader(strings.NewReader(string(html)))
-	if docErr != nil {
-		log.Fatal(docErr)
-	}
-
-	header := "wiki.open.mp | __" + threadName(file) + "__\n||<https://www.open.mp/docs/scripting/" + strings.ReplaceAll(file, filepath.Ext(file), ">||")
-	description := "**Description**\n\t" + doc.Find(`h2:contains("Description")`).Next().Text()
-	// parameters := "**Parameters**"
-	rankings := buildhelpstring(threadName(file))
-
-	var (
-		selectionCache       *goquery.Selection
-		parametersAddition   string
-		relatedFuncsAddition string
-	)
-
-	lastULClass := doc.Find("ul").Last()
-	lastULClass.Find("li").Each(func(i int, s *goquery.Selection) {
-		//selectionCache = s.First()
-		relatedFuncsAddition = relatedFuncsAddition + "\n\t" + s.Text()
-	})
-
-	doc.Find("table tbody tr").Each(func(i int, s *goquery.Selection) {
-		selectionCache = s.Find("td").First()
-		parametersAddition = parametersAddition + "\n\t`" + selectionCache.Text() + "`\t_*" + selectionCache.Next().Text() + "*_"
-	})
-
-	formatedText := header + "\n\n" + description + rankings
-
-	// if len(parametersAddition) > 0 {
-	// 	formatedText = formatedText + "\n\n" + parameters + parametersAddition
-	// }
-
-	formatedText = formatedText + "\n\n"
-
-	return formatedText, nil
-}
-
-func searchThread(threads []string, thread string) (results []string) {
-	maxdistance := 3
-	for i := range threads {
-		origin := threadName(threads[i])
-		dist := levenshtein.DistanceForStrings(
-			[]rune(strings.ToLower(origin)),
-			[]rune(strings.ToLower(thread)),
-			levenshtein.DefaultOptions,
-		)
-		if dist == 0 {
-			return []string{threads[i]}
-		}
-		if dist <= maxdistance {
-			results = append(results, threads[i])
-		}
-	}
-	return
-}
-
-func getWikiFiles() (files []string, err error) {
-	var (
-		cb  *os.File
-		fn  *os.File
-		tmp []string
-	)
-	cb, err = os.Open(filepath.Join(".", "wiki", "docs", "scripting", "callbacks"))
-	if err != nil {
-		return
-	}
-
-	fn, err = os.Open(filepath.Join(".", "wiki", "docs", "scripting", "functions"))
-	if err != nil {
-		cb.Close()
-		return
-	}
-
-	defer cb.Close()
-	defer fn.Close()
-
-	tmp, err = cb.Readdirnames(0)
-	if err != nil {
-		return
-	}
-
-	for foo := range tmp {
-		tmp[foo] = "callbacks/" + tmp[foo]
-	}
-
-	files = tmp
-
-	tmp, err = fn.Readdirnames(0)
-	if err != nil {
-		return
-	}
-
-	for foo := range tmp {
-		tmp[foo] = "functions/" + tmp[foo]
-	}
-
-	files = append(files, tmp...)
-
-	return
-}
-
-func threadName(threadPath string) string {
-	return strings.TrimSuffix(filepath.Base(threadPath), filepath.Ext(threadPath))
-}
-
-func buildhelpstring(file string) string {
-	return fmt.Sprintf(`
-	
-**Help open.mp out!** Click this search link and find the page to help improve the rankings!
-	
-https://www.google.com/search?q=open+mp+%s`, strings.ToLower(file))
+	return strings.ReplaceAll(
+		strings.ReplaceAll(
+			hit.Fragments.Description[0],
+			"<mark>", "**"),
+		"</mark>", "**")
 }

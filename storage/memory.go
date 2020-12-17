@@ -77,9 +77,3 @@ func (m *Memory) FetchReadmeMessage(gistID string, gistFile github.GistFilename)
 func (m *Memory) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
 	return
 }
-func (m *Memory) PullWiki(wikiURL string) (err error) {
-	return
-}
-func (m *Memory) WikiExists() (exists bool) {
-	return
-}
