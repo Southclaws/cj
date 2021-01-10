@@ -7,6 +7,7 @@ replace github.com/go-resty/resty => gopkg.in/resty.v1 v1.12.0
 replace gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v2.0.1
 
 require (
+	github.com/Bios-Marcel/discordemojimap v1.0.1
 	github.com/PuerkitoBio/goquery v1.6.0
 	github.com/Southclaws/samp-servers-api v0.0.0-20190501054307-50d4ce94e27b
 	github.com/bwmarrin/discordgo v0.22.0
