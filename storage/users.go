@@ -93,6 +93,9 @@ func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopRea
 				"counter": -1,
 			},
 		},
+		bson.M{
+			"$limit": top,
+		},
 	}
 	// Get the top stats overall when no argument is supplied.
 	// Just remove the $match pipeline stage.
