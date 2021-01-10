@@ -90,6 +90,12 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Rankings for most messages sent.",
 			Cooldown:    time.Minute * 10,
 		},
+		"/toprep": {
+			Function:    cm.commandTopRep,
+			Source:      CommandSourcePRIMARY,
+			Description: "Rankings for most emojis sent.",
+			Cooldown:    time.Minute * 10,
+		},
 		"/konesyntees": {
 			Function:    cm.commandKonesyntees,
 			Source:      CommandSourcePRIMARY,

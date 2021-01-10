@@ -89,3 +89,28 @@ func FormatMessageRankings(r storage.TopMessages, s *discord.Session) (embed *di
 
 	return embed, nil
 }
+
+// FormatMessageRankings formats a TopMessages into a discord embed message
+func FormatReactionRankings(r []storage.TopReactionEntry, s *discord.Session) (embed *discordgo.MessageEmbed, err error) {
+	statsMessage := strings.Builder{}
+	statsMessage.WriteString("Statistics\n\n") //nolint:errcheck
+
+	embed = &discordgo.MessageEmbed{Color: 0x3498DB}
+	var user *discordgo.User
+	for i, tm := range r {
+		var username string
+		user, err = s.S.User(tm.UserID)
+		if err != nil {
+			zap.L().Warn("failed to get user", zap.Error(err), zap.String("user_id", tm.UserID))
+			username = tm.UserID
+		} else {
+			username = user.Username
+		}
+
+		statsMessage.WriteString(fmt.Sprintf("%d. **<%s>** - %s x %d\n", i+1, username, tm.Reaction, tm.Counter)) //nolint:errcheck
+	}
+
+	embed.Description = statsMessage.String()
+
+	return embed, nil
+}

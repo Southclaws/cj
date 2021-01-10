@@ -33,6 +33,7 @@ type Storer interface {
 	GetDiscordUserFromForumName(forumName string) (legacyUserID string, burgerUserID string, err error)
 	AddEmojiReactionToUser(discordUserID string, emoji string) (err error)
 	RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error)
+	GetTopReactions(top int, reaction string) (result []TopReactionEntry, err error)
 
 	SetCommandSettings(command string, settings types.CommandSettings) (err error)
 	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)

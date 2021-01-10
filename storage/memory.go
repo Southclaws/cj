@@ -62,6 +62,9 @@ func (m *Memory) AddEmojiReactionToUser(discordUserID string, emoji string) (err
 func (m *Memory) RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error) {
 	return
 }
+func (m *Memory) GetTopReactions(top int, reaction string) (result []TopReactionEntry, err error) {
+	return
+}
 func (m *Memory) SetCommandSettings(command string, settings types.CommandSettings) (err error) {
 	return
 }

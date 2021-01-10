@@ -65,6 +65,39 @@ func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string)
 	return err
 }
 
+type TopReactionEntry struct {
+	UserID		string 	`bson:"discord_user_id"`
+	Counter 	int		`bson:"counter"`
+	Reaction	string	`bson:"reaction"`
+}
+
+// GetTopReactions gets the top <top> amount of people who received reaction <reaction>
+func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopReactionEntry, err error) {
+	err = m.accounts.Pipe([]bson.M{
+		bson.M{
+			"$unwind": "$received_reactions",
+		},
+		bson.M{
+			"$match": bson.M{
+				"received_reactions.reaction": reaction,
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"discord_user_id": "$discord_user_id",
+				"counter": "$received_reactions.counter",
+				"reaction": "$received_reactions.reaction",
+			},
+		},
+		bson.M{
+			"$sort": bson.M{
+				"counter": -1,
+			},
+		},
+	}).All(&result)
+	return
+}
+
 // RemoveEmojiReactionFromUser records an emoji reaction to a message of a discordUser.
 func (m *MongoStorer) RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error) {
 	user := m.GetUserOrCreate(discordUserID)
@@ -76,6 +109,9 @@ func (m *MongoStorer) RemoveEmojiReactionFromUser(discordUserID string, emoji st
 	err = m.UpdateUser(user)
 	return
 }
+
+
+
 
 // UpdateUserUsername updates a person's Burgershot forum name in the database. In case they have their name changed.
 func (m *MongoStorer) UpdateUserUsername(discordUserID string, username string) (err error) {
