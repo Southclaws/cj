@@ -97,6 +97,9 @@ func FormatReactionRankings(r []storage.TopReactionEntry, s *discord.Session) (e
 
 	embed = &discordgo.MessageEmbed{Color: 0x3498DB}
 	var user *discordgo.User
+	if len(r) == 0 {
+		statsMessage.WriteString("There are no entries to display here!")
+	}
 	for i, tm := range r {
 		var username string
 		user, err = s.S.User(tm.UserID)

@@ -9,18 +9,18 @@ import (
 
 // User is a recorded and verified burgershot forum user.
 type User struct {
-	DiscordUserID  		string 				`json:"discord_user_id" bson:"discord_user_id"`
-	ForumUserID    		string 				`json:"forum_user_id" bson:"forum_user_id"`
-	BurgerUserID   		string 				`json:"burger_user_id" bson:"burger_user_id"`
-	ForumUserName  		string 				`json:"forum_user_name" bson:"forum_user_name"`
-	BurgerUserName 		string 				`json:"burger_user_name" bson:"burger_user_name"`
-	BurgerVerify   		bool   				`json:"burgershot_verified" bson:"burgershot_verified"`
-	ReceivedReactions	[]ReactionCounter	`json:"received_reactions" bson:"received_reactions,omitempty"`
+	DiscordUserID     string            `json:"discord_user_id" bson:"discord_user_id"`
+	ForumUserID       string            `json:"forum_user_id" bson:"forum_user_id"`
+	BurgerUserID      string            `json:"burger_user_id" bson:"burger_user_id"`
+	ForumUserName     string            `json:"forum_user_name" bson:"forum_user_name"`
+	BurgerUserName    string            `json:"burger_user_name" bson:"burger_user_name"`
+	BurgerVerify      bool              `json:"burgershot_verified" bson:"burgershot_verified"`
+	ReceivedReactions []ReactionCounter `json:"received_reactions" bson:"received_reactions,omitempty"`
 }
 
-type ReactionCounter struct{
-	Counter 	int
-	Reaction	string
+type ReactionCounter struct {
+	Counter  int
+	Reaction string
 }
 
 // GetUserOrCreate gets a user or creates one and returns it
@@ -29,20 +29,19 @@ func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User) {
 	if err != nil {
 		user.DiscordUserID = discordUserID
 		err = m.accounts.Insert(&User{
-			DiscordUserID:  discordUserID,
-			BurgerVerify: false,
+			DiscordUserID: discordUserID,
+			BurgerVerify:  false,
 		})
 	}
 	return user
 }
 
 // UpdateUser aims to update a full document of a user
-func (m* MongoStorer) UpdateUser(user User) (err error) {
+func (m *MongoStorer) UpdateUser(user User) (err error) {
 	err = m.accounts.Update(bson.M{"discord_user_id": user.DiscordUserID},
 		bson.M{"$set": user})
 	return err
 }
-
 
 // AddEmojiReactionToUser records an emoji reaction to a message of a discordUser.
 func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string) (err error) {
@@ -56,24 +55,24 @@ func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string)
 	}
 	if found == false {
 		entry := ReactionCounter{
-			Counter: 1,
+			Counter:  1,
 			Reaction: emoji,
 		}
-		user.ReceivedReactions =  append(user.ReceivedReactions, entry)
+		user.ReceivedReactions = append(user.ReceivedReactions, entry)
 	}
 	err = m.UpdateUser(user)
 	return err
 }
 
 type TopReactionEntry struct {
-	UserID		string 	`bson:"discord_user_id"`
-	Counter 	int		`bson:"counter"`
-	Reaction	string	`bson:"reaction"`
+	UserID   string `bson:"discord_user_id"`
+	Counter  int    `bson:"counter"`
+	Reaction string `bson:"reaction"`
 }
 
 // GetTopReactions gets the top <top> amount of people who received reaction <reaction>
 func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopReactionEntry, err error) {
-	err = m.accounts.Pipe([]bson.M{
+	pipeline := []bson.M{
 		bson.M{
 			"$unwind": "$received_reactions",
 		},
@@ -85,8 +84,8 @@ func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopRea
 		bson.M{
 			"$project": bson.M{
 				"discord_user_id": "$discord_user_id",
-				"counter": "$received_reactions.counter",
-				"reaction": "$received_reactions.reaction",
+				"counter":         "$received_reactions.counter",
+				"reaction":        "$received_reactions.reaction",
 			},
 		},
 		bson.M{
@@ -94,7 +93,13 @@ func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopRea
 				"counter": -1,
 			},
 		},
-	}).All(&result)
+	}
+	// Get the top stats overall when no argument is supplied.
+	// Just remove the $match pipeline stage.
+	if reaction == "" {
+		pipeline = append(pipeline[0:1], pipeline[2:]...)
+	}
+	m.accounts.Pipe(pipeline).All(&result)
 	return
 }
 
@@ -109,9 +114,6 @@ func (m *MongoStorer) RemoveEmojiReactionFromUser(discordUserID string, emoji st
 	err = m.UpdateUser(user)
 	return
 }
-
-
-
 
 // UpdateUserUsername updates a person's Burgershot forum name in the database. In case they have their name changed.
 func (m *MongoStorer) UpdateUserUsername(discordUserID string, username string) (err error) {
