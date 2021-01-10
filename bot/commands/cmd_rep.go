@@ -2,10 +2,12 @@ package commands
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 
+	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/Southclaws/cj/types"
 )
 
@@ -26,7 +28,11 @@ func (cm *CommandManager) commandRep(
 			return false, errors.New("No default emoji ID set, please fill one in the field defaultID for this command's config (/config /rep)")
 		}
 	} else {
-		reaction = args
+		var valid bool
+		reaction, valid = validateEmoji(args)
+		if valid == false {
+			return false, errors.New("Enter a valid emoji fool!")
+		}
 	}
 
 	user := cm.Storage.GetUserOrCreate(message.Author.ID)
@@ -41,4 +47,19 @@ func (cm *CommandManager) commandRep(
 	cm.Discord.ChannelMessageSend(message.ChannelID,
 		fmt.Sprintf("Your %s count: %d", reaction, count))
 	return
+}
+
+func validateEmoji(input string) (string, bool) {
+	regex := regexp.MustCompile("^<:.+:[0-9]+>$")
+	str := regex.FindString(input)
+	if str != "" {
+		return str, true
+	}
+
+	for _, v := range discordemojimap.EmojiMap {
+		if v == input {
+			return v, true
+		}
+	}
+	return "", false
 }

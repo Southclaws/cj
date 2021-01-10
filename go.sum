@@ -1,3 +1,5 @@
+github.com/Bios-Marcel/discordemojimap v1.0.1 h1:b3UYPO7+h1+ciStkwU/KQCerOmpUNPHsBf4a7EjMdys=
+github.com/Bios-Marcel/discordemojimap v1.0.1/go.mod h1:AoHIpUwf3EVCAAUmk+keXjb9khyZcFnW84/rhJd4IkU=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/PuerkitoBio/goquery v1.5.0 h1:uGvmFXOA73IKluu/F84Xd1tt/z07GYm8X49XKHP7EJk=
