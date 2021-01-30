@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-
+	"html"
+	
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/Southclaws/cj/types"
@@ -140,9 +141,9 @@ func formatDescription(hit Hit) string {
 		return "(No description found)"
 	}
 
-	return strings.ReplaceAll(
+	return html.UnescapeString(strings.ReplaceAll(
 		strings.ReplaceAll(
 			hit.Fragments.Description[0],
 			"<mark>", "**"),
-		"</mark>", "**")
+		"</mark>", "**"))
 }
