@@ -13,20 +13,20 @@ import (
 )
 
 type serverCore struct {
-    Address     string  `json:"ip"`
-    Hostname    string  `json:"hn"`
-    Players     int     `json:"pc"`
-    MaxPlayers  int     `json:"pm"`
-    Language    string  `json:"la"`
-    Password    bool    `json:"pa"`
-    Version     string  `json:"vn"`
+	Address    string `json:"ip"`
+	Hostname   string `json:"hn"`
+	Players    int    `json:"pc"`
+	MaxPlayers int    `json:"pm"`
+	Language   string `json:"la"`
+	Password   bool   `json:"pa"`
+	Version    string `json:"vn"`
 }
 
 type serverListing struct {
-	Core        serverCore          `json:"core"`
-	Description string              `json:"description"`
-	Banner      string              `json:"banner"`
-	Active      bool                `json:"active"`
+	Core        serverCore `json:"core"`
+	Description string     `json:"description"`
+	Banner      string     `json:"banner"`
+	Active      bool       `json:"active"`
 }
 
 func (cm *CommandManager) commandStats(
