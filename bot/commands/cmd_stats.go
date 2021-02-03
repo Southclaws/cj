@@ -6,28 +6,27 @@ import (
 	"strings"
 	"time"
 
-	apitypes "github.com/Southclaws/samp-servers-api/types"
 	"github.com/bwmarrin/discordgo"
 	"gopkg.in/resty.v1"
 
 	"github.com/Southclaws/cj/types"
 )
 
-type serverRules struct {
-	Mapname   string `json:"mapname"`
-	Weather   string `json:"weather"`
-	Worldtime string `json:"worldtime"`
-	Version   string `json:"version"`
-	Weburl    string `json:"weburl"`
-	Artwork   string `json:"artwork"`
+type serverCore struct {
+	Address    string `json:"ip"`
+	Hostname   string `json:"hn"`
+	Players    int    `json:"pc"`
+	MaxPlayers int    `json:"pm"`
+	Language   string `json:"la"`
+	Password   bool   `json:"pa"`
+	Version    string `json:"vn"`
 }
 
 type serverListing struct {
-	Core        apitypes.ServerCore `json:"core"`
-	Rules       serverRules         `json:"ru,omitempty"`
-	Description string              `json:"description"`
-	Banner      string              `json:"banner"`
-	Active      bool                `json:"active"`
+	Core        serverCore `json:"core"`
+	Description string     `json:"description"`
+	Banner      string     `json:"banner"`
+	Active      bool       `json:"active"`
 }
 
 func (cm *CommandManager) commandStats(
@@ -42,7 +41,6 @@ func (cm *CommandManager) commandStats(
 	var (
 		server   string
 		password string
-		artwork  string
 	)
 
 	if strings.Contains(args, ":") {
@@ -51,14 +49,14 @@ func (cm *CommandManager) commandStats(
 		server = args + ":7777"
 	}
 
-	resp, err := resty.R().Get("https://api.samp-servers.net/v2/server/" + server)
+	resp, err := resty.R().Get("https://api.open.mp/server/" + server)
 	if err != nil {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "Unable to query the SA:MP servers API.")
+		cm.Discord.ChannelMessageSend(message.ChannelID, "Unable to query the open.mp servers API.")
 		return
 	}
 
-	if strings.Contains(resp.String(), "could not find server by address") {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "Invalid server. Not recognised by https://samp-servers.net.")
+	if strings.Contains(resp.String(), "ErrNotFound") {
+		cm.Discord.ChannelMessageSend(message.ChannelID, "Invalid server. Not recognised by https://api.open.mp/server")
 		return
 	}
 
@@ -73,15 +71,8 @@ func (cm *CommandManager) commandStats(
 		password = "No"
 	}
 
-	if len(serverInfo.Rules.Artwork) > 0 {
-		artwork = serverInfo.Rules.Artwork
-	} else {
-		artwork = "No"
-	}
-
 	embedData := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			URL:     "https://" + serverInfo.Rules.Weburl,
 			Name:    serverInfo.Core.Hostname,
 			IconURL: "https://github.com/Southclaws/cj/raw/master/cj.png",
 		},
@@ -103,27 +94,12 @@ func (cm *CommandManager) commandStats(
 				Value:  password,
 				Inline: true,
 			},
-			&discordgo.MessageEmbedField{
-				Name:   "🎭 Artwork",
-				Value:  artwork,
-				Inline: true,
-			},
-			&discordgo.MessageEmbedField{
-				Name:   "⏱ Time",
-				Value:  serverInfo.Rules.Worldtime,
-				Inline: true,
-			},
-			&discordgo.MessageEmbedField{
-				Name:   "🌞 Weather",
-				Value:  serverInfo.Rules.Weather,
-				Inline: true,
-			},
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: serverInfo.Banner,
 		},
 		Footer: &discordgo.MessageEmbedFooter{
-			Text: "Made possible by samp-servers.net",
+			Text: "Made possible by open.mp servers api",
 		},
 		Color:     0x006400,
 		Timestamp: time.Now().Format(time.RFC3339),
