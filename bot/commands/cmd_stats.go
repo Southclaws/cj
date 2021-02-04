@@ -27,6 +27,7 @@ type serverListing struct {
 	Description string     `json:"description"`
 	Banner      string     `json:"banner"`
 	Active      bool       `json:"active"`
+	Error       string     `json:"error"`
 }
 
 func (cm *CommandManager) commandStats(
@@ -55,14 +56,14 @@ func (cm *CommandManager) commandStats(
 		return
 	}
 
-	if strings.Contains(resp.String(), "ErrNotFound") {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "Invalid server. Not recognised by https://api.open.mp/server")
-		return
-	}
-
 	serverInfo, err := decodeServerInfo(resp.String())
 	if err != nil {
 		println(err)
+	}
+
+	if serverInfo.Error != "" {
+		cm.Discord.ChannelMessageSend(message.ChannelID, serverInfo.Error)
+		return
 	}
 
 	if serverInfo.Core.Password == true {
