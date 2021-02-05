@@ -50,6 +50,13 @@ func (cm *CommandManager) commandStats(
 		server = args + ":7777"
 	}
 
+	//Incase if user types host name instead of IP of server
+	host, port, _ := net.SplitHostPort(server)
+	IPs, err := net.LookupHost(host)
+	if err == nil {
+		server = net.JoinHostPort(IPs[0], port)
+	}
+	
 	resp, err := resty.R().Get("https://api.open.mp/server/" + server)
 	if err != nil {
 		cm.Discord.ChannelMessageSend(message.ChannelID, "Unable to query the open.mp servers API.")
