@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
+	"net"
+	
 	"github.com/bwmarrin/discordgo"
 	"gopkg.in/resty.v1"
 
