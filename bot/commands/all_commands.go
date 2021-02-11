@@ -102,11 +102,6 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Use superior Estonian technology to express your feelings like you've never before!",
 			Cooldown:    time.Minute,
 		},
-		"/stats": {
-			Function:    cm.commandStats,
-			Source:      CommandSourcePRIMARY,
-			Description: "Query a server for information using the SA:MP servers API.",
-		},
 		"/mf": {
 			Function:    cm.commandMessageFreq,
 			Source:      CommandSourcePRIMARY,
