@@ -49,6 +49,12 @@ func (cm *CommandManager) LoadCommands() {
 			Source:      CommandSourcePRIMARY,
 			Description: "Display a Discord user's forum account name.",
 		},
+		"/stats": {
+			Function:    cm.commandStats,
+			Source:      CommandSourcePRIMARY,
+			Description: "Query a server through open.mp API",
+			Cooldown:    time.Minute * 10,
+		},
 		"cj": {
 			Function:    cm.commandCJQuote,
 			Source:      CommandSourcePRIMARY,
