@@ -101,6 +101,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Know how many reactions your messages have gotten",
 			Cooldown:    time.Second * 2,
 		},
+		"/mytop": {
+			Function:    cm.commandMyTop,
+			Description: "Know your rank.",
+			Cooldown:    time.Second * 2,
+		},
 	}
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown

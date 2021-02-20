@@ -9,11 +9,11 @@ import (
 
 // ChatLog represents a single logged chat message from Discord
 type ChatLog struct {
-	Timestamp      		int64
-	DiscordUserID  		string
-	DiscordChannel 		string
-	Message        		string
-	DiscordMessageID	string
+	Timestamp        int64
+	DiscordUserID    string
+	DiscordChannel   string
+	Message          string
+	DiscordMessageID string
 }
 
 // RecordChatLog records a chat message from a user in a channel
@@ -74,6 +74,37 @@ func (m *MongoStorer) GetTopMessages(top int) (result TopMessages, err error) {
 		},
 	}).All(&result)
 	// sort.Sort(sort.Reverse(result))
+	return
+}
+
+// GetUserRank returns rank according to most messages sent with the top user having rank 1
+func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
+	messageCount, err := m.chat.Find(bson.M{"discorduserid": discordUserID}).Count()
+
+	myPipe := m.chat.Pipe([]bson.M{
+		bson.M{
+			"$group": bson.M{
+				"_id": "$discorduserid",
+				"count": bson.M{
+					"$sum": 1,
+				},
+			},
+		},
+		bson.M{
+			"$sort": bson.M{
+				"count": -1,
+			},
+		},
+		bson.M{
+			"$match": bson.M{"count": bson.M{"$gt": messageCount}},
+		},
+		bson.M{
+			"$count": "rank",
+		},
+	})
+	var tempMap = make(map[string]int)
+	err = myPipe.One(tempMap)
+	rank = tempMap["rank"]+1 // +1 otherwise the top user will have rank 0
 	return
 }
 
