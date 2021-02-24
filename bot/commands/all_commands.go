@@ -104,7 +104,7 @@ func (cm *CommandManager) LoadCommands() {
 		"/mytop": {
 			Function:    cm.commandMyTop,
 			Description: "Know your rank.",
-			Cooldown:    time.Second * 2,
+			Cooldown:    time.Minute * 10,
 		},
 	}
 	for k, v := range commands {
