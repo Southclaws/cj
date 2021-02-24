@@ -44,6 +44,19 @@ var funnyStats = []string{
 	"Host CJ yourself and use this command.",
 	"CJ is busy with the previous query.",
 	"This command has been muted for you. Reason: spam.",
+	"only rollerplayers can query this server",
+	"Error: NSFW detected",
+	"/help",
+	"/commands",
+	"server contains n word in its name",
+	"please sir we only allow android servers here",
+	"/stats /stats /stats. CJ lost his mind",
+	"cj lost his mom in that server so it's a no go zone for him",
+	"Use api.open.mp/server",
+	"/fuck off",
+	"I forgot what I was about say, I will tell you after it comes to my mind.",
+	"WHY ARE YOU DOING THIS",
+	"Did you mean /stats",
 }
 
 func (cm *CommandManager) commandStats(

@@ -56,27 +56,8 @@ type Command struct {
 	Description string
 	Settings    types.CommandSettings
 
-	Source   CommandSource // DEPRECATED
 	Cooldown time.Duration // DEPRECATED
 }
-
-// CommandSource represents the source of a command.
-type CommandSource int8
-
-const (
-	// CommandSourceADMINISTRATIVE are commands in the administrator channel,
-	// mainly for admin work that may clutter up the primary channel.
-	CommandSourceADMINISTRATIVE CommandSource = iota
-	// CommandSourcePRIMARY are primary channel commands visible to all users
-	// and mainly used for fun and group activity commands.
-	CommandSourcePRIMARY CommandSource = iota
-	// CommandSourcePRIVATE are private channel commands for dealing with
-	// sensitive information such as verification.
-	CommandSourcePRIVATE CommandSource = iota
-	// CommandSourceOTHER represents any other channel that does not fall into
-	// the above sources.
-	CommandSourceOTHER CommandSource = iota
-)
 
 // CommandParametersRange represents minimum value and maximum value number of parameters for a command
 type CommandParametersRange struct {
@@ -124,28 +105,11 @@ func (cm *CommandManager) commandHelp(
 // and, if so, call the associated function.
 // nolint:gocyclo
 func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
-	source, err := cm.getCommandSource(message)
-	if err != nil {
-		return
-	}
-
 	storedContext, found := cm.Contexts.Get(message.Author.ID)
 	if found {
-		contextCommand, ok := storedContext.(Command)
+		_, ok := storedContext.(Command)
 		if !ok {
 			return errors.New("failed to cast stored context to command type")
-		}
-		if contextCommand.Source == source {
-			var continueContext bool
-			continueContext, err = contextCommand.Function(message.Content, message, true, contextCommand.Settings)
-			if err != nil {
-				cm.Contexts.Delete(message.Author.ID)
-				return
-			}
-			if !continueContext {
-				cm.Contexts.Delete(message.Author.ID)
-			}
-			return
 		}
 	}
 
@@ -191,39 +155,33 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	}
 
 	var allowed bool
-	if source == CommandSourcePRIVATE {
-		if commandObject.Settings.Private {
-			allowed = true
-		}
-	} else {
-		for _, ch := range settings.Channels {
-			if ch == "all" {
-				allowed = true
-				break
-			}
-			if ch == message.ChannelID {
-				allowed = true
-				break
-			}
-		}
-		for _, sr := range settings.Roles {
-			if sr == "all" {
-				allowed = true
-				break
-			}
-			var u *discordgo.Member
-			u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
-			if err != nil {
-				return
-			}
-			for _, ur := range u.Roles {
-				if sr == ur {
-					allowed = true
-					break
-				}
-			}
-		}
-	}
+    for _, ch := range settings.Channels {
+        if ch == "all" {
+            allowed = true
+            break
+        }
+        if ch == message.ChannelID {
+            allowed = true
+            break
+        }
+    }
+    for _, sr := range settings.Roles {
+        if sr == "all" {
+            allowed = true
+            break
+        }
+        var u *discordgo.Member
+        u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
+        if err != nil {
+            return
+        }
+        for _, ur := range u.Roles {
+            if sr == ur {
+                allowed = true
+                break
+            }
+        }
+    }
 	if !allowed {
 		zap.L().Debug("command not allowed with current channel or role",
 			zap.String("channel", message.ChannelID),
@@ -264,24 +222,6 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	return nil
 }
 
-func (cm *CommandManager) getCommandSource(message discordgo.Message) (CommandSource, error) {
-	if message.ChannelID == cm.Config.AdministrativeChannel {
-		return CommandSourceADMINISTRATIVE, nil
-	} else if message.ChannelID == cm.Config.PrimaryChannel {
-		return CommandSourcePRIMARY, nil
-	} else {
-		ch, err := cm.Discord.S.Channel(message.ChannelID)
-		if err != nil {
-			return CommandSourceOTHER, err
-		}
-
-		if ch.Type == discordgo.ChannelTypeDM {
-			return CommandSourcePRIVATE, nil
-		}
-	}
-
-	return CommandSourceOTHER, nil
-}
 
 var clocks = []string{
 	"🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛",
