@@ -17,6 +17,7 @@ type Storer interface {
 	RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error)
 	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
+	GetUserMessageCount(discordUserID string) (messageCount int, err error)
 	GetUserRank(discordUserID string) (rank int, err error)
 	GetRandomMessage() (result ChatLog, err error)
 	GetRandomUser() (result string, err error)

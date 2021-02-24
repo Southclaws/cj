@@ -22,7 +22,11 @@ func (cm *CommandManager) commandMyTop(
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get user's rank")
 	}
+	messageCount, err := cm.Storage.GetUserMessageCount(message.Author.ID)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to get user's message count")
+	}
 
-	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Your top: %d", rank))
+	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Your top: %d. Messages: %d", rank, messageCount))
 	return
 }

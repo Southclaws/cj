@@ -77,6 +77,11 @@ func (m *MongoStorer) GetTopMessages(top int) (result TopMessages, err error) {
 	return
 }
 
+func (m *MongoStorer) GetUserMessageCount(discordUserID string) (messageCount int, err error) {
+	messageCount, err = m.chat.Find(bson.M{"discorduserid": discordUserID}).Count()
+	return
+}
+
 // GetUserRank returns rank according to most messages sent with the top user having rank 1
 func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
 	messageCount, err := m.chat.Find(bson.M{"discorduserid": discordUserID}).Count()
@@ -91,11 +96,6 @@ func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
 			},
 		},
 		bson.M{
-			"$sort": bson.M{
-				"count": -1,
-			},
-		},
-		bson.M{
 			"$match": bson.M{"count": bson.M{"$gt": messageCount}},
 		},
 		bson.M{
@@ -104,7 +104,7 @@ func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
 	})
 	var tempMap = make(map[string]int)
 	err = myPipe.One(tempMap)
-	rank = tempMap["rank"]+1 // +1 otherwise the top user will have rank 0
+	rank = tempMap["rank"] + 1 // +1 otherwise the top user will have rank 0
 	return
 }
 
