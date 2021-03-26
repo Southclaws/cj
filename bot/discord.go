@@ -36,6 +36,10 @@ func (app *App) ConnectDiscord() (err error) {
 	app.discordClient.S.AddHandler(app.onReactionAdd)
 	app.discordClient.S.AddHandler(app.onReactionRemove)
 
+	intent := discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers)
+
+	app.discordClient.S.Identify.Intents = intent
+
 	err = app.discordClient.S.Open()
 	if err != nil {
 		return
