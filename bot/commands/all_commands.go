@@ -42,11 +42,6 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandWhois,
 			Description: "Display a Discord user's forum account name.",
 		},
-		"/stats": {
-			Function:    cm.commandStats,
-			Description: "Query a server through open.mp API",
-			Cooldown:    time.Minute * 10,
-		},
 		"cj": {
 			Function:    cm.commandCJQuote,
 			Description: "Talk to CJ.",
@@ -100,6 +95,11 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandRep,
 			Description: "Know how many reactions your messages have gotten",
 			Cooldown:    time.Second * 2,
+		},
+		"/mytop": {
+			Function:    cm.commandMyTop,
+			Description: "Know your rank.",
+			Cooldown:    time.Minute * 10,
 		},
 	}
 	for k, v := range commands {

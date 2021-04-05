@@ -20,6 +20,7 @@ To run the app, you need:
 
 - A Discord server to test - you can't use the SA:MP Discord to do tests
 - Go 1.11 - no guarantees on older versions
+- A Discord bot with the 'Server Members Intent' enabled
 
 If you don't own/admin a Discord server, creating one is simple, you can do it from the same menu you join discord
 servers from.

@@ -20,6 +20,12 @@ func (m *Memory) GetMessagesForUser(discordUserID string) (messages []ChatLog, e
 func (m *Memory) GetTopMessages(top int) (result TopMessages, err error) {
 	return
 }
+func (m *Memory) GetUserMessageCount(discordUserID string) (messageCount int, err error) {
+	return
+}
+func (m *Memory) GetUserRank(discordUserID string) (rank int, err error) {
+	return
+}
 func (m *Memory) GetRandomMessage() (result ChatLog, err error) {
 	return
 }
