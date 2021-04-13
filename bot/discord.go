@@ -52,6 +52,8 @@ func (app *App) ConnectDiscord() (err error) {
 
 	zap.L().Info("finished initialising discord module")
 
+	app.discordClient.S.UpdateStatus(0, fmt.Sprintf("🐧 R.I.P. - %s", app.config.Version))
+
 	return
 }
 
