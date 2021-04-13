@@ -29,6 +29,9 @@ func (m *Memory) GetUserRank(discordUserID string) (rank int, err error) {
 func (m *Memory) GetRandomMessage() (result ChatLog, err error) {
 	return
 }
+func (m *Memory) GetRandomMessageFromUsers([]string) (result ChatLog, err error) {
+	return
+}
 func (m *Memory) GetRandomUser() (result string, err error) {
 	return
 }

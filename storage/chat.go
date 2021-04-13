@@ -17,7 +17,7 @@ type ChatLog struct {
 }
 
 // RecordChatLog records a chat message from a user in a channel
-func (m *MongoStorer) RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error) {
+func (m *MongoStorer) RecordChatLog(discordUserID, discordChannel, message, messageID string) (err error) {
 	record := ChatLog{
 		time.Now().Unix(),
 		discordUserID,
@@ -102,7 +102,7 @@ func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
 			"$count": "rank",
 		},
 	})
-	var tempMap = make(map[string]int)
+	tempMap := make(map[string]int)
 	err = myPipe.One(tempMap)
 	rank = tempMap["rank"] + 1 // +1 otherwise the top user will have rank 0
 	return
@@ -115,6 +115,20 @@ func (m *MongoStorer) GetRandomMessage() (log ChatLog, err error) {
 			"size": 1,
 		}},
 	}).One(&log)
+	return
+}
+
+func (m *MongoStorer) GetRandomMessageFromUsers(users []string) (result ChatLog, err error) {
+	err = m.chat.Pipe([]bson.M{
+		{"$match": bson.M{
+			"DiscordUserID": bson.M{
+				"$in": users,
+			},
+		}},
+		{"$sample": bson.M{
+			"size": 1,
+		}},
+	}).One(&result)
 	return
 }
 

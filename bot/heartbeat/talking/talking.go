@@ -52,6 +52,11 @@ func (t *Talk) Register() (actions []common.Action) {
 			Chance:   0.5,
 			Call:     t.impersonate,
 		},
+		{
+			Schedule: "@every 1h",
+			Chance:   0.5,
+			Call:     t.ltf,
+		},
 	}
 }
 
@@ -165,6 +170,35 @@ func (t *Talk) impersonate() (err error) {
 	t.Discord.ChannelMessageSend(channelID, fmt.Sprintf(
 		"\"%s\" is what **%s** sounds like",
 		strings.Join(tokens[1:len(tokens)-1], " "), nick))
+
+	return
+}
+
+func (t *Talk) ltf() (err error) {
+	channelID := "831189475480436746"
+
+	f, err := t.Discord.GetCurrentChannelMessageFrequency(channelID)
+	if err != nil {
+		return
+	}
+	if f < 0.01 {
+		return
+	}
+
+	message, err := t.Storage.GetRandomMessageFromUsers([]string{
+		"456226577798135808",
+		"778144453751078913",
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to get messages for user")
+	}
+
+	nick := "LinuxTheFish"
+	time := time.Unix(message.Timestamp, 0)
+
+	t.Discord.ChannelMessageSend(channelID, fmt.Sprintf(
+		"> %s\n - **%s** (%s, %d)",
+		message.Message, nick, time.Month().String(), time.Year()))
 
 	return
 }

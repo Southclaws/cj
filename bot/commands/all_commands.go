@@ -101,6 +101,11 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Know your rank.",
 			Cooldown:    time.Minute * 10,
 		},
+		"/ltf": {
+			Function:    cm.ltf,
+			Description: "Rest in peace.",
+			Cooldown:    time.Minute * 10,
+		},
 	}
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
