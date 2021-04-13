@@ -44,11 +44,13 @@ push:
 # Testing Database
 # -
 
-mongodb:
+mongodb-stop:
 	-docker stop mongodb
 	-docker rm mongodb
 	-docker stop express
 	-docker rm express
+
+mongodb: mongodb-stop
 	docker run --name mongodb -p 27017:27017 -d mongo
 	docker run --name express --link mongodb:mongo -p 8080:8081 -d mongo-express
 
