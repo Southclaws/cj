@@ -26,7 +26,7 @@ func (cm *CommandManager) ltf(
 	}
 
 	msg, err := cm.Storage.GetRandomMessageFromUsers([]string{
-		"456226577798135808",
+		"515214692751376387",
 		"778144453751078913",
 	})
 	if err != nil {
