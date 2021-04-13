@@ -121,7 +121,7 @@ func (m *MongoStorer) GetRandomMessage() (log ChatLog, err error) {
 func (m *MongoStorer) GetRandomMessageFromUsers(users []string) (result ChatLog, err error) {
 	err = m.chat.Pipe([]bson.M{
 		{"$match": bson.M{
-			"DiscordUserID": bson.M{
+			"discorduserid": bson.M{
 				"$in": users,
 			},
 		}},
