@@ -38,6 +38,10 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandUserInfo,
 			Description: "Get a user's Burgershot forum info.",
 		},
+		"/getmsginfo": {
+			Function:    cm.commandGetMessageInfo,
+			Description: "Get a message's info by ID",
+		},
 		"/whois": {
 			Function:    cm.commandWhois,
 			Description: "Display a Discord user's forum account name.",
