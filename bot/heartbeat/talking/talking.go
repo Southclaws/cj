@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/mb-14/gomarkov"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
