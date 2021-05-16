@@ -2,12 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"regexp"
+	"sort"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/pkg/errors"
 
-	"github.com/Bios-Marcel/discordemojimap"
+	"github.com/Southclaws/cj/discord"
+	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
 )
 
@@ -20,46 +21,49 @@ func (cm *CommandManager) commandRep(
 	context bool,
 	err error,
 ) {
-	var reaction string
-	if len(args) == 0 {
-		// When setting it: pass it as <:emoji:id_as_long_number>
-		reaction = fmt.Sprintf("%v", settings.Misc["default"])
-		if reaction == "<nil>" {
-			return false, errors.New("No default emoji ID set, please fill one in the field defaultID for this command's config (/config /rep)")
-		}
-	} else {
-		var valid bool
-		reaction, valid = validateEmoji(args)
-		if valid == false {
-			return false, errors.New("Enter a valid emoji fool!")
-		}
-	}
 
 	user := cm.Storage.GetUserOrCreate(message.Author.ID)
+	sort.Slice(user.ReceivedReactions, func(i, j int) bool {
+		return user.ReceivedReactions[i].Counter > user.ReceivedReactions[j].Counter
+	})
+	embed, err := FormatUserReactions(&user.ReceivedReactions, message.Author, cm.Discord)
 
-	count := 0
-	for _, v := range user.ReceivedReactions {
-		if v.Reaction == reaction {
-			count = v.Counter
-			break
-		}
+	if err != nil {
+		return
 	}
-	cm.Discord.ChannelMessageSend(message.ChannelID,
-		fmt.Sprintf("Your %s count: %d", reaction, count))
+
+	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, embed)
+
 	return
 }
 
-func validateEmoji(input string) (string, bool) {
-	regex := regexp.MustCompile("^<:.+:[0-9]+>$")
-	str := regex.FindString(input)
-	if str != "" {
-		return str, true
+func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo.User, session *discord.Session) (embed *discordgo.MessageEmbed, err error) {
+	statsMessage := strings.Builder{}
+	statsMessage.WriteString(fmt.Sprintf("**%s's Reactions**\n\n", author.Username)) //nolint:errcheck
+
+	embed = &discordgo.MessageEmbed{Color: 0x3498DB}
+	if len(*reactions) == 0 {
+		statsMessage.WriteString("There are no reactions to display here!")
+	}
+	for _, reaction := range *reactions {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+			Name:   reaction.Reaction,
+			Value:  fmt.Sprintf("%dx", reaction.Counter),
+			Inline: true,
+		})
 	}
 
-	for _, v := range discordemojimap.EmojiMap {
-		if v == input {
-			return v, true
-		}
+	// Add one more 'filling' embed field in case there are 2
+	// fields (with 1 and 3 fields the formatting is fine)
+	if len(*reactions)%3 == 2 {
+		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+			Name:   "", // Note: the content of this seemingly empty string is u0080
+			Value:  "", // Note: the content of this seemingly empty string is u0080
+			Inline: true,
+		})
 	}
-	return "", false
+
+	embed.Description = statsMessage.String()
+
+	return embed, nil
 }
