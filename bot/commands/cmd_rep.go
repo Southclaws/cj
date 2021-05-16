@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Bios-Marcel/discordemojimap"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/Southclaws/cj/discord"
@@ -27,7 +28,6 @@ func (cm *CommandManager) commandRep(
 		return user.ReceivedReactions[i].Counter > user.ReceivedReactions[j].Counter
 	})
 	embed, err := FormatUserReactions(&user.ReceivedReactions, message.Author, cm.Discord)
-
 	if err != nil {
 		return
 	}
@@ -35,6 +35,19 @@ func (cm *CommandManager) commandRep(
 	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, embed)
 
 	return
+}
+
+// Only post emoji that we have access to
+func validateEmoji(input string, serverEmoji []*discordgo.Emoji) bool {
+	isValid := discordemojimap.ContainsEmoji(input)
+	if isValid == false {
+		for _, v := range serverEmoji {
+			if v.MessageFormat() == input {
+				return true
+			}
+		}
+	}
+	return isValid
 }
 
 func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo.User, session *discord.Session) (embed *discordgo.MessageEmbed, err error) {
@@ -45,12 +58,21 @@ func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo
 	if len(*reactions) == 0 {
 		statsMessage.WriteString("There are no reactions to display here!")
 	}
+
+	var serverEmoji []*discordgo.Emoji
+	// Colllect emoji from every server CJ is in (since it can display them from those)
+	for _, guild := range session.S.State.Guilds {
+		serverEmoji = append(serverEmoji, guild.Emojis...)
+	}
+
 	for _, reaction := range *reactions {
-		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name:   reaction.Reaction,
-			Value:  fmt.Sprintf("%dx", reaction.Counter),
-			Inline: true,
-		})
+		if validateEmoji(reaction.Reaction, serverEmoji) {
+			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+				Name:   reaction.Reaction,
+				Value:  fmt.Sprintf("%dx", reaction.Counter),
+				Inline: true,
+			})
+		}
 	}
 
 	// Add one more 'filling' embed field in case there are 2
