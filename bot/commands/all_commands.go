@@ -1,8 +1,7 @@
 package commands
 
 import (
-	"time"
-
+	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
 
@@ -10,106 +9,107 @@ import (
 // all commands and binding them to functions.
 func (cm *CommandManager) LoadCommands() {
 	commands := map[string]Command{
-		"/commands": {
+		"commands": {
 			Function:    cm.commandCommands,
+			Name:        "commands",
 			Description: "Displays a list of commands.",
 		},
-		"/help": {
-			Function:    cm.commandHelp,
-			Description: "Displays a list of commands.",
-		},
-		"/config": {
-			Function:    cm.commandConfig,
-			Description: "Configure command settings.",
-		},
-		"/readme": {
-			Function:    cm.commandReadme,
-			Description: "Force fetches the readme message.",
-		},
-		"/roles": {
-			Function:    cm.commandRoles,
-			Description: "List of roles and their IDs.",
-		},
-		"/say": {
-			Function:    cm.commandSay,
-			Description: "Say something as CJ.",
-		},
-		"/userinfo": {
-			Function:    cm.commandUserInfo,
-			Description: "Get a user's Burgershot forum info.",
-		},
-		"/getmsginfo": {
-			Function:    cm.commandGetMessageInfo,
-			Description: "Get a message's info by ID",
-		},
-		"/whois": {
-			Function:    cm.commandWhois,
-			Description: "Display a Discord user's forum account name.",
-		},
-		"cj": {
-			Function:    cm.commandCJQuote,
-			Description: "Talk to CJ.",
-			Cooldown:    time.Minute * 10,
-		},
-		"gmname": {
-			Function:    cm.commandGmName,
-			Description: "generates a professional gamemode name for your next NGG edit.",
-			Cooldown:    time.Minute * 10,
-		},
-		"mpname": {
-			Function:    cm.commandMP,
-			Description: "scrapes the web for the next BIG samp ripoff.",
-			Cooldown:    time.Minute * 10,
-		},
-		"dynamic": {
-			Function:    cm.commandDynamic,
-			Description: "inspiration for your next script.",
-			Cooldown:    time.Minute * 10,
-		},
-		"rpname": {
-			Function:    cm.commandRP,
-			Description: "the next big unique dynamic server.",
-			Cooldown:    time.Minute * 10,
-		},
-		"/wiki": {
-			Function:    cm.commandWiki,
-			Description: "Returns an article from open.mp wiki.",
-		},
-		"/top": {
-			Function:    cm.commandTop,
-			Description: "Rankings for most messages sent.",
-			Cooldown:    time.Minute * 10,
-		},
-		"/toprep": {
-			Function:    cm.commandTopRep,
-			Description: "Rankings for most emojis sent.",
-			Cooldown:    time.Minute * 10,
-		},
-		"/konesyntees": {
-			Function:    cm.commandKonesyntees,
-			Description: "Use superior Estonian technology to express your feelings like you've never before!",
-			Cooldown:    time.Minute,
-		},
-		"/mf": {
-			Function:    cm.commandMessageFreq,
-			Description: "Message frequency",
-			Cooldown:    time.Minute,
-		},
-		"/rep": {
-			Function:    cm.commandRep,
-			Description: "Know how many reactions your messages have gotten",
-			Cooldown:    time.Second * 2,
-		},
-		"/mytop": {
-			Function:    cm.commandMyTop,
-			Description: "Know your rank.",
-			Cooldown:    time.Minute * 10,
-		},
-		"/ltf": {
-			Function:    cm.ltf,
-			Description: "Rest in peace.",
-			Cooldown:    time.Minute * 10,
-		},
+		// "/help": {
+		// 	Function:    cm.commandHelp,
+		// 	Description: "Displays a list of commands.",
+		// },
+		// "/config": {
+		// 	Function:    cm.commandConfig,
+		// 	Description: "Configure command settings.",
+		// },
+		// "/readme": {
+		// 	Function:    cm.commandReadme,
+		// 	Description: "Force fetches the readme message.",
+		// },
+		// "/roles": {
+		// 	Function:    cm.commandRoles,
+		// 	Description: "List of roles and their IDs.",
+		// },
+		// "/say": {
+		// 	Function:    cm.commandSay,
+		// 	Description: "Say something as CJ.",
+		// },
+		// "/userinfo": {
+		// 	Function:    cm.commandUserInfo,
+		// 	Description: "Get a user's Burgershot forum info.",
+		// },
+		// "/getmsginfo": {
+		// 	Function:    cm.commandGetMessageInfo,
+		// 	Description: "Get a message's info by ID",
+		// },
+		// "/whois": {
+		// 	Function:    cm.commandWhois,
+		// 	Description: "Display a Discord user's forum account name.",
+		// },
+		// "cj": {
+		// 	Function:    cm.commandCJQuote,
+		// 	Description: "Talk to CJ.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "gmname": {
+		// 	Function:    cm.commandGmName,
+		// 	Description: "generates a professional gamemode name for your next NGG edit.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "mpname": {
+		// 	Function:    cm.commandMP,
+		// 	Description: "scrapes the web for the next BIG samp ripoff.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "dynamic": {
+		// 	Function:    cm.commandDynamic,
+		// 	Description: "inspiration for your next script.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "rpname": {
+		// 	Function:    cm.commandRP,
+		// 	Description: "the next big unique dynamic server.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "/wiki": {
+		// 	Function:    cm.commandWiki,
+		// 	Description: "Returns an article from open.mp wiki.",
+		// },
+		// "/top": {
+		// 	Function:    cm.commandTop,
+		// 	Description: "Rankings for most messages sent.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "/toprep": {
+		// 	Function:    cm.commandTopRep,
+		// 	Description: "Rankings for most emojis sent.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "/konesyntees": {
+		// 	Function:    cm.commandKonesyntees,
+		// 	Description: "Use superior Estonian technology to express your feelings like you've never before!",
+		// 	Cooldown:    time.Minute,
+		// },
+		// "/mf": {
+		// 	Function:    cm.commandMessageFreq,
+		// 	Description: "Message frequency",
+		// 	Cooldown:    time.Minute,
+		// },
+		// "/rep": {
+		// 	Function:    cm.commandRep,
+		// 	Description: "Know how many reactions your messages have gotten",
+		// 	Cooldown:    time.Second * 2,
+		// },
+		// "/mytop": {
+		// 	Function:    cm.commandMyTop,
+		// 	Description: "Know your rank.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
+		// "/ltf": {
+		// 	Function:    cm.ltf,
+		// 	Description: "Rest in peace.",
+		// 	Cooldown:    time.Minute * 10,
+		// },
 	}
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
@@ -130,6 +130,20 @@ func (cm *CommandManager) LoadCommands() {
 				zap.L().Fatal("failed to assign command settings",
 					zap.Error(err))
 			}
+		}
+
+		for _, guild := range cm.Discord.S.State.Guilds {
+			cm.Discord.S.ApplicationCommandCreate(cm.Discord.S.State.User.ID, guild.ID, &discordgo.ApplicationCommand{
+				Name:        v.Name,
+				Description: v.Description,
+			})
+
+			cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+				zap.L().Info("hello")
+				if i.Data.Name == v.Name {
+					v.Function(i, v.Settings)
+				}
+			})
 		}
 
 		commands[k] = v
