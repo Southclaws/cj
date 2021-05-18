@@ -65,40 +65,6 @@ type CommandParametersRange struct {
 	Maximum int
 }
 
-func (cm *CommandManager) commandCommands(
-	args string,
-	message discordgo.Message,
-	settings types.CommandSettings,
-) (
-	context bool,
-	err error,
-) {
-	embed := &discordgo.MessageEmbed{
-		Color: 0x3498DB,
-	}
-
-	var cmdlist string
-	for trigger, cmd := range cm.Commands {
-		cmdlist += fmt.Sprintf("**%s** - %s\n", trigger, cmd.Description)
-	}
-	embed.Description = cmdlist
-
-	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, embed)
-	return
-}
-
-func (cm *CommandManager) commandHelp(
-	args string,
-	message discordgo.Message,
-	settings types.CommandSettings,
-) (
-	context bool,
-	err error,
-) {
-	cm.Discord.ChannelMessageSend(message.ChannelID, "fuck off")
-	return
-}
-
 // OnMessage is called on a command string to check whether it's a valid command
 // and, if so, call the associated function.
 // nolint:gocyclo
