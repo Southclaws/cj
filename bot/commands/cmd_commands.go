@@ -9,6 +9,7 @@ import (
 
 func (cm *CommandManager) commandCommands(
 	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,

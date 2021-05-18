@@ -48,7 +48,7 @@ func (cm *CommandManager) Init(
 
 // Command represents a public, private or administrative command
 type Command struct {
-	Function    func(interaction *discordgo.InteractionCreate, settings types.CommandSettings) (context bool, err error)
+	Function    func(interaction *discordgo.InteractionCreate, args map[string]*discordgo.ApplicationCommandInteractionDataOption, settings types.CommandSettings) (context bool, err error)
 	Name        string
 	Description string
 	Settings    types.CommandSettings
@@ -186,7 +186,11 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.Data.Name {
-			command.Function(interaction, command.Settings)
+			args := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
+			for _, option := range interaction.Data.Options {
+				args[option.Name] = option
+			}
+			command.Function(interaction, args, command.Settings)
 			break
 		}
 	}
