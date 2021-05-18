@@ -217,7 +217,6 @@ func makeDynamic() string {
 func (cm *CommandManager) commandDynamic(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

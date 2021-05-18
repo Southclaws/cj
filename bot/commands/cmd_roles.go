@@ -11,7 +11,6 @@ import (
 func (cm *CommandManager) commandRoles(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

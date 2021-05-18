@@ -2,18 +2,18 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
-	"strings"
-	"time"
 )
 
 func (cm *CommandManager) commandGetMessageInfo(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

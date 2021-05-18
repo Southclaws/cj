@@ -15,7 +15,6 @@ import (
 func (cm *CommandManager) commandKonesyntees(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

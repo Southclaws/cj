@@ -3,11 +3,11 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"html"
-	
+
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/Southclaws/cj/types"
@@ -69,7 +69,6 @@ type Hit struct {
 func (cm *CommandManager) commandWiki(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

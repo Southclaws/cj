@@ -52,7 +52,7 @@ func (cm *CommandManager) Init(
 
 // Command represents a public, private or administrative command
 type Command struct {
-	Function    func(args string, message discordgo.Message, contextual bool, settings types.CommandSettings) (context bool, err error)
+	Function    func(args string, message discordgo.Message, settings types.CommandSettings) (context bool, err error)
 	Description string
 	Settings    types.CommandSettings
 
@@ -68,7 +68,6 @@ type CommandParametersRange struct {
 func (cm *CommandManager) commandCommands(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,
@@ -91,7 +90,6 @@ func (cm *CommandManager) commandCommands(
 func (cm *CommandManager) commandHelp(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,
@@ -155,33 +153,33 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	}
 
 	var allowed bool
-    for _, ch := range settings.Channels {
-        if ch == "all" {
-            allowed = true
-            break
-        }
-        if ch == message.ChannelID {
-            allowed = true
-            break
-        }
-    }
-    for _, sr := range settings.Roles {
-        if sr == "all" {
-            allowed = true
-            break
-        }
-        var u *discordgo.Member
-        u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
-        if err != nil {
-            return
-        }
-        for _, ur := range u.Roles {
-            if sr == ur {
-                allowed = true
-                break
-            }
-        }
-    }
+	for _, ch := range settings.Channels {
+		if ch == "all" {
+			allowed = true
+			break
+		}
+		if ch == message.ChannelID {
+			allowed = true
+			break
+		}
+	}
+	for _, sr := range settings.Roles {
+		if sr == "all" {
+			allowed = true
+			break
+		}
+		var u *discordgo.Member
+		u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
+		if err != nil {
+			return
+		}
+		for _, ur := range u.Roles {
+			if sr == ur {
+				allowed = true
+				break
+			}
+		}
+	}
 	if !allowed {
 		zap.L().Debug("command not allowed with current channel or role",
 			zap.String("channel", message.ChannelID),
@@ -203,7 +201,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 		return
 	}
 
-	enterContext, err := commandObject.Function(commandArgument, message, false, settings)
+	enterContext, err := commandObject.Function(commandArgument, message, settings)
 	if err != nil {
 		cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
 		cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
@@ -221,7 +219,6 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 
 	return nil
 }
-
 
 var clocks = []string{
 	"🕐", "🕑", "🕒", "🕓", "🕔", "🕕", "🕖", "🕗", "🕘", "🕙", "🕚", "🕛",

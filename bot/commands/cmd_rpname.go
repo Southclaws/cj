@@ -78,7 +78,6 @@ func rpname() string {
 func (cm *CommandManager) commandRP(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

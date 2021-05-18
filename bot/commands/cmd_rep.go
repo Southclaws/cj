@@ -16,7 +16,6 @@ import (
 func (cm *CommandManager) commandRep(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

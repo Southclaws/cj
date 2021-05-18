@@ -12,7 +12,6 @@ import (
 func (cm *CommandManager) commandMyTop(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

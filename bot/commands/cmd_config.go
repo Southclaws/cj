@@ -17,7 +17,6 @@ var matchConfigInput = regexp.MustCompile(`(?ms)\x60\x60\x60.*\n(.+)\n\x60\x60\x
 func (cm *CommandManager) commandConfig(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

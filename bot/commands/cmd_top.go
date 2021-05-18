@@ -11,7 +11,6 @@ import (
 func (cm *CommandManager) commandTop(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,

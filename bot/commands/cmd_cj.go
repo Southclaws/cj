@@ -999,7 +999,6 @@ var quotes = []string{
 func (cm *CommandManager) commandCJQuote(
 	args string,
 	message discordgo.Message,
-	contextual bool,
 	settings types.CommandSettings,
 ) (
 	context bool,
