@@ -16,10 +16,11 @@ func (cm *CommandManager) LoadCommands() {
 			Name:        "/commands",
 			Description: "Displays a list of commands.",
 		},
-		// "/help": {
-		// 	Function:    cm.commandHelp,
-		// 	Description: "Displays a list of commands.",
-		// },
+		{
+			Function:    cm.commandHelp,
+			Name:        "/help",
+			Description: "Displays a list of commands.",
+		},
 		// "/config": {
 		// 	Function:    cm.commandConfig,
 		// 	Description: "Configure command settings.",
@@ -142,13 +143,11 @@ func (cm *CommandManager) LoadCommands() {
 				Name:        strings.TrimLeft(v.Name, "/"),
 				Description: v.Description,
 			})
-
-			cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-				if i.Data.Name == strings.TrimLeft(v.Name, "/") {
-					v.Function(i, v.Settings)
-				}
-			})
 		}
+
+		cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			cm.TryFindAndFireCommand(i)
+		})
 	}
 
 	cm.Commands = commands

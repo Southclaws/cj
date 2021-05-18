@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -180,6 +181,15 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 	// }
 
 	return nil
+}
+
+func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
+	for _, command := range cm.Commands {
+		if strings.TrimLeft(command.Name, "/") == interaction.Data.Name {
+			command.Function(interaction, command.Settings)
+			break
+		}
+	}
 }
 
 var clocks = []string{
