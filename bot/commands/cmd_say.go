@@ -6,13 +6,17 @@ import (
 )
 
 func (cm *CommandManager) commandSay(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(cm.Config.PrimaryChannel, args)
+	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Content: interaction.Data.Options[0].StringValue(),
+		},
+	})
 	return
 }

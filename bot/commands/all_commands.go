@@ -33,10 +33,19 @@ func (cm *CommandManager) LoadCommands() {
 		// 	Function:    cm.commandRoles,
 		// 	Description: "List of roles and their IDs.",
 		// },
-		// "/say": {
-		// 	Function:    cm.commandSay,
-		// 	Description: "Say something as CJ.",
-		// },
+		{
+			Function:    cm.commandSay,
+			Name:        "/sayylmao",
+			Description: "Say something as CJ.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "message",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The message to echo back to you.",
+					Required:    true,
+				},
+			},
+		},
 		// "/userinfo": {
 		// 	Function:    cm.commandUserInfo,
 		// 	Description: "Get a user's Burgershot forum info.",
@@ -114,6 +123,17 @@ func (cm *CommandManager) LoadCommands() {
 		// 	Cooldown:    time.Minute * 10,
 		// },
 	}
+
+	// Cleanup of existing commands
+	// This is worth doing, e.g. if discord bugs out
+	// or a command signature changes or is deleted.
+	for _, guild := range cm.Discord.S.State.Guilds {
+		commands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, guild.ID)
+		for _, command := range commands {
+			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, guild.ID, command.ID)
+		}
+	}
+
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
 		v.Settings.Channels = []string{cm.Config.DefaultChannel}
@@ -139,10 +159,15 @@ func (cm *CommandManager) LoadCommands() {
 
 		// Register the command to discord
 		for _, guild := range cm.Discord.S.State.Guilds {
-			cm.Discord.S.ApplicationCommandCreate(cm.Discord.S.State.User.ID, guild.ID, &discordgo.ApplicationCommand{
+			_, err = cm.Discord.S.ApplicationCommandCreate(cm.Discord.S.State.User.ID, guild.ID, &discordgo.ApplicationCommand{
 				Name:        strings.TrimLeft(v.Name, "/"),
 				Description: v.Description,
+				Options:     v.Options,
 			})
+			if err != nil {
+				zap.L().Error("Error creating command!", zap.Any("At command:", v.Name))
+				zap.L().Error("Error creating command!", zap.Error(err))
+			}
 		}
 
 		cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {

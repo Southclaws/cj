@@ -52,8 +52,8 @@ type Command struct {
 	Name        string
 	Description string
 	Settings    types.CommandSettings
-
-	Cooldown time.Duration // DEPRECATED
+	Options     []*discordgo.ApplicationCommandOption
+	Cooldown    time.Duration // DEPRECATED
 }
 
 // CommandParametersRange represents minimum value and maximum value number of parameters for a command
