@@ -18,7 +18,7 @@ type CommandManager struct {
 	Discord   *discord.Session
 	Storage   storage.Storer
 	Forum     *forum.ForumClient
-	Commands  map[string]Command
+	Commands  []Command
 	Contexts  *cache.Cache
 	Cooldowns map[string]time.Time
 	Cache     *cache.Cache

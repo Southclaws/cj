@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
@@ -8,10 +10,10 @@ import (
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
 func (cm *CommandManager) LoadCommands() {
-	commands := map[string]Command{
-		"commands": {
+	commands := []Command{
+		{
 			Function:    cm.commandCommands,
-			Name:        "commands",
+			Name:        "/commands",
 			Description: "Displays a list of commands.",
 		},
 		// "/help": {
@@ -115,9 +117,9 @@ func (cm *CommandManager) LoadCommands() {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
 		v.Settings.Channels = []string{cm.Config.DefaultChannel}
 		v.Settings.Roles = []string{cm.Config.DefaultRole}
-		v.Settings.Command = k
+		v.Settings.Command = v.Name
 
-		settings, found, err := cm.Storage.GetCommandSettings(k)
+		settings, found, err := cm.Storage.GetCommandSettings(v.Name)
 		if err != nil {
 			zap.L().Fatal("failed to load command settings",
 				zap.Error(err))
@@ -125,28 +127,28 @@ func (cm *CommandManager) LoadCommands() {
 		if found {
 			v.Settings = settings
 		} else {
-			err = cm.Storage.SetCommandSettings(k, v.Settings)
+			err = cm.Storage.SetCommandSettings(v.Name, v.Settings)
 			if err != nil {
 				zap.L().Fatal("failed to assign command settings",
 					zap.Error(err))
 			}
 		}
 
+		commands[k] = v
+
+		// Register the command to discord
 		for _, guild := range cm.Discord.S.State.Guilds {
 			cm.Discord.S.ApplicationCommandCreate(cm.Discord.S.State.User.ID, guild.ID, &discordgo.ApplicationCommand{
-				Name:        v.Name,
+				Name:        strings.TrimLeft(v.Name, "/"),
 				Description: v.Description,
 			})
 
 			cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-				zap.L().Info("hello")
-				if i.Data.Name == v.Name {
+				if i.Data.Name == strings.TrimLeft(v.Name, "/") {
 					v.Function(i, v.Settings)
 				}
 			})
 		}
-
-		commands[k] = v
 	}
 
 	cm.Commands = commands

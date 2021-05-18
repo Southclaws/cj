@@ -66,14 +66,20 @@ to update the configuration
 	return false, nil
 }
 
-func (cm *CommandManager) getCommand(command string) (cmd Command, f func(Command) error, err error) {
-	commandObject, ok := cm.Commands[command]
-	if !ok {
-		err = errors.Errorf("Unrecognised command `%s`", command)
+func (cm *CommandManager) getCommand(commandName string) (cmd Command, f func(Command) error, err error) {
+	var index = -1
+	for i, v := range cm.Commands {
+		if v.Name == commandName {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		err = errors.Errorf("Unrecognised command `%s`", commandName)
 		return
 	}
-	return commandObject, func(newCommand Command) error {
-		cm.Commands[command] = newCommand
-		return cm.Storage.SetCommandSettings(command, newCommand.Settings)
+	return cm.Commands[index], func(newCommand Command) error {
+		cm.Commands[index] = newCommand
+		return cm.Storage.SetCommandSettings(commandName, newCommand.Settings)
 	}, nil
 }
