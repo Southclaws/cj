@@ -162,6 +162,11 @@ func (cm *CommandManager) LoadCommands() {
 			Cooldown:    time.Minute * 10,
 		},
 		{
+			Function:    cm.commandDebugReload,
+			Name:        "/debugreload",
+			Description: "Force reload commands to Discord",
+		},
+		{
 			Function:    cm.ltf,
 			Name:        "/ltf",
 			Description: "Rest in peace.",
@@ -169,15 +174,7 @@ func (cm *CommandManager) LoadCommands() {
 		},
 	}
 
-	// Cleanup of existing commands
-	// This is worth doing, e.g. if discord bugs out
-	// or a command signature changes or is deleted.
-	for _, guild := range cm.Discord.S.State.Guilds {
-		commands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, guild.ID)
-		for _, command := range commands {
-			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, guild.ID, command.ID)
-		}
-	}
+	var discordCommands = []*discordgo.ApplicationCommand{}
 
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
@@ -203,18 +200,31 @@ func (cm *CommandManager) LoadCommands() {
 		commands[k] = v
 
 		// Register the command to discord
-		for _, guild := range cm.Discord.S.State.Guilds {
-			_, err = cm.Discord.S.ApplicationCommandCreate(cm.Discord.S.State.User.ID, guild.ID, &discordgo.ApplicationCommand{
-				Name:        strings.TrimLeft(v.Name, "/"),
-				Description: v.Description,
-				Options:     v.Options,
-			})
-			if err != nil {
-				zap.L().Error("Error creating command!", zap.Any("At command:", v.Name))
-				zap.L().Error("Error creating command!", zap.Error(err))
+		discordCommands = append(discordCommands, &discordgo.ApplicationCommand{
+			Name:        strings.TrimLeft(v.Name, "/"),
+			Description: v.Description,
+			Options:     v.Options,
+		})
+	}
+
+	// Cleanup of old commands
+	// This is worth doing, e.g. if discord bugs out
+	// or a command signature changes or is deleted.
+	existingsDiscordCommands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, "")
+	for _, existingCommand := range existingsDiscordCommands {
+		commandExists := false
+		for _, command := range discordCommands {
+			if command.Name == existingCommand.Name {
+				commandExists = true
+				break
 			}
 		}
+		if commandExists == false {
+			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
+		}
 	}
+
+	cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
 
 	cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		cm.TryFindAndFireCommand(i)

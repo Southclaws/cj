@@ -21,12 +21,11 @@ func (cm *CommandManager) commandRep(
 	context bool,
 	err error,
 ) {
-
-	user := cm.Storage.GetUserOrCreate(interaction.User.ID)
+	user := cm.Storage.GetUserOrCreate(interaction.Member.User.ID)
 	sort.Slice(user.ReceivedReactions, func(i, j int) bool {
 		return user.ReceivedReactions[i].Counter > user.ReceivedReactions[j].Counter
 	})
-	embed, err := FormatUserReactions(&user.ReceivedReactions, interaction.User, cm.Discord)
+	embed, err := FormatUserReactions(&user.ReceivedReactions, interaction.Member.User, cm.Discord)
 	if err != nil {
 		cm.replyDirectly(interaction, fmt.Sprintf("Failed to format reactions with error %s", err.Error()))
 		return
