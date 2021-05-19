@@ -3,64 +3,60 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/types"
 )
 
-var matchConfigInput = regexp.MustCompile(`(?ms)\x60\x60\x60.*\n(.+)\n\x60\x60\x60`)
-
 func (cm *CommandManager) commandConfig(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	t := strings.SplitN(args, "\n", 2)
-	if len(t[0]) == 0 {
-		cm.Discord.ChannelMessageSend(message.ChannelID, `Usage:
-/config [command] to view the current configuration
-/config [command]⏎
-[raw JSON as a code block]
-to update the configuration
-`)
-		return
-	}
-	command := t[0]
+	zap.L().Info("cmds", zap.Any("args", args))
 
-	cmd, set, err := cm.getCommand(command)
+	commandName := args["command"].StringValue()
+
+	cmd, set, err := cm.getCommand(commandName)
 	if err != nil {
-		cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
+		cm.replyDirectly(interaction, err.Error())
 		return false, nil
 	}
 
-	if len(t) == 1 {
+	newConfigValue, hasNewConfig := args["config"]
+	if hasNewConfig == false {
 		var b []byte
 		b, err = json.Marshal(cmd.Settings)
 		if err != nil {
-			return false, err
+			cm.replyDirectly(interaction,
+				fmt.Sprintf("Existing config for **%s** couldn't be marshalled to valid JSON. Contact a CJ administrator.", commandName))
+		} else {
+			cm.replyDirectly(interaction, fmt.Sprintf("Config for **%s**:\n```json\n%s```", commandName, string(b)))
 		}
-		cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("```json\n%s```", string(b)))
 	} else {
-		match := matchConfigInput.FindStringSubmatch(message.Content)
-		if err = json.Unmarshal([]byte(match[1]), &cmd.Settings); err != nil {
-			return false, err
+		newConfig := newConfigValue.StringValue()
+		newConfig = strings.TrimLeft(
+			strings.TrimRight(newConfig, "` "),
+			"` ")
+		if err = json.Unmarshal([]byte(newConfig), &cmd.Settings); err != nil {
+			cm.replyDirectly(interaction, fmt.Sprintf("Failed to unmarshal to JSON:\n```json\n%s```\nWith error: %s", newConfig, err.Error()))
 		}
 		if err = set(cmd); err != nil {
-			return false, err
+			cm.replyDirectly(interaction, fmt.Sprintf("Failed to update command **%s** with error: %s", commandName, err.Error()))
 		}
 		var b []byte
 		b, err = json.Marshal(cmd.Settings)
 		if err != nil {
-			return false, err
+			cm.replyDirectly(interaction, fmt.Sprintf("Successfully updated command **%s** but re-marshalling JSON failed with error: %s", commandName, err.Error()))
 		}
-		cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Updated to:\n```json\n%s```", string(b)))
+		cm.replyDirectly(interaction, fmt.Sprintf("Updated **%s** to:\n```json\n%s```", commandName, string(b)))
 	}
 
 	return false, nil
@@ -75,7 +71,7 @@ func (cm *CommandManager) getCommand(commandName string) (cmd Command, f func(Co
 		}
 	}
 	if index == -1 {
-		err = errors.Errorf("Unrecognised command `%s`", commandName)
+		err = errors.Errorf("Unrecognised command name `%s`", commandName)
 		return
 	}
 	return cm.Commands[index], func(newCommand Command) error {

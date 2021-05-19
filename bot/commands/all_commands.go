@@ -21,10 +21,25 @@ func (cm *CommandManager) LoadCommands() {
 			Name:        "/help",
 			Description: "Displays a list of commands.",
 		},
-		// "/config": {
-		// 	Function:    cm.commandConfig,
-		// 	Description: "Configure command settings.",
-		// },
+		{
+			Function:    cm.commandConfig,
+			Name:        "/config",
+			Description: "Configure command settings.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "command",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "A valid CJ command",
+					Required:    true,
+				},
+				{
+					Name:        "config",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "A JSON configuration for the command",
+					Required:    false,
+				},
+			},
+		},
 		// "/roles": {
 		// 	Function:    cm.commandRoles,
 		// 	Description: "List of roles and their IDs.",
