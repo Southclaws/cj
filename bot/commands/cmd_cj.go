@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-
-	"github.com/Southclaws/cj/types"
 )
 
 var quotes = []string{
@@ -997,14 +995,10 @@ var quotes = []string{
 }
 
 func (cm *CommandManager) commandCJQuote(
-	interaction *discordgo.InteractionCreate,
-	settings types.CommandSettings,
-) (
-	context bool,
-	err error,
+	message *discordgo.Message,
 ) {
 	rand.Seed(time.Now().UnixNano())
 	quote := quotes[rand.Intn(len(quotes))]
-	cm.Discord.ChannelMessageSend(interaction.ChannelID, quote)
+	cm.Discord.ChannelMessageSend(message.ChannelID, quote)
 	return
 }

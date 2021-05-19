@@ -66,120 +66,13 @@ type CommandParametersRange struct {
 // and, if so, call the associated function.
 // nolint:gocyclo
 func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
-	// storedContext, found := cm.Contexts.Get(message.Author.ID)
-	// if found {
-	// 	_, ok := storedContext.(Command)
-	// 	if !ok {
-	// 		return errors.New("failed to cast stored context to command type")
-	// 	}
-	// }
-
-	// commandAndParameters := strings.SplitN(message.Content, " ", 2)
-	// commandTrigger := strings.ToLower(commandAndParameters[0])
-	// commandArgument := ""
-
-	// if len(commandAndParameters) > 1 {
-	// 	commandArgument = commandAndParameters[1]
-	// }
-
-	// commandObject, exists := cm.Commands[commandTrigger]
-	// if !exists {
-	// 	if strings.HasPrefix(commandTrigger, "/") {
-	// 		threshold := 2
-	// 		result := ""
-	// 		for word := range cm.Commands {
-	// 			dist := levenshtein.DistanceForStrings(
-	// 				[]rune(commandTrigger),
-	// 				[]rune(word),
-	// 				levenshtein.DefaultOptions)
-
-	// 			if dist < threshold {
-	// 				threshold = dist
-	// 				result = word
-	// 			}
-	// 		}
-	// 		if result != "" {
-	// 			cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Did you mean %s?", result))
-	// 		}
-	// 	}
-	// 	return
-	// }
-
-	// settings, found, err := cm.Storage.GetCommandSettings(commandTrigger)
-	// if err != nil {
-	// 	return
-	// }
-	// if !found {
-	// 	settings.Cooldown = cm.Config.DefaultCooldown
-	// 	settings.Channels = []string{cm.Config.DefaultChannel}
-	// 	settings.Roles = []string{cm.Config.DefaultRole}
-	// }
-
-	// var allowed bool
-	// for _, ch := range settings.Channels {
-	// 	if ch == "all" {
-	// 		allowed = true
-	// 		break
-	// 	}
-	// 	if ch == message.ChannelID {
-	// 		allowed = true
-	// 		break
-	// 	}
-	// }
-	// for _, sr := range settings.Roles {
-	// 	if sr == "all" {
-	// 		allowed = true
-	// 		break
-	// 	}
-	// 	var u *discordgo.Member
-	// 	u, err = cm.Discord.S.GuildMember(cm.Config.GuildID, message.Author.ID)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// 	for _, ur := range u.Roles {
-	// 		if sr == ur {
-	// 			allowed = true
-	// 			break
-	// 		}
-	// 	}
-	// }
-	// if !allowed {
-	// 	zap.L().Debug("command not allowed with current channel or role",
-	// 		zap.String("channel", message.ChannelID),
-	// 		zap.Any("config", settings))
-	// 	return
-	// }
-
-	// // Check if command is on cooldown
-	// if when, ok := cm.Cooldowns[commandTrigger]; ok {
-	// 	since := time.Since(when)
-	// 	if since < settings.Cooldown {
-	// 		err = cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, pcd(since, settings.Cooldown))
-	// 		return
-	// 	}
-	// }
-
-	// err = cm.Discord.S.ChannelTyping(message.ChannelID)
-	// if err != nil {
-	// 	return
-	// }
-
-	// enterContext, err := commandObject.Function(_, settings) // update this at some point
-	// if err != nil {
-	// 	cm.Discord.ChannelMessageSend(message.ChannelID, err.Error())
-	// 	cm.Discord.ChannelMessageSend(message.ChannelID, commandObject.Description)
-	// 	return
-	// }
-
-	// if enterContext {
-	// 	commandObject.Settings = settings
-	// 	cm.Contexts.Set(message.Author.ID, commandObject, cache.DefaultExpiration)
-	// }
-
-	// if commandObject.Cooldown > 0 {
-	// 	cm.Cooldowns[commandTrigger] = time.Now()
-	// }
-
+	split := strings.Split(message.Content, " ")
+	for _, s := range split {
+		if strings.ToLower(s) == "cj" {
+			cm.commandCJQuote(&message)
+			break
+		}
+	}
 	return nil
 }
 
