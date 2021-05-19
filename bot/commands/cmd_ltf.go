@@ -29,7 +29,8 @@ func (cm *CommandManager) ltf(
 		"778144453751078913",
 	})
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get messages for user")
+		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get messages for user").Error()))
+		return
 	}
 
 	nick := "LinuxTheFish"

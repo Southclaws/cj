@@ -32,6 +32,7 @@ func (cm *CommandManager) commandTopRep(
 	}
 	rankings, err := FormatReactionRankings(top, cm.Discord)
 	if err != nil {
+		cm.replyDirectly(interaction, err.Error())
 		return
 	}
 

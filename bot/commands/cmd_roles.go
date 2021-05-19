@@ -18,6 +18,7 @@ func (cm *CommandManager) commandRoles(
 ) {
 	roles, err := cm.Discord.S.GuildRoles(cm.Config.GuildID)
 	if err != nil {
+		cm.replyDirectly(interaction, err.Error())
 		return
 	}
 	msg := strings.Builder{}

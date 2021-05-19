@@ -18,6 +18,7 @@ func (cm *CommandManager) commandMessageFreq(
 ) {
 	freq, err := cm.Discord.GetCurrentChannelMessageFrequency(interaction.ChannelID)
 	if err != nil {
+		cm.replyDirectly(interaction, err.Error())
 		return
 	}
 	cm.replyDirectly(interaction, fmt.Sprintf("%02f messages per second", freq))

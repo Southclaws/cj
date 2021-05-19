@@ -24,7 +24,7 @@ func (cm *CommandManager) commandConfig(
 	cmd, set, err := cm.getCommand(commandName)
 	if err != nil {
 		cm.replyDirectly(interaction, err.Error())
-		return false, nil
+		return
 	}
 
 	newConfigValue, hasNewConfig := args["config"]
@@ -55,8 +55,7 @@ func (cm *CommandManager) commandConfig(
 		}
 		cm.replyDirectly(interaction, fmt.Sprintf("Updated **%s** to:\n```json\n%s```", commandName, string(b)))
 	}
-
-	return false, nil
+	return
 }
 
 func (cm *CommandManager) getCommand(commandName string) (cmd Command, f func(Command) error, err error) {
