@@ -186,14 +186,33 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.Data.Name {
-			args := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
-			for _, option := range interaction.Data.Options {
-				args[option.Name] = option
+			if hasPermissions(command.Settings.Roles, interaction.Member.Roles) {
+				args := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
+				for _, option := range interaction.Data.Options {
+					args[option.Name] = option
+				}
+				command.Function(interaction, args, command.Settings)
 			}
-			command.Function(interaction, args, command.Settings)
 			break
 		}
 	}
+}
+
+func hasPermissions(commandRoles []string, memberRoles []string) bool {
+	if len(commandRoles) == 0 {
+		return true
+	}
+	for _, i := range commandRoles {
+		if i == "all" {
+			return true
+		}
+		for _, j := range memberRoles {
+			if i == j {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 var clocks = []string{
