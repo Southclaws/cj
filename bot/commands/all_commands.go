@@ -199,7 +199,7 @@ func (cm *CommandManager) LoadCommands() {
 
 		commands[k] = v
 
-		// Register the command to discord
+		// Add an entry for the bulk overwrite list
 		discordCommands = append(discordCommands, &discordgo.ApplicationCommand{
 			Name:        strings.TrimLeft(v.Name, "/"),
 			Description: v.Description,
@@ -211,6 +211,7 @@ func (cm *CommandManager) LoadCommands() {
 	// This is worth doing, e.g. if discord bugs out
 	// or a command signature changes or is deleted.
 	existingsDiscordCommands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, "")
+	zap.L().Info("Existing slash commands:", zap.Any("e", existingsDiscordCommands))
 	for _, existingCommand := range existingsDiscordCommands {
 		commandExists := false
 		for _, command := range discordCommands {
@@ -220,6 +221,7 @@ func (cm *CommandManager) LoadCommands() {
 			}
 		}
 		if commandExists == false {
+			zap.L().Info("Deleting non-existent slash command from Discord:", zap.Any("e", existingCommand))
 			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
 		}
 	}
@@ -231,4 +233,5 @@ func (cm *CommandManager) LoadCommands() {
 	})
 
 	cm.Commands = commands
+	zap.L().Info("Set up command handler complete")
 }
