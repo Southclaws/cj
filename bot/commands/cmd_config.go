@@ -7,7 +7,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/types"
 )
@@ -20,8 +19,6 @@ func (cm *CommandManager) commandConfig(
 	context bool,
 	err error,
 ) {
-	zap.L().Info("cmds", zap.Any("args", args))
-
 	commandName := args["command"].StringValue()
 
 	cmd, set, err := cm.getCommand(commandName)
