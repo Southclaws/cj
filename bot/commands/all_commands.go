@@ -25,10 +25,6 @@ func (cm *CommandManager) LoadCommands() {
 		// 	Function:    cm.commandConfig,
 		// 	Description: "Configure command settings.",
 		// },
-		// "/readme": {
-		// 	Function:    cm.commandReadme,
-		// 	Description: "Force fetches the readme message.",
-		// },
 		// "/roles": {
 		// 	Function:    cm.commandRoles,
 		// 	Description: "List of roles and their IDs.",
@@ -46,17 +42,9 @@ func (cm *CommandManager) LoadCommands() {
 				},
 			},
 		},
-		// "/userinfo": {
-		// 	Function:    cm.commandUserInfo,
-		// 	Description: "Get a user's Burgershot forum info.",
-		// },
 		// "/getmsginfo": {
 		// 	Function:    cm.commandGetMessageInfo,
 		// 	Description: "Get a message's info by ID",
-		// },
-		// "/whois": {
-		// 	Function:    cm.commandWhois,
-		// 	Description: "Display a Discord user's forum account name.",
 		// },
 		// "cj": {
 		// 	Function:    cm.commandCJQuote,
