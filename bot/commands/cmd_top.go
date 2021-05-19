@@ -1,16 +1,17 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
-	"github.com/pkg/errors"
 
 	"github.com/Southclaws/cj/bot/heartbeat/stats"
 	"github.com/Southclaws/cj/types"
 )
 
 func (cm *CommandManager) commandTop(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
@@ -18,14 +19,16 @@ func (cm *CommandManager) commandTop(
 ) {
 	top, err := cm.Storage.GetTopMessages(10)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get message rankings")
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to get message rankings: %s", err.Error()))
+		return
 	}
 
 	rankings, err := stats.FormatMessageRankings(top, cm.Discord)
 	if err != nil {
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to format message rankings: %s", err.Error()))
 		return
 	}
 
-	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, rankings)
+	cm.replyDirectlyEmbed(interaction, "", rankings)
 	return
 }

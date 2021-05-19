@@ -2,6 +2,7 @@ package commands
 
 import (
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
@@ -40,10 +41,11 @@ func (cm *CommandManager) LoadCommands() {
 				},
 			},
 		},
-		// "/roles": {
-		// 	Function:    cm.commandRoles,
-		// 	Description: "List of roles and their IDs.",
-		// },
+		{
+			Function:    cm.commandRoles,
+			Name:        "/roles",
+			Description: "List of roles and their IDs.",
+		},
 		{
 			Function:    cm.commandSay,
 			Name:        "/sayylmao",
@@ -57,74 +59,114 @@ func (cm *CommandManager) LoadCommands() {
 				},
 			},
 		},
-		// "/getmsginfo": {
-		// 	Function:    cm.commandGetMessageInfo,
-		// 	Description: "Get a message's info by ID",
-		// },
-		// "cj": {
-		// 	Function:    cm.commandCJQuote,
-		// 	Description: "Talk to CJ.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "gmname": {
-		// 	Function:    cm.commandGmName,
-		// 	Description: "generates a professional gamemode name for your next NGG edit.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "mpname": {
-		// 	Function:    cm.commandMP,
-		// 	Description: "scrapes the web for the next BIG samp ripoff.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "dynamic": {
-		// 	Function:    cm.commandDynamic,
-		// 	Description: "inspiration for your next script.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "rpname": {
-		// 	Function:    cm.commandRP,
-		// 	Description: "the next big unique dynamic server.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "/wiki": {
-		// 	Function:    cm.commandWiki,
-		// 	Description: "Returns an article from open.mp wiki.",
-		// },
-		// "/top": {
-		// 	Function:    cm.commandTop,
-		// 	Description: "Rankings for most messages sent.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "/toprep": {
-		// 	Function:    cm.commandTopRep,
-		// 	Description: "Rankings for most emojis sent.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "/konesyntees": {
-		// 	Function:    cm.commandKonesyntees,
-		// 	Description: "Use superior Estonian technology to express your feelings like you've never before!",
-		// 	Cooldown:    time.Minute,
-		// },
-		// "/mf": {
-		// 	Function:    cm.commandMessageFreq,
-		// 	Description: "Message frequency",
-		// 	Cooldown:    time.Minute,
-		// },
-		// "/rep": {
-		// 	Function:    cm.commandRep,
-		// 	Description: "Know how many reactions your messages have gotten",
-		// 	Cooldown:    time.Second * 2,
-		// },
-		// "/mytop": {
-		// 	Function:    cm.commandMyTop,
-		// 	Description: "Know your rank.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
-		// "/ltf": {
-		// 	Function:    cm.ltf,
-		// 	Description: "Rest in peace.",
-		// 	Cooldown:    time.Minute * 10,
-		// },
+		{
+			Function:    cm.commandGetMessageInfo,
+			Name:        "/getmsginfo",
+			Description: "Get a message's info by ID",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "message-id",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The message ID to retrieve from the DB",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Function:    cm.commandGmName,
+			Name:        "/gmname",
+			Description: "generates a professional gamemode name for your next NGG edit.",
+			Cooldown:    time.Minute * 10,
+		},
+		{
+			Function:    cm.commandMP,
+			Name:        "/mpname",
+			Description: "scrapes the web for the next BIG samp ripoff.",
+			Cooldown:    time.Minute * 10,
+		},
+		{
+			Function:    cm.commandDynamic,
+			Name:        "/dynamic",
+			Description: "inspiration for your next script.",
+			Cooldown:    time.Minute * 10,
+		},
+		{
+			Function:    cm.commandRP,
+			Name:        "/rpname",
+			Description: "the next big unique dynamic server.",
+			Cooldown:    time.Minute * 10,
+		},
+		{
+			Function:    cm.commandWiki,
+			Name:        "/wiki",
+			Description: "Returns an article from open.mp wiki.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "search-term",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The wiki term to search",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Function:    cm.commandTop,
+			Name:        "/top",
+			Description: "Rankings for most messages sent.",
+			Cooldown:    time.Minute * 10,
+		},
+		{
+			Function:    cm.commandTopRep,
+			Name:        "/toprep",
+			Description: "Rankings for most emojis sent.",
+			Cooldown:    time.Minute * 10,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "emoji",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "Optional: Rankings for a specific emoji",
+					Required:    false,
+				},
+			},
+		},
+		{
+			Function:    cm.commandKonesyntees,
+			Name:        "/konesyntees",
+			Description: "Use superior Estonian technology to express your feelings like you've never before!",
+			Cooldown:    time.Minute,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "input",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "Konesyntezing input",
+					Required:    false,
+				},
+			},
+		},
+		{
+			Function:    cm.commandMessageFreq,
+			Name:        "/mf",
+			Description: "Message frequency",
+			Cooldown:    time.Minute,
+		},
+		{
+			Function:    cm.commandRep,
+			Name:        "/rep",
+			Description: "Know how many reactions your messages have gotten",
+			Cooldown:    time.Second * 2,
+		},
+		{
+			Function:    cm.commandMyTop,
+			Name:        "/mytop",
+			Description: "Know your rank.",
+			Cooldown:    time.Minute * 10,
+		},
+		{
+			Function:    cm.ltf,
+			Name:        "/ltf",
+			Description: "Rest in peace.",
+			Cooldown:    time.Minute * 10,
+		},
 	}
 
 	// Cleanup of existing commands
@@ -172,11 +214,11 @@ func (cm *CommandManager) LoadCommands() {
 				zap.L().Error("Error creating command!", zap.Error(err))
 			}
 		}
-
-		cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			cm.TryFindAndFireCommand(i)
-		})
 	}
+
+	cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		cm.TryFindAndFireCommand(i)
+	})
 
 	cm.Commands = commands
 }

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,34 +14,49 @@ import (
 )
 
 func (cm *CommandManager) commandKonesyntees(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	text, speed, voice, err := parseVoiceParams(message.Content)
+	text, speed, voice, err := parseVoiceParams(args["input"].StringValue())
 	if err != nil {
+		cm.replyDirectly(interaction, fmt.Sprintf("An error occurred: %s", err.Error()))
 		return
 	}
 
 	if len(text) > 100 {
-		return false, errors.New("text too long")
+		cm.replyDirectly(interaction, "Text too long! (<100)")
+		return
 	}
+
+	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Content: "Processing your konesyntees",
+		},
+	})
 
 	response, err := gonesyntees.Request(text, gonesyntees.Voice(voice), speed)
 
 	if err != nil {
+		cm.Discord.S.FollowupMessageCreate(cm.Discord.S.State.User.ID, interaction.Interaction, false, &discordgo.WebhookParams{
+			Content: fmt.Sprintf("Error in sending request: %s", err.Error()),
+		})
 		return
 	}
 
 	audio, err := http.Get(response.MP3Url)
 	if err != nil {
+		cm.Discord.S.FollowupMessageCreate(cm.Discord.S.State.User.ID, interaction.Interaction, false, &discordgo.WebhookParams{
+			Content: fmt.Sprintf("Error in getting response URL: %s", err.Error()),
+		})
 		return
 	}
 
-	cm.Discord.ChannelFileSend(message.ChannelID, "konesyntees.mp3", audio.Body)
+	cm.Discord.ChannelFileSend(interaction.ChannelID, "konesyntees.mp3", audio.Body)
 	return
 }
 

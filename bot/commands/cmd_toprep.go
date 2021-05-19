@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/discord"
@@ -14,23 +13,29 @@ import (
 )
 
 func (cm *CommandManager) commandTopRep(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	top, err := cm.Storage.GetTopReactions(10, args)
+	reaction := ""
+	val, exists := args["reaction"]
+	if exists {
+		reaction = val.StringValue()
+	}
+	top, err := cm.Storage.GetTopReactions(10, reaction)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get message rankings")
+		cm.replyDirectly(interaction, err.Error())
+		return
 	}
 	rankings, err := FormatReactionRankings(top, cm.Discord)
 	if err != nil {
 		return
 	}
 
-	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, rankings)
+	cm.replyDirectlyEmbed(interaction, "", rankings)
 	return
 }
 

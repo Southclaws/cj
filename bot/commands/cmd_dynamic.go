@@ -215,13 +215,13 @@ func makeDynamic() string {
 }
 
 func (cm *CommandManager) commandDynamic(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(message.ChannelID, makeDynamic())
+	cm.replyDirectly(interaction, makeDynamic())
 	return
 }

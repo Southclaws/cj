@@ -67,33 +67,33 @@ type Hit struct {
 }
 
 func (cm *CommandManager) commandWiki(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	if len(args) == 0 {
-		cm.Discord.ChannelMessageSend(message.ChannelID, cmdUsage)
-		return
-	} else if len(args) < 3 {
-		cm.Discord.ChannelMessageSend(message.ChannelID, "Query must be 3 characters or more")
+	searchTerm := args["search-term"].StringValue()
+	if len(searchTerm) < 3 {
+		cm.replyDirectly(interaction, "Query must be 3 characters or more")
 		return
 	}
 
-	r, err := http.Get(fmt.Sprintf("https://api.open.mp/docs/search?q=%s", strings.ReplaceAll(args, " ", "%20")))
+	r, err := http.Get(fmt.Sprintf("https://api.open.mp/docs/search?q=%s", strings.ReplaceAll(searchTerm, " ", "%20")))
 	if err != nil {
-		return false, err
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to GET result for search term %s\nError: %s", searchTerm, err.Error()))
+		return
 	}
 
 	var results Results
-	if err := json.NewDecoder(r.Body).Decode(&results); err != nil {
-		return false, err
+	if err = json.NewDecoder(r.Body).Decode(&results); err != nil {
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to decode result for search term %s\nError: %s\n", searchTerm, err.Error()))
+		return
 	}
 
 	if results.TotalHits == 0 {
-		cm.Discord.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+		cm.replyDirectlyEmbed(interaction, "", &discordgo.MessageEmbed{
 			Type:        discordgo.EmbedTypeRich,
 			Title:       "No results",
 			Description: "There were no results for that query.",
@@ -121,14 +121,14 @@ func (cm *CommandManager) commandWiki(
 			formatDescription(hit)))
 		rendered++
 	}
-
-	cm.Discord.ChannelMessageSendEmbed(message.ChannelID, &discordgo.MessageEmbed{
+	embed := &discordgo.MessageEmbed{
 		Type:        discordgo.EmbedTypeRich,
 		Title:       "Documentation Search Results",
 		Description: desc.String(),
-	})
+	}
+	cm.replyDirectlyEmbed(interaction, "", embed)
 
-	return false, err
+	return false, err // Todo: remove this
 }
 
 func nameFromPath(p string) string {

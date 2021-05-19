@@ -219,3 +219,13 @@ func (cm *CommandManager) replyDirectly(interaction *discordgo.InteractionCreate
 		},
 	})
 }
+
+func (cm *CommandManager) replyDirectlyEmbed(interaction *discordgo.InteractionCreate, response string, embed *discordgo.MessageEmbed) {
+	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Content: response,
+			Embeds:  []*discordgo.MessageEmbed{embed},
+		},
+	})
+}
