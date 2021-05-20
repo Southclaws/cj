@@ -7,6 +7,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+var lastUseTime = time.Time{}
+
 var quotes = []string{
 	"What, you ran out of donuts?",
 	"You can talk about this in the shower with your buddies!",
@@ -997,6 +999,11 @@ var quotes = []string{
 func (cm *CommandManager) commandCJQuote(
 	message *discordgo.Message,
 ) {
+	if lastUseTime.Add(time.Second * 60).After(time.Now()) {
+		cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, "🕛")
+		return
+	}
+	lastUseTime = time.Now()
 	rand.Seed(time.Now().UnixNano())
 	quote := quotes[rand.Intn(len(quotes))]
 	cm.Discord.ChannelMessageSend(message.ChannelID, quote)

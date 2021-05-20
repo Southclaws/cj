@@ -85,6 +85,15 @@ func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.Interacti
 					args[option.Name] = option
 				}
 				command.Function(interaction, args, command.Settings)
+			} else {
+				cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionApplicationCommandResponseData{
+						Content: "You're not authorized for this!",
+					},
+				})
+				time.Sleep(time.Second * 5)
+				cm.Discord.S.InteractionResponseDelete(cm.Discord.S.State.User.ID, interaction.Interaction)
 			}
 			break
 		}
