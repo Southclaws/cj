@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/patrickmn/go-cache"
+	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
@@ -48,12 +49,12 @@ func (cm *CommandManager) Init(
 
 // Command represents a public, private or administrative command
 type Command struct {
-	Function    func(interaction *discordgo.InteractionCreate, args map[string]*discordgo.ApplicationCommandInteractionDataOption, settings types.CommandSettings) (context bool, err error)
-	Name        string
-	Description string
-	Settings    types.CommandSettings
-	Options     []*discordgo.ApplicationCommandOption
-	Cooldown    time.Duration // DEPRECATED
+	Function         func(interaction *discordgo.InteractionCreate, args map[string]*discordgo.ApplicationCommandInteractionDataOption, settings types.CommandSettings) (context bool, err error)
+	Name             string
+	Description      string
+	Settings         types.CommandSettings
+	Options          []*discordgo.ApplicationCommandOption
+	IsAdministrative bool
 }
 
 // CommandParametersRange represents minimum value and maximum value number of parameters for a command
@@ -77,6 +78,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 }
 
 func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
+	zap.L().Debug("Received command interactoin", zap.Any("", interaction))
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.Data.Name {
 			if hasPermissions(command.Settings.Roles, interaction.Member.Roles) {

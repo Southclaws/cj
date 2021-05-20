@@ -56,6 +56,7 @@ func (cm *CommandManager) commandKonesyntees(
 		return
 	}
 
+	cm.Discord.S.InteractionResponseDelete(cm.Discord.S.State.User.ID, interaction.Interaction)
 	cm.Discord.ChannelFileSend(interaction.ChannelID, "konesyntees.mp3", audio.Body)
 	return
 }

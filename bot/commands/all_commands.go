@@ -2,7 +2,6 @@ package commands
 
 import (
 	"strings"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
@@ -23,9 +22,10 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Displays a list of commands.",
 		},
 		{
-			Function:    cm.commandConfig,
-			Name:        "/config",
-			Description: "Configure command settings.",
+			Function:         cm.commandConfig,
+			Name:             "/config",
+			Description:      "Configure command settings.",
+			IsAdministrative: true,
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "command",
@@ -60,9 +60,10 @@ func (cm *CommandManager) LoadCommands() {
 			},
 		},
 		{
-			Function:    cm.commandGetMessageInfo,
-			Name:        "/getmsginfo",
-			Description: "Get a message's info by ID",
+			Function:         cm.commandGetMessageInfo,
+			Name:             "/getmsginfo",
+			Description:      "Get a message's info by ID",
+			IsAdministrative: true,
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "message-id",
@@ -76,25 +77,21 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandGmName,
 			Name:        "/gmname",
 			Description: "generates a professional gamemode name for your next NGG edit.",
-			Cooldown:    time.Minute * 10,
 		},
 		{
 			Function:    cm.commandMP,
 			Name:        "/mpname",
 			Description: "scrapes the web for the next BIG samp ripoff.",
-			Cooldown:    time.Minute * 10,
 		},
 		{
 			Function:    cm.commandDynamic,
 			Name:        "/dynamic",
 			Description: "inspiration for your next script.",
-			Cooldown:    time.Minute * 10,
 		},
 		{
 			Function:    cm.commandRP,
 			Name:        "/rpname",
 			Description: "the next big unique dynamic server.",
-			Cooldown:    time.Minute * 10,
 		},
 		{
 			Function:    cm.commandWiki,
@@ -113,13 +110,11 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandTop,
 			Name:        "/top",
 			Description: "Rankings for most messages sent.",
-			Cooldown:    time.Minute * 10,
 		},
 		{
 			Function:    cm.commandTopRep,
 			Name:        "/toprep",
 			Description: "Rankings for most emojis sent.",
-			Cooldown:    time.Minute * 10,
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "emoji",
@@ -133,44 +128,41 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandKonesyntees,
 			Name:        "/konesyntees",
 			Description: "Use superior Estonian technology to express your feelings like you've never before!",
-			Cooldown:    time.Minute,
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "input",
 					Type:        discordgo.ApplicationCommandOptionString,
 					Description: "Konesyntezing input",
-					Required:    false,
+					Required:    true,
 				},
 			},
 		},
 		{
-			Function:    cm.commandMessageFreq,
-			Name:        "/mf",
-			Description: "Message frequency",
-			Cooldown:    time.Minute,
+			Function:         cm.commandMessageFreq,
+			Name:             "/mf",
+			Description:      "Message frequency",
+			IsAdministrative: true,
 		},
 		{
 			Function:    cm.commandRep,
 			Name:        "/rep",
 			Description: "Know how many reactions your messages have gotten",
-			Cooldown:    time.Second * 2,
 		},
 		{
 			Function:    cm.commandMyTop,
 			Name:        "/mytop",
 			Description: "Know your rank.",
-			Cooldown:    time.Minute * 10,
 		},
 		{
-			Function:    cm.commandDebugReload,
-			Name:        "/debugreload",
-			Description: "Force reload commands to Discord",
+			Function:         cm.commandDebugReload,
+			Name:             "/debugreload",
+			Description:      "Force reload commands to Discord",
+			IsAdministrative: true,
 		},
 		{
 			Function:    cm.ltf,
 			Name:        "/ltf",
 			Description: "Rest in peace.",
-			Cooldown:    time.Minute * 10,
 		},
 	}
 
@@ -178,8 +170,11 @@ func (cm *CommandManager) LoadCommands() {
 
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
-		v.Settings.Channels = []string{cm.Config.DefaultChannel}
-		v.Settings.Roles = []string{cm.Config.DefaultRole}
+		v.Settings.Roles = []string{"all"}
+		if v.IsAdministrative {
+			// Operator, Admin, Test server role, Cj Config Man
+			v.Settings.Roles = []string{"363383930143113216", "282353010192023552", "825041993251029032", "783100099969548288"}
+		}
 		v.Settings.Command = v.Name
 
 		settings, found, err := cm.Storage.GetCommandSettings(v.Name)
