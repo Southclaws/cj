@@ -211,7 +211,8 @@ func (cm *CommandManager) LoadCommands() {
 	// This is worth doing, e.g. if discord bugs out
 	// or a command signature changes or is deleted.
 	existingsDiscordCommands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, "")
-	zap.L().Info("Existing slash commands:", zap.Any("e", existingsDiscordCommands))
+	zap.L().Info("Existing slash commands:", zap.Any("cmds", existingsDiscordCommands))
+
 	for _, existingCommand := range existingsDiscordCommands {
 		commandExists := false
 		for _, command := range discordCommands {
@@ -221,11 +222,13 @@ func (cm *CommandManager) LoadCommands() {
 			}
 		}
 		if commandExists == false {
-			zap.L().Info("Deleting non-existent slash command from Discord:", zap.Any("e", existingCommand))
+			zap.L().Info("Deleting non-existent slash command from Discord:", zap.Any("cmd", existingCommand))
 			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
 		}
 	}
 
+	// Leave guild ID empty to indicate a global command
+	zap.L().Info("Pushing commands to discord...")
 	cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
 
 	cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {

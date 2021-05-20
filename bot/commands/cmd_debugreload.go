@@ -19,15 +19,13 @@ func (cm *CommandManager) commandDebugReload(
 
 	existingsDiscordCommands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, "")
 	for _, existingCommand := range existingsDiscordCommands {
-		commandExists := false
-		for _, command := range cm.Commands {
-			if command.Name == existingCommand.Name {
-				commandExists = true
-				break
-			}
-		}
-		if commandExists == false {
-			go cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
+		cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
+	}
+
+	for _, guild := range cm.Discord.S.State.Guilds {
+		existingsDiscordCommands, _ = cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, guild.ID)
+		for _, existingCommand := range existingsDiscordCommands {
+			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, guild.ID, existingCommand.ID)
 		}
 	}
 
