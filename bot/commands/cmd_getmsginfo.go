@@ -2,28 +2,27 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
-	"github.com/pkg/errors"
 )
 
 func (cm *CommandManager) commandGetMessageInfo(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	messageId := strings.TrimSpace(args)
+	messageId := args["message-id"].StringValue()
 	var chatLog storage.ChatLog
 	chatLog, err = cm.Storage.GetMessageByID(messageId)
 	if err != nil {
-		return false, errors.New("Bad message ID")
+		cm.replyDirectly(interaction, "Bad message ID")
+		return
 	}
 	discordMessage := fmt.Sprintf(
 		"Message ID: %s\n"+
@@ -37,6 +36,6 @@ func (cm *CommandManager) commandGetMessageInfo(
 		chatLog.DiscordUserID,
 		chatLog.Message)
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, discordMessage)
+	cm.replyDirectly(interaction, discordMessage)
 	return
 }

@@ -9,8 +9,8 @@ import (
 )
 
 func (cm *CommandManager) commandRoles(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
@@ -18,6 +18,7 @@ func (cm *CommandManager) commandRoles(
 ) {
 	roles, err := cm.Discord.S.GuildRoles(cm.Config.GuildID)
 	if err != nil {
+		cm.replyDirectly(interaction, err.Error())
 		return
 	}
 	msg := strings.Builder{}
@@ -25,6 +26,6 @@ func (cm *CommandManager) commandRoles(
 	for _, r := range roles {
 		msg.WriteString(fmt.Sprintf("`%s`: %s\n", r.ID, r.Name))
 	}
-	cm.Discord.ChannelMessageSend(message.ChannelID, msg.String())
+	cm.replyDirectly(interaction, msg.String())
 	return
 }

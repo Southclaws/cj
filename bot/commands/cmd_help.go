@@ -6,13 +6,18 @@ import (
 )
 
 func (cm *CommandManager) commandHelp(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	cm.Discord.ChannelMessageSend(message.ChannelID, "fuck off")
+	err = cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Content: "fuck off",
+		},
+	})
 	return
 }

@@ -9,17 +9,18 @@ import (
 )
 
 func (cm *CommandManager) commandMessageFreq(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	freq, err := cm.Discord.GetCurrentChannelMessageFrequency(message.ChannelID)
+	freq, err := cm.Discord.GetCurrentChannelMessageFrequency(interaction.ChannelID)
 	if err != nil {
+		cm.replyDirectly(interaction, err.Error())
 		return
 	}
-	cm.Discord.ChannelMessageSend(message.ChannelID, fmt.Sprintf("%02f messages per second", freq))
+	cm.replyDirectly(interaction, fmt.Sprintf("%02f messages per second", freq))
 	return
 }

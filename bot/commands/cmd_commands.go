@@ -8,8 +8,8 @@ import (
 )
 
 func (cm *CommandManager) commandCommands(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
@@ -20,11 +20,16 @@ func (cm *CommandManager) commandCommands(
 	}
 
 	var cmdlist string
-	for trigger, cmd := range cm.Commands {
-		cmdlist += fmt.Sprintf("**%s** - %s\n", trigger, cmd.Description)
+	for _, cmd := range cm.Commands {
+		cmdlist += fmt.Sprintf("**%s** - %s\n", cmd.Name, cmd.Description)
 	}
 	embed.Description = cmdlist
 
-	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, embed)
+	err = cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
 	return
 }

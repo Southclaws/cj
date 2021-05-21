@@ -14,24 +14,24 @@ import (
 )
 
 func (cm *CommandManager) commandRep(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-
-	user := cm.Storage.GetUserOrCreate(message.Author.ID)
+	user := cm.Storage.GetUserOrCreate(interaction.Member.User.ID)
 	sort.Slice(user.ReceivedReactions, func(i, j int) bool {
 		return user.ReceivedReactions[i].Counter > user.ReceivedReactions[j].Counter
 	})
-	embed, err := FormatUserReactions(&user.ReceivedReactions, message.Author, cm.Discord)
+	embed, err := FormatUserReactions(&user.ReceivedReactions, interaction.Member.User, cm.Discord)
 	if err != nil {
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to format reactions with error %s", err.Error()))
 		return
 	}
 
-	_, err = cm.Discord.S.ChannelMessageSendEmbed(message.ChannelID, embed)
+	cm.replyDirectlyEmbed(interaction, "", embed)
 
 	return
 }

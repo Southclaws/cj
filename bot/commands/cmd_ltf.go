@@ -11,8 +11,8 @@ import (
 )
 
 func (cm *CommandManager) ltf(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
@@ -20,7 +20,7 @@ func (cm *CommandManager) ltf(
 ) {
 	channelID := "831189475480436746"
 
-	if message.ChannelID != channelID {
+	if interaction.ChannelID != channelID {
 		return
 	}
 
@@ -29,13 +29,14 @@ func (cm *CommandManager) ltf(
 		"778144453751078913",
 	})
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get messages for user")
+		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get messages for user").Error()))
+		return
 	}
 
 	nick := "LinuxTheFish"
 	time := time.Unix(msg.Timestamp, 0)
 
-	cm.Discord.ChannelMessageSend(channelID, fmt.Sprintf(
+	cm.replyDirectly(interaction, fmt.Sprintf(
 		"> %s\n - **%s** (%s, %d)",
 		msg.Message, nick, time.Month().String(), time.Year()))
 

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-
-	"github.com/Southclaws/cj/types"
 )
+
+var lastUseTime = time.Time{}
 
 var quotes = []string{
 	"What, you ran out of donuts?",
@@ -997,13 +997,13 @@ var quotes = []string{
 }
 
 func (cm *CommandManager) commandCJQuote(
-	args string,
-	message discordgo.Message,
-	settings types.CommandSettings,
-) (
-	context bool,
-	err error,
+	message *discordgo.Message,
 ) {
+	if lastUseTime.Add(time.Second * 60).After(time.Now()) {
+		cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, "🕛")
+		return
+	}
+	lastUseTime = time.Now()
 	rand.Seed(time.Now().UnixNano())
 	quote := quotes[rand.Intn(len(quotes))]
 	cm.Discord.ChannelMessageSend(message.ChannelID, quote)

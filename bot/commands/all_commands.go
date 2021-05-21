@@ -1,123 +1,183 @@
 package commands
 
 import (
-	"time"
+	"strings"
 
+	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
 func (cm *CommandManager) LoadCommands() {
-	commands := map[string]Command{
-		"/commands": {
+	commands := []Command{
+		{
 			Function:    cm.commandCommands,
+			Name:        "/commands",
 			Description: "Displays a list of commands.",
 		},
-		"/help": {
+		{
 			Function:    cm.commandHelp,
+			Name:        "/help",
 			Description: "Displays a list of commands.",
 		},
-		"/config": {
-			Function:    cm.commandConfig,
-			Description: "Configure command settings.",
+		{
+			Function:         cm.commandConfig,
+			Name:             "/config",
+			Description:      "Configure command settings.",
+			IsAdministrative: true,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "command",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "A valid CJ command",
+					Required:    true,
+				},
+				{
+					Name:        "config",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "A JSON configuration for the command",
+					Required:    false,
+				},
+			},
 		},
-		"/readme": {
-			Function:    cm.commandReadme,
-			Description: "Force fetches the readme message.",
-		},
-		"/roles": {
+		{
 			Function:    cm.commandRoles,
+			Name:        "/roles",
 			Description: "List of roles and their IDs.",
 		},
-		"/say": {
+		{
 			Function:    cm.commandSay,
+			Name:        "/sayylmao",
 			Description: "Say something as CJ.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "message",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The message to echo back to you.",
+					Required:    true,
+				},
+			},
 		},
-		"/userinfo": {
-			Function:    cm.commandUserInfo,
-			Description: "Get a user's Burgershot forum info.",
+		{
+			Function:         cm.commandGetMessageInfo,
+			Name:             "/getmsginfo",
+			Description:      "Get a message's info by ID",
+			IsAdministrative: true,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "message-id",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The message ID to retrieve from the DB",
+					Required:    true,
+				},
+			},
 		},
-		"/getmsginfo": {
-			Function:    cm.commandGetMessageInfo,
-			Description: "Get a message's info by ID",
-		},
-		"/whois": {
-			Function:    cm.commandWhois,
-			Description: "Display a Discord user's forum account name.",
-		},
-		"cj": {
-			Function:    cm.commandCJQuote,
-			Description: "Talk to CJ.",
-			Cooldown:    time.Minute * 10,
-		},
-		"gmname": {
+		{
 			Function:    cm.commandGmName,
+			Name:        "/gmname",
 			Description: "generates a professional gamemode name for your next NGG edit.",
-			Cooldown:    time.Minute * 10,
 		},
-		"mpname": {
+		{
 			Function:    cm.commandMP,
+			Name:        "/mpname",
 			Description: "scrapes the web for the next BIG samp ripoff.",
-			Cooldown:    time.Minute * 10,
 		},
-		"dynamic": {
+		{
 			Function:    cm.commandDynamic,
+			Name:        "/dynamic",
 			Description: "inspiration for your next script.",
-			Cooldown:    time.Minute * 10,
 		},
-		"rpname": {
+		{
 			Function:    cm.commandRP,
+			Name:        "/rpname",
 			Description: "the next big unique dynamic server.",
-			Cooldown:    time.Minute * 10,
 		},
-		"/wiki": {
+		{
 			Function:    cm.commandWiki,
+			Name:        "/wiki",
 			Description: "Returns an article from open.mp wiki.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "search-term",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The wiki term to search",
+					Required:    true,
+				},
+			},
 		},
-		"/top": {
+		{
 			Function:    cm.commandTop,
+			Name:        "/top",
 			Description: "Rankings for most messages sent.",
-			Cooldown:    time.Minute * 10,
 		},
-		"/toprep": {
+		{
 			Function:    cm.commandTopRep,
+			Name:        "/toprep",
 			Description: "Rankings for most emojis sent.",
-			Cooldown:    time.Minute * 10,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "emoji",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "Optional: Rankings for a specific emoji",
+					Required:    false,
+				},
+			},
 		},
-		"/konesyntees": {
+		{
 			Function:    cm.commandKonesyntees,
+			Name:        "/konesyntees",
 			Description: "Use superior Estonian technology to express your feelings like you've never before!",
-			Cooldown:    time.Minute,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "input",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "Konesyntezing input",
+					Required:    true,
+				},
+			},
 		},
-		"/mf": {
-			Function:    cm.commandMessageFreq,
-			Description: "Message frequency",
-			Cooldown:    time.Minute,
+		{
+			Function:         cm.commandMessageFreq,
+			Name:             "/mf",
+			Description:      "Message frequency",
+			IsAdministrative: true,
 		},
-		"/rep": {
+		{
 			Function:    cm.commandRep,
+			Name:        "/rep",
 			Description: "Know how many reactions your messages have gotten",
-			Cooldown:    time.Second * 2,
 		},
-		"/mytop": {
+		{
 			Function:    cm.commandMyTop,
+			Name:        "/mytop",
 			Description: "Know your rank.",
-			Cooldown:    time.Minute * 10,
 		},
-		"/ltf": {
+		{
+			Function:         cm.commandDebugReload,
+			Name:             "/debugreload",
+			Description:      "Force reload commands to Discord",
+			IsAdministrative: true,
+		},
+		{
 			Function:    cm.ltf,
+			Name:        "/ltf",
 			Description: "Rest in peace.",
-			Cooldown:    time.Minute * 10,
 		},
 	}
+
+	var discordCommands = []*discordgo.ApplicationCommand{}
+
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
-		v.Settings.Channels = []string{cm.Config.DefaultChannel}
-		v.Settings.Roles = []string{cm.Config.DefaultRole}
-		v.Settings.Command = k
+		v.Settings.Roles = []string{"all"}
+		if v.IsAdministrative {
+			// Operator, Admin, Test server role, Cj Config Man
+			v.Settings.Roles = []string{"363383930143113216", "282353010192023552", "825041993251029032", "783100099969548288"}
+		}
+		v.Settings.Command = v.Name
 
-		settings, found, err := cm.Storage.GetCommandSettings(k)
+		settings, found, err := cm.Storage.GetCommandSettings(v.Name)
 		if err != nil {
 			zap.L().Fatal("failed to load command settings",
 				zap.Error(err))
@@ -125,7 +185,7 @@ func (cm *CommandManager) LoadCommands() {
 		if found {
 			v.Settings = settings
 		} else {
-			err = cm.Storage.SetCommandSettings(k, v.Settings)
+			err = cm.Storage.SetCommandSettings(v.Name, v.Settings)
 			if err != nil {
 				zap.L().Fatal("failed to assign command settings",
 					zap.Error(err))
@@ -133,7 +193,43 @@ func (cm *CommandManager) LoadCommands() {
 		}
 
 		commands[k] = v
+
+		// Add an entry for the bulk overwrite list
+		discordCommands = append(discordCommands, &discordgo.ApplicationCommand{
+			Name:        strings.TrimLeft(v.Name, "/"),
+			Description: v.Description,
+			Options:     v.Options,
+		})
 	}
 
+	// Cleanup of old commands
+	// This is worth doing, e.g. if discord bugs out
+	// or a command signature changes or is deleted.
+	existingsDiscordCommands, _ := cm.Discord.S.ApplicationCommands(cm.Discord.S.State.User.ID, "")
+	zap.L().Info("Existing slash commands:", zap.Any("cmds", existingsDiscordCommands))
+
+	for _, existingCommand := range existingsDiscordCommands {
+		commandExists := false
+		for _, command := range discordCommands {
+			if command.Name == existingCommand.Name {
+				commandExists = true
+				break
+			}
+		}
+		if commandExists == false {
+			zap.L().Info("Deleting non-existent slash command from Discord:", zap.Any("cmd", existingCommand))
+			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
+		}
+	}
+
+	// Leave guild ID empty to indicate a global command
+	zap.L().Info("Pushing commands to discord...")
+	cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
+
+	cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		cm.TryFindAndFireCommand(i)
+	})
+
 	cm.Commands = commands
+	zap.L().Info("Set up command handler complete")
 }

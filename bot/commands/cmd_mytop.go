@@ -10,22 +10,24 @@ import (
 )
 
 func (cm *CommandManager) commandMyTop(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
-	rank, err := cm.Storage.GetUserRank(message.Author.ID)
+	rank, err := cm.Storage.GetUserRank(interaction.Member.User.ID)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get user's rank")
+		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user's rank").Error()))
+		return
 	}
-	messageCount, err := cm.Storage.GetUserMessageCount(message.Author.ID)
+	messageCount, err := cm.Storage.GetUserMessageCount(interaction.Member.User.ID)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get user's message count")
+		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user's message count").Error()))
+		return
 	}
 
-	_, err = cm.Discord.S.ChannelMessageSend(message.ChannelID, fmt.Sprintf("Your top: %d. Messages: %d", rank, messageCount))
+	cm.replyDirectly(interaction, fmt.Sprintf("Your top: %d. Messages: %d", rank, messageCount))
 	return
 }

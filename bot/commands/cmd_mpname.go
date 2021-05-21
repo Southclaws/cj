@@ -74,14 +74,14 @@ func mpname() string {
 }
 
 func (cm *CommandManager) commandMP(
-	args string,
-	message discordgo.Message,
+	interaction *discordgo.InteractionCreate,
+	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
 	settings types.CommandSettings,
 ) (
 	context bool,
 	err error,
 ) {
 
-	cm.Discord.ChannelMessageSend(message.ChannelID, mpname())
+	cm.replyDirectly(interaction, mpname())
 	return
 }
