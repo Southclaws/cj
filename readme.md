@@ -2,8 +2,6 @@
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-14-orange.svg?style=flat-square)](#contributors)
 
-[![Travis](https://img.shields.io/travis/Southclaws/cj.svg)](https://travis-ci.org/Southclaws/cj)
-
 ![CJ](cj.png)
 
 ## Development
