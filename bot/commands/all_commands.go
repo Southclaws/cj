@@ -216,6 +216,7 @@ func (cm *CommandManager) LoadCommands() {
 				break
 			}
 		}
+
 		if commandExists == false {
 			zap.L().Info("Deleting non-existent slash command from Discord:", zap.Any("cmd", existingCommand))
 			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
@@ -224,7 +225,39 @@ func (cm *CommandManager) LoadCommands() {
 
 	// Leave guild ID empty to indicate a global command
 	zap.L().Info("Pushing commands to discord...")
-	cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
+	discordCommands, _ = cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
+
+	for _, guild := range cm.Discord.S.State.Guilds {
+		var guildPermissions []discordgo.GuildApplicationCommandPermissions
+		for _, cmd := range commands {
+			permissions := GetCommandPermissionsList(cmd)
+			if len(permissions) > 0 {
+				for _, dcmd := range discordCommands {
+					if strings.TrimLeft(cmd.Name, "/") == dcmd.Name {
+
+						zap.L().Info("Pushing permissions", zap.Any("command", dcmd), zap.Any("permissons", permissions))
+
+						cmdPerms := cm.Discord.S.ApplicationCommandPermissions(cm.Discord.S.State.User.ID,
+							guild.ID, dcmd.ID)
+						zap.L().Info("cmdPerms", zap.Any("perms", cmdPerms))
+
+						guildPermissions = append(guildPermissions, discordgo.GuildApplicationCommandPermissions{
+							ID:            dcmd.ID,
+							ApplicationId: dcmd.ApplicationID,
+							GuildID:       guild.ID,
+							Permissions:   permissions,
+						})
+						break
+					}
+				}
+			}
+		}
+		guildPerms := cm.Discord.S.GuildApplicationCommandsPermissions(cm.Discord.S.State.User.ID, guild.ID)
+		zap.L().Info("guildPerms", zap.Any("perms", guildPerms))
+		cm.Discord.S.ApplicationCommandBatchEditPermissions(cm.Discord.S.State.User.ID,
+			guild.ID,
+			guildPermissions)
+	}
 
 	cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		cm.TryFindAndFireCommand(i)
@@ -232,4 +265,18 @@ func (cm *CommandManager) LoadCommands() {
 
 	cm.Commands = commands
 	zap.L().Info("Set up command handler complete")
+}
+
+func GetCommandPermissionsList(command Command) (list []discordgo.ApplicationCommandPermissions) {
+	for _, role := range command.Settings.Roles {
+		if role == "all" {
+			return []discordgo.ApplicationCommandPermissions{}
+		}
+		list = append(list, discordgo.ApplicationCommandPermissions{
+			ID:         role,
+			Type:       discordgo.ApplicationCommandPermissionTypeRole,
+			Permission: true,
+		})
+	}
+	return list
 }
