@@ -12,11 +12,6 @@ import (
 func (cm *CommandManager) LoadCommands() {
 	commands := []Command{
 		{
-			Function:    cm.commandHelp,
-			Name:        "/help",
-			Description: "Displays a list of commands.",
-		},
-		{
 			Function:         cm.commandConfig,
 			Name:             "/config",
 			Description:      "Configure command settings.",
