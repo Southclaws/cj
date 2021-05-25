@@ -12,11 +12,6 @@ import (
 func (cm *CommandManager) LoadCommands() {
 	commands := []Command{
 		{
-			Function:    cm.commandCommands,
-			Name:        "/commands",
-			Description: "Displays a list of commands.",
-		},
-		{
 			Function:    cm.commandHelp,
 			Name:        "/help",
 			Description: "Displays a list of commands.",
@@ -38,24 +33,6 @@ func (cm *CommandManager) LoadCommands() {
 					Type:        discordgo.ApplicationCommandOptionString,
 					Description: "A JSON configuration for the command",
 					Required:    false,
-				},
-			},
-		},
-		{
-			Function:    cm.commandRoles,
-			Name:        "/roles",
-			Description: "List of roles and their IDs.",
-		},
-		{
-			Function:    cm.commandSay,
-			Name:        "/sayylmao",
-			Description: "Say something as CJ.",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Name:        "message",
-					Type:        discordgo.ApplicationCommandOptionString,
-					Description: "The message to echo back to you.",
-					Required:    true,
 				},
 			},
 		},
@@ -117,7 +94,7 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Rankings for most emojis sent.",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Name:        "emoji",
+					Name:        "reaction",
 					Type:        discordgo.ApplicationCommandOptionString,
 					Description: "Optional: Rankings for a specific emoji",
 					Required:    false,
@@ -136,12 +113,6 @@ func (cm *CommandManager) LoadCommands() {
 					Required:    true,
 				},
 			},
-		},
-		{
-			Function:         cm.commandMessageFreq,
-			Name:             "/mf",
-			Description:      "Message frequency",
-			IsAdministrative: true,
 		},
 		{
 			Function:    cm.commandRep,
