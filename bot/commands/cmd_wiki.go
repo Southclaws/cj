@@ -95,7 +95,7 @@ func (cm *CommandManager) commandWiki(
 	if results.TotalHits == 0 {
 		cm.replyDirectlyEmbed(interaction, "", &discordgo.MessageEmbed{
 			Type:        discordgo.EmbedTypeRich,
-			Title:       "No results",
+			Title:       fmt.Sprintf("No results: %s", searchTerm),
 			Description: "There were no results for that query.",
 		})
 		return
@@ -123,7 +123,7 @@ func (cm *CommandManager) commandWiki(
 	}
 	embed := &discordgo.MessageEmbed{
 		Type:        discordgo.EmbedTypeRich,
-		Title:       "Documentation Search Results",
+		Title:       fmt.Sprintf("Documentation Search Results: %s", searchTerm),
 		Description: desc.String(),
 	}
 	cm.replyDirectlyEmbed(interaction, "", embed)
