@@ -150,3 +150,19 @@ func (cm *CommandManager) replyDirectlyEmbed(interaction *discordgo.InteractionC
 		},
 	})
 }
+
+// sendThinkingResponse is used to avoid the 3 seconds timeout limit
+func (cm *CommandManager) sendThinkingResponse(interaction *discordgo.InteractionCreate) {
+	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		Data: &discordgo.InteractionApplicationCommandResponseData{
+			Content: ""
+		},
+	})
+}
+
+func (cm *CommandManager) editOriginalResponse(interaction *discordgo.InteractionCreate, response string) {
+	cm.Discord.S.InteractionResponseEdit(cm.Discord.S.State.User.ID, interaction.Interaction, &discordgo.WebhookEdit{
+		Content: response,
+	})
+}

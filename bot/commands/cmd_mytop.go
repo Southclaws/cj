@@ -17,17 +17,18 @@ func (cm *CommandManager) commandMyTop(
 	context bool,
 	err error,
 ) {
+	cm.sendThinkingResponse(interaction)
 	rank, err := cm.Storage.GetUserRank(interaction.Member.User.ID)
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user's rank").Error()))
+		cm.editOriginalResponse(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user").Error()))
 		return
 	}
 	messageCount, err := cm.Storage.GetUserMessageCount(interaction.Member.User.ID)
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user's message count").Error()))
+		cm.editOriginalResponse(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user's message count").Error()))
 		return
 	}
 
-	cm.replyDirectly(interaction, fmt.Sprintf("Your top: %d. Messages: %d", rank, messageCount))
+	cm.editOriginalResponse(interaction, fmt.Sprintf("Your top: %d Messages: %d", rank, messageCount))
 	return
 }
