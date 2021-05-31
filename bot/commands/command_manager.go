@@ -156,7 +156,7 @@ func (cm *CommandManager) sendThinkingResponse(interaction *discordgo.Interactio
 	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 		Data: &discordgo.InteractionApplicationCommandResponseData{
-			Content: ""
+			Content: "",
 		},
 	})
 }

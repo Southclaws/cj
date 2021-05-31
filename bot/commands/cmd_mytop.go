@@ -20,7 +20,7 @@ func (cm *CommandManager) commandMyTop(
 	cm.sendThinkingResponse(interaction)
 	rank, err := cm.Storage.GetUserRank(interaction.Member.User.ID)
 	if err != nil {
-		cm.editOriginalResponse(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user").Error()))
+		cm.editOriginalResponse(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get user's rank").Error()))
 		return
 	}
 	messageCount, err := cm.Storage.GetUserMessageCount(interaction.Member.User.ID)
