@@ -80,7 +80,7 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
-	r, err := http.Get(fmt.Sprintf("https://api.open.mp/docs/search?q=%s", strings.ReplaceAll(searchTerm, " ", "%20")))
+	r, err := http.Get(fmt.Sprintf("https://open.mp/api/search?q=%s", strings.ReplaceAll(searchTerm, " ", "%20")))
 	if err != nil {
 		cm.replyDirectly(interaction, fmt.Sprintf("Failed to GET result for search term %s\nError: %s", searchTerm, err.Error()))
 		return
