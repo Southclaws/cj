@@ -49,7 +49,7 @@ func (w *Watcher) OnMessage(m discordgo.Message) error {
 		if err != nil {
 			return err
 		}
-		w.discord.ChannelMessageSend(ch.ID, "Your ad was deleted as it was too short. Low-effort ads are removed from the channel to cut down on noise. Ads with only an IP or a link have a near-zero click-through rate and only serve to waste space in the channel. Write a short description about the server explaining why players should try it out!")
+		w.discord.ChannelMessageSend(ch.ID, "test")
 	} else {
 		message := http.ReplaceAllString(m.Content, "https://r.open.mp/$1")
 		w.discord.ChannelMessageSendEmbed(w.channel, &discordgo.MessageEmbed{
