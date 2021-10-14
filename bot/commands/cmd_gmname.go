@@ -43,6 +43,10 @@ var coolwordsxd = []string{
 	"xd",
 	"xtreme",
 	"you're",
+	"kungkingkang",
+	"mengheran",
+	"mengakak",
+	"menghadeh",
 }
 
 var morewords = []string{
@@ -72,6 +76,9 @@ var morewords = []string{
 	"scripters",
 	"white",
 	"you(them)tubers",
+	"mengontol",
+	"kontol",
+	"pepeq",
 }
 
 var gamemodes = []string{
@@ -147,6 +154,7 @@ var tags = []string{
 	"Y_INI",
 	"ZCMD",
 	"ZOMBIES",
+	"MISEBAHXD",
 }
 
 func init() {
