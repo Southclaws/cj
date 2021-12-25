@@ -67,7 +67,7 @@ func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo
 	for _, reaction := range *reactions {
 		if validateEmoji(reaction.Reaction, serverEmoji) {
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   reaction.Reaction,
+				Name:   fmt.Sprintf("%s​", reaction.Reaction),
 				Value:  fmt.Sprintf("%dx", reaction.Counter),
 				Inline: true,
 			})

@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/patrickmn/go-cache"
+	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
@@ -77,6 +78,7 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 }
 
 func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
+	zap.L().Info("User attempting command", zap.Any("user", interaction.Member.User.ID), zap.Any("command", interaction.Data.Name))
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.Data.Name {
 			if hasPermissions(command.Settings.Roles, interaction.Member.Roles) {
