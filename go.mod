@@ -12,7 +12,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/google/go-github/v28 v28.1.1
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/joho/godotenv v1.3.0
+	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kristoisberg/gonesyntees v0.0.0-20190527174556-0595a02f9399
