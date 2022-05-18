@@ -30,7 +30,7 @@ func (cm *CommandManager) commandTopRep(
 		cm.replyDirectly(interaction, err.Error())
 		return
 	}
-	rankings, err := FormatReactionRankings(top, cm.Discord)
+	rankings, err := FormatReactionRankings(top, reaction, cm.Discord)
 	if err != nil {
 		cm.replyDirectly(interaction, err.Error())
 		return
@@ -40,14 +40,14 @@ func (cm *CommandManager) commandTopRep(
 	return
 }
 
-func FormatReactionRankings(r []storage.TopReactionEntry, s *discord.Session) (embed *discordgo.MessageEmbed, err error) {
+func FormatReactionRankings(r []storage.TopReactionEntry, reaction string, s *discord.Session) (embed *discordgo.MessageEmbed, err error) {
 	statsMessage := strings.Builder{}
 	statsMessage.WriteString("Statistics\n\n") //nolint:errcheck
 
 	embed = &discordgo.MessageEmbed{Color: 0x3498DB}
 	var user *discordgo.User
 	if len(r) == 0 {
-		statsMessage.WriteString("There are no entries to display here!")
+		statsMessage.WriteString(fmt.Sprintf("%s: There are no entries to display here!", reaction))
 	}
 	for i, tm := range r {
 		var username string
