@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"path/filepath"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -40,30 +39,17 @@ type Results struct {
 		SearchBefore     interface{} `json:"search_before"`
 	} `json:"request"`
 	Hits      []Hit       `json:"hits"`
-	TotalHits int         `json:"total_hits"`
-	MaxScore  float64     `json:"max_score"`
+	TotalHits int         `json:"total"`
 	Took      int64       `json:"took"`
-	Facets    interface{} `json:"facets"`
 }
 
 type Hit struct {
-	Index     string  `json:"index"`
-	ID        string  `json:"id"`
-	Score     float64 `json:"score"`
-	Locations struct {
-		Description struct {
-			Position []struct {
-				Pos            int         `json:"pos"`
-				Start          int         `json:"start"`
-				End            int         `json:"end"`
-				ArrayPositions interface{} `json:"array_positions"`
-			} `json:"position"`
-		} `json:"Description"`
-	} `json:"locations"`
-	Fragments struct {
-		Description []string `json:"Description"`
-	} `json:"fragments"`
-	Sort []string `json:"sort"`
+	Url                  string  `json:"url"`
+	Title                string  `json:"title"`
+	Description          string  `json:"desc"`
+	TitleFragments       string  `json:"title_fragment"`
+	DescriptionFragments string  `json:"desc_fragment"`
+	Score                float64 `json:"score"`
 }
 
 func (cm *CommandManager) commandWiki(
@@ -110,14 +96,14 @@ func (cm *CommandManager) commandWiki(
 		}
 
 		// Skip searching translations
-		if strings.Contains(hit.ID, "translations") {
+		if strings.Contains(hit.Url, "translations") {
 			continue
 		}
 
 		desc.WriteString(fmt.Sprintf(
 			"[%s](https://open.mp/%s): %s\n",
-			nameFromPath(hit.ID),
-			strings.TrimSuffix(hit.ID, ".md"),
+			hit.Title,
+			strings.TrimSuffix(hit.Url, ".md"),
 			formatDescription(hit)))
 		rendered++
 	}
@@ -131,18 +117,14 @@ func (cm *CommandManager) commandWiki(
 	return false, err // Todo: remove this
 }
 
-func nameFromPath(p string) string {
-	return strings.TrimSuffix(filepath.Base(p), filepath.Ext(p))
-}
-
 func formatDescription(hit Hit) string {
-	if len(hit.Fragments.Description) == 0 {
+	if len(hit.Description) == 0 {
 		return "(No description found)"
 	}
 
 	return html.UnescapeString(strings.ReplaceAll(
 		strings.ReplaceAll(
-			hit.Fragments.Description[0],
+			hit.Description,
 			"<mark>", "**"),
 		"</mark>", "**"))
 }
