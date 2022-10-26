@@ -156,9 +156,18 @@
       ]
     },
     {
-      "login": "GNZTMPZ",
-      "name": "Dennys Matthew",
+      "login": "clemiee",
+      "name": "Clemie McCartney",
       "avatar_url": "https://avatars.githubusercontent.com/u/27568445?v=4",
+      "profile": "https://github.com/clemiee",
+      "contributions": [
+        "content"
+      ]
+    },
+    {
+      "login": "GNZTMPZ",
+      "name": "GNZTMPZ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/85807297?v=4",
       "profile": "https://github.com/GNZTMPZ",
       "contributions": [
         "content"
