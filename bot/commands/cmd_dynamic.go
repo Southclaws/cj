@@ -104,6 +104,8 @@ var scripts = []string{
 	"Vibrator System",
 	"Weapon control",
 	"Weapon shop",
+	"GM 2 JUTA TCUYY!!!",
+	"PRO KONGDIR",
 }
 
 var features = []string{
@@ -134,6 +136,8 @@ var features = []string{
 	"streamer",
 	"with advanced anti db",
 	"zcmd",
+	"FiveM Abiss",
+	"#REVIEWJUJUR",
 }
 
 func makeDynamic() string {
