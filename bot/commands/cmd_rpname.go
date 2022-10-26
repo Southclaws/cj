@@ -44,6 +44,11 @@ var rpfirsts = []string{
 	"kungkingkang",
 	"mengontol",
 	"misebah",
+	"ariventot",
+	"west",
+	"syekh",
+	"pukimak",
+	"bebeg",
 }
 var rpseconds = []string{
 	"SAMP",
@@ -68,6 +73,11 @@ var rpseconds = []string{
 	"turtle",
 	"world",
 	"timer",
+	"bioskop",
+	"java",
+	"klodbret",
+	"kontol",
+	"gorenk",
 }
 
 func rpname() string {

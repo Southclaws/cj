@@ -40,6 +40,11 @@ var firsts = []string{
 	"scavenge",
 	"sexy",
 	"texas",
+	"ariventot",
+	"west",
+	"syekh",
+	"pukimak",
+	"bebeg",
 }
 var seconds = []string{
 	"SAMP",
@@ -62,6 +67,11 @@ var seconds = []string{
 	"survive",
 	"turtle",
 	"world",
+	"bioskop",
+	"java",
+	"klodbret",
+	"kontol",
+	"gorenk",
 }
 
 func mpname() string {
