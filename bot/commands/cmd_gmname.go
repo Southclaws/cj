@@ -43,6 +43,9 @@ var coolwordsxd = []string{
 	"xd",
 	"xtreme",
 	"you're",
+	"ariventod",
+	"unity",
+	"lunarpride",
 	"kungkingkang",
 	"mengheran",
 	"mengakak",
@@ -79,6 +82,9 @@ var morewords = []string{
 	"mengontol",
 	"kontol",
 	"pepeq",
+	"ngentot",
+	"memek",
+	"imitation",
 }
 
 var gamemodes = []string{
@@ -90,6 +96,7 @@ var gamemodes = []string{
 	"gangbang",
 	"gangwars",
 	"minigames",
+	"harga 2juta",
 	"pisd",
 	"race",
 	"racing",
@@ -152,6 +159,8 @@ var tags = []string{
 	"UNIQUE",
 	"YLESS",
 	"Y_INI",
+	"FITUR FIVEM",
+	"#REVIEWJUJUR",
 	"ZCMD",
 	"ZOMBIES",
 	"MISEBAHXD",
