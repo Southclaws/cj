@@ -106,6 +106,8 @@ var scripts = []string{
 	"Weapon shop",
 	"GM 2 JUTA TCUYY!!!",
 	"PRO KONGDIR",
+	"#include <matthew.pwn>",
+	"WAGYU A5😋",
 }
 
 var features = []string{
@@ -138,6 +140,7 @@ var features = []string{
 	"zcmd",
 	"FiveM Abiss",
 	"#REVIEWJUJUR",
+	"YAHAHAWAHYU",
 }
 
 func makeDynamic() string {
