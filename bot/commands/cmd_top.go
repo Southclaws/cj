@@ -17,18 +17,19 @@ func (cm *CommandManager) commandTop(
 	context bool,
 	err error,
 ) {
+	cm.sendThinkingResponse(interaction)
 	top, err := cm.Storage.GetTopMessages(10)
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf("Failed to get message rankings: %s", err.Error()))
+		cm.editOriginalResponse(interaction, fmt.Sprintf("Failed to get message rankings: %s", err.Error()))
 		return
 	}
 
 	rankings, err := stats.FormatMessageRankings(top, cm.Discord)
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf("Failed to format message rankings: %s", err.Error()))
+		cm.editOriginalResponse(interaction, fmt.Sprintf("Failed to format message rankings: %s", err.Error()))
 		return
 	}
 
-	cm.replyDirectlyEmbed(interaction, "", rankings)
+	cm.editOriginalResponseWithEmbed(interaction, rankings)
 	return
 }

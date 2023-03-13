@@ -168,3 +168,10 @@ func (cm *CommandManager) editOriginalResponse(interaction *discordgo.Interactio
 		Content: response,
 	})
 }
+
+func (cm *CommandManager) editOriginalResponseWithEmbed(interaction *discordgo.InteractionCreate, embed *discordgo.MessageEmbed) {
+	cm.Discord.S.InteractionResponseEdit(cm.Discord.S.State.User.ID, interaction.Interaction, &discordgo.WebhookEdit{
+		Content: "",
+		Embeds:  []*discordgo.MessageEmbed{embed},
+	})
+}
