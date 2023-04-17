@@ -27,6 +27,7 @@ func (cm *CommandManager) ltf(
 	msg, err := cm.Storage.GetRandomMessageFromUsers([]string{
 		"468356073095430144",
 		"778144453751078913",
+		"123456789987654321",
 	})
 	if err != nil {
 		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get messages for user").Error()))
