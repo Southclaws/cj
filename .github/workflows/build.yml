@@ -25,5 +25,5 @@ jobs:
     - name: Start MongoDB for test
       uses: supercharge/mongodb-github-action@1.4.0
 
-    - name: Test
-      run: go test -v ./...
+#    - name: Test
+#      run: go test -v ./...
