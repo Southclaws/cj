@@ -21,17 +21,18 @@ func (cm *CommandManager) commandRep(
 	context bool,
 	err error,
 ) {
+	cm.sendThinkingResponse(interaction)
 	user := cm.Storage.GetUserOrCreate(interaction.Member.User.ID)
 	sort.Slice(user.ReceivedReactions, func(i, j int) bool {
 		return user.ReceivedReactions[i].Counter > user.ReceivedReactions[j].Counter
 	})
 	embed, err := FormatUserReactions(&user.ReceivedReactions, interaction.Member.User, cm.Discord)
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf("Failed to format reactions with error %s", err.Error()))
+		cm.editOriginalResponse(interaction, fmt.Sprintf("Failed to format reactions with error %s", err.Error()))
 		return
 	}
 
-	cm.replyDirectlyEmbed(interaction, "", embed)
+	cm.editOriginalResponseWithEmbed(interaction, embed)
 
 	return
 }
