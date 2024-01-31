@@ -89,7 +89,7 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		}
 	}
 
-	if event.Message.Author.ID == app.config.BotID {
+	if event.Message.Author.Bot == true {
 		return
 	}
 
