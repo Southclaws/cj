@@ -13,6 +13,10 @@ import (
 	"github.com/Southclaws/cj/types"
 )
 
+// limit of discord embed fields is 25
+// I have put 23 to account for the 'filling' embed field (look below)
+const DISCORD_EMBED_FIELDS_LIMIT = 23
+
 func (cm *CommandManager) commandRep(
 	interaction *discordgo.InteractionCreate,
 	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
@@ -67,6 +71,9 @@ func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo
 
 	for _, reaction := range *reactions {
 		if validateEmoji(reaction.Reaction, serverEmoji) {
+			if len(embed.Fields) == DISCORD_EMBED_FIELDS_LIMIT {
+				break
+			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
 				Name:   fmt.Sprintf("%s​", reaction.Reaction),
 				Value:  fmt.Sprintf("%dx", reaction.Counter),
