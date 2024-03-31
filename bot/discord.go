@@ -89,7 +89,7 @@ func (app *App) onMessage(s *discordgo.Session, event *discordgo.MessageCreate) 
 		}
 	}
 
-	if event.Message.Author.Bot == true {
+	if event.Message.Author.Bot {
 		return
 	}
 
@@ -130,7 +130,7 @@ func (app *App) onReactionAdd(s *discordgo.Session, event *discordgo.MessageReac
 	}
 
 	emoji := event.Emoji.APIName()
-	if strings.Index(emoji, ":") != -1 {
+	if strings.Contains(emoji, ":") {
 		emoji = fmt.Sprintf("<:%s>", emoji)
 	}
 	err = app.storage.AddEmojiReactionToUser(message.DiscordUserID, emoji)
@@ -147,7 +147,7 @@ func (app *App) onReactionRemove(s *discordgo.Session, event *discordgo.MessageR
 	}
 
 	emoji := event.Emoji.APIName()
-	if strings.Index(emoji, ":") != -1 {
+	if strings.Contains(emoji, ":") {
 		emoji = fmt.Sprintf("<:%s>", emoji)
 	}
 	err = app.storage.RemoveEmojiReactionFromUser(message.DiscordUserID, emoji)
