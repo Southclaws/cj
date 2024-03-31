@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  vscode:
+    build: .
+    volumes:
+      - ../:/workspace
+      # Docker socket to access Docker server
+      - /var/run/docker.sock:/var/run/docker.sock
+      # SSH directory for Linux, OSX and WSL
+      # On Linux and OSX, a symlink /mnt/ssh <-> ~/.ssh is
+      # created in the container. On Windows, files are copied
+      # from /mnt/ssh to ~/.ssh to fix permissions.
+      - ~/.ssh:/mnt/ssh
+      # Shell history persistence
+      - ~/.zsh_history:/root/.zsh_history
+      # Git config
+      - ~/.gitconfig:/root/.gitconfig
+    environment:
+      - TZ=Europe/London
+    depends_on:
+      - mongo
+    cap_add:
+      # For debugging with dlv
+      - SYS_PTRACE
+    security_opt:
+      # For debugging with dlv
+      - seccomp:unconfined
+    entrypoint: [ "zsh", "-c", "while sleep 1000; do :; done" ]
+
+  mongo:
+    image: mongo:4.4.0
+    container_name: 'southclaws-cj-mongo-${MONGO_CONTAINER_ID:-local}'
+    hostname: mongo
+    ports:
+      - "${MONGO_EXPOSED_PORT:-27017}:27017"
+    volumes:
+      - ./data/db:/data/db
