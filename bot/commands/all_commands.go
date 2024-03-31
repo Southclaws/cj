@@ -182,7 +182,7 @@ func (cm *CommandManager) LoadCommands() {
 				break
 			}
 		}
-		if commandExists == false {
+		if !commandExists {
 			zap.L().Info("Deleting non-existent slash command from Discord:", zap.Any("cmd", existingCommand))
 			cm.Discord.S.ApplicationCommandDelete(cm.Discord.S.State.User.ID, "", existingCommand.ID)
 		}

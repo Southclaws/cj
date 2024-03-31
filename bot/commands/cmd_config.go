@@ -28,7 +28,7 @@ func (cm *CommandManager) commandConfig(
 	}
 
 	newConfigValue, hasNewConfig := args["config"]
-	if hasNewConfig == false {
+	if !hasNewConfig {
 		var b []byte
 		b, err = json.Marshal(cmd.Settings)
 		if err != nil {
