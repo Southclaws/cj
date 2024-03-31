@@ -34,7 +34,7 @@ func (cm *CommandManager) commandKonesyntees(
 
 	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-		Data: &discordgo.InteractionApplicationCommandResponseData{
+		Data: &discordgo.InteractionResponseData{
 			Content: "Processing your konesyntees",
 		},
 	})
@@ -42,7 +42,7 @@ func (cm *CommandManager) commandKonesyntees(
 	response, err := gonesyntees.Request(text, gonesyntees.Voice(voice), speed)
 
 	if err != nil {
-		cm.Discord.S.FollowupMessageCreate(cm.Discord.S.State.User.ID, interaction.Interaction, false, &discordgo.WebhookParams{
+		cm.Discord.S.FollowupMessageCreate(interaction.Interaction, false, &discordgo.WebhookParams{
 			Content: fmt.Sprintf("Error in sending request: %s", err.Error()),
 		})
 		return
@@ -50,13 +50,13 @@ func (cm *CommandManager) commandKonesyntees(
 
 	audio, err := http.Get(response.MP3Url)
 	if err != nil {
-		cm.Discord.S.FollowupMessageCreate(cm.Discord.S.State.User.ID, interaction.Interaction, false, &discordgo.WebhookParams{
+		cm.Discord.S.FollowupMessageCreate(interaction.Interaction, false, &discordgo.WebhookParams{
 			Content: fmt.Sprintf("Error in getting response URL: %s", err.Error()),
 		})
 		return
 	}
 
-	cm.Discord.S.InteractionResponseDelete(cm.Discord.S.State.User.ID, interaction.Interaction)
+	cm.Discord.S.InteractionResponseDelete(interaction.Interaction)
 	cm.Discord.ChannelFileSend(interaction.ChannelID, "konesyntees.mp3", audio.Body)
 	return
 }
@@ -72,7 +72,7 @@ func parseVoiceParams(text string) (string, int, int, error) {
 	voice := 0
 
 	for i := 0; i < len(params); i++ {
-		if strings.HasPrefix(params[i], "--") == false {
+		if !strings.HasPrefix(params[i], "--") {
 			break
 		}
 

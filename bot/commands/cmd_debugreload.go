@@ -40,8 +40,9 @@ func (cm *CommandManager) commandDebugReload(
 
 	cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
 
-	cm.Discord.S.InteractionResponseEdit(cm.Discord.S.State.User.ID, interaction.Interaction, &discordgo.WebhookEdit{
-		Content: "Reload commands succeeded. This can take an hour to take effect.",
+	content := "Reload commands succeeded. This can take an hour to take effect."
+	cm.Discord.S.InteractionResponseEdit(interaction.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
 	})
 
 	return

@@ -78,24 +78,24 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 }
 
 func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
-	zap.L().Info("User attempting command", zap.Any("user", interaction.Member.User.ID), zap.Any("command", interaction.Data.Name))
+	zap.L().Info("User attempting command", zap.Any("user", interaction.Member.User.ID), zap.Any("command", interaction.ApplicationCommandData().Name))
 	for _, command := range cm.Commands {
-		if strings.TrimLeft(command.Name, "/") == interaction.Data.Name {
+		if strings.TrimLeft(command.Name, "/") == interaction.ApplicationCommandData().Name {
 			if hasPermissions(command.Settings.Roles, interaction.Member.Roles) {
 				args := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
-				for _, option := range interaction.Data.Options {
+				for _, option := range interaction.ApplicationCommandData().Options {
 					args[option.Name] = option
 				}
 				command.Function(interaction, args, command.Settings)
 			} else {
 				cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionApplicationCommandResponseData{
+					Data: &discordgo.InteractionResponseData{
 						Content: "You're not authorized for this!",
 					},
 				})
 				time.Sleep(time.Second * 5)
-				cm.Discord.S.InteractionResponseDelete(cm.Discord.S.State.User.ID, interaction.Interaction)
+				cm.Discord.S.InteractionResponseDelete(interaction.Interaction)
 			}
 			break
 		}
@@ -137,7 +137,7 @@ func pcd(since time.Duration, cooldown time.Duration) (result string) {
 func (cm *CommandManager) replyDirectly(interaction *discordgo.InteractionCreate, response string) {
 	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionApplicationCommandResponseData{
+		Data: &discordgo.InteractionResponseData{
 			Content: response,
 		},
 	})
@@ -146,7 +146,7 @@ func (cm *CommandManager) replyDirectly(interaction *discordgo.InteractionCreate
 func (cm *CommandManager) replyDirectlyEmbed(interaction *discordgo.InteractionCreate, response string, embed *discordgo.MessageEmbed) {
 	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionApplicationCommandResponseData{
+		Data: &discordgo.InteractionResponseData{
 			Content: response,
 			Embeds:  []*discordgo.MessageEmbed{embed},
 		},
@@ -157,21 +157,23 @@ func (cm *CommandManager) replyDirectlyEmbed(interaction *discordgo.InteractionC
 func (cm *CommandManager) sendThinkingResponse(interaction *discordgo.InteractionCreate) {
 	cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
-		Data: &discordgo.InteractionApplicationCommandResponseData{
+		Data: &discordgo.InteractionResponseData{
 			Content: "",
 		},
 	})
 }
 
 func (cm *CommandManager) editOriginalResponse(interaction *discordgo.InteractionCreate, response string) {
-	cm.Discord.S.InteractionResponseEdit(cm.Discord.S.State.User.ID, interaction.Interaction, &discordgo.WebhookEdit{
-		Content: response,
+	cm.Discord.S.InteractionResponseEdit(interaction.Interaction, &discordgo.WebhookEdit{
+		Content: &response,
 	})
 }
 
 func (cm *CommandManager) editOriginalResponseWithEmbed(interaction *discordgo.InteractionCreate, embed *discordgo.MessageEmbed) {
-	cm.Discord.S.InteractionResponseEdit(cm.Discord.S.State.User.ID, interaction.Interaction, &discordgo.WebhookEdit{
-		Content: "",
-		Embeds:  []*discordgo.MessageEmbed{embed},
+	content := ""
+	embeds := []*discordgo.MessageEmbed{embed}
+	cm.Discord.S.InteractionResponseEdit(interaction.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+		Embeds:  &embeds,
 	})
 }
