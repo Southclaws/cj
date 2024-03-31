@@ -97,6 +97,6 @@ func Start(config *types.Config) {
 		zap.Any("config", config))
 
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGTERM, syscall.SIGKILL)
+	signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT)
 	<-signals
 }

@@ -57,7 +57,7 @@ func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string)
 			user.ReceivedReactions[i].Counter++
 		}
 	}
-	if found == false {
+	if !found {
 		entry := ReactionCounter{
 			Counter:  1,
 			Reaction: emoji,
@@ -77,27 +77,27 @@ type TopReactionEntry struct {
 // GetTopReactions gets the top <top> amount of people who received reaction <reaction>
 func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopReactionEntry, err error) {
 	pipeline := []bson.M{
-		bson.M{
+		{
 			"$unwind": "$received_reactions",
 		},
-		bson.M{
+		{
 			"$match": bson.M{
 				"received_reactions.reaction": reaction,
 			},
 		},
-		bson.M{
+		{
 			"$project": bson.M{
 				"discord_user_id": "$discord_user_id",
 				"counter":         "$received_reactions.counter",
 				"reaction":        "$received_reactions.reaction",
 			},
 		},
-		bson.M{
+		{
 			"$sort": bson.M{
 				"counter": -1,
 			},
 		},
-		bson.M{
+		{
 			"$limit": top,
 		},
 	}
