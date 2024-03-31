@@ -8,7 +8,7 @@ import (
 
 type Memory struct{}
 
-func (m *Memory) GetUserOrCreate(discordUserID string) (result User) {
+func (m *Memory) GetUserOrCreate(discordUserID string) (result User, err error) {
 	return
 }
 func (m *Memory) RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error) {
