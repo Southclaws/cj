@@ -35,3 +35,6 @@ log.txt
 
 # binary
 cj
+
+# devcontainer
+.devcontainer/data
