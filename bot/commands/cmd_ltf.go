@@ -30,7 +30,7 @@ func (cm *CommandManager) ltf(
 		"123456789987654321",
 	})
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf(errors.Wrap(err, "failed to get messages for user").Error()))
+		cm.replyDirectly(interaction, fmt.Sprint(errors.Wrap(err, "failed to get messages for user").Error()))
 		return
 	}
 
