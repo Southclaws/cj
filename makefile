@@ -1,5 +1,5 @@
 VERSION := $(shell git describe --tags --dirty --always)
-SERVICE := $(shell basename $(shell pwd))
+SERVICE := cj
 OWNER := southclaws
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 -include .env
