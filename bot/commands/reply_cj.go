@@ -1004,7 +1004,7 @@ func (cm *CommandManager) commandCJQuote(
 		return
 	}
 	lastUseTime = time.Now()
-	rand.New(rand.NewSource(time.Now().Unix()))
-	quote := quotes[rand.Intn(len(quotes))]
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	quote := quotes[r.Intn(len(quotes))]
 	cm.Discord.ChannelMessageSend(message.ChannelID, quote)
 }
