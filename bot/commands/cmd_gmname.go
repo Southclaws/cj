@@ -157,11 +157,10 @@ var tags = []string{
 	"MISEBAHXD",
 }
 
-func init() {
-	rand.Seed(time.Now().Unix())
-}
+func init() {}
 
 func generateGmName() (result string) {
+	rand.New(rand.NewSource(time.Now().Unix()))
 	buf := bytes.NewBuffer(nil)
 
 	coolword := coolwordsxd[rand.Intn(len(coolwordsxd))]
