@@ -44,7 +44,7 @@ func (cm *CommandManager) commandRep(
 // Only post emoji that we have access to
 func validateEmoji(input string, serverEmoji []*discordgo.Emoji) bool {
 	isValid := discordemojimap.ContainsEmoji(input)
-	if isValid == false {
+	if !isValid {
 		for _, v := range serverEmoji {
 			if v.MessageFormat() == input {
 				return true
@@ -75,7 +75,7 @@ func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo
 				break
 			}
 			embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-				Name:   fmt.Sprintf("%s​", reaction.Reaction),
+				Name:   fmt.Sprintf("%s\u200b", reaction.Reaction),
 				Value:  fmt.Sprintf("%dx", reaction.Counter),
 				Inline: true,
 			})
@@ -86,8 +86,8 @@ func FormatUserReactions(reactions *[]storage.ReactionCounter, author *discordgo
 	// fields (with 1 and 3 fields the formatting is fine)
 	if len(*reactions)%3 == 2 {
 		embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
-			Name:   "", // Note: the content of this seemingly empty string is u0080
-			Value:  "", // Note: the content of this seemingly empty string is u0080
+			Name:   "\u0080", // Note: the content of this seemingly empty string is u0080
+			Value:  "\u0080", // Note: the content of this seemingly empty string is u0080
 			Inline: true,
 		})
 	}

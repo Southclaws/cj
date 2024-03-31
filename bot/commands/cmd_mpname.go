@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/Southclaws/cj/types"
 )
@@ -70,7 +72,8 @@ func mpname() string {
 	second := seconds[rand.Intn(len(seconds))]
 	mp[0] = []byte(strings.ToUpper(first))[0]
 	mp[1] = []byte(strings.ToUpper(second))[0]
-	return fmt.Sprintf("%s: %s %s Multiplayer", string(mp), strings.Title(first), strings.Title(second))
+	title := cases.Title(language.English)
+	return fmt.Sprintf("%s: %s %s Multiplayer", string(mp), title.String(first), title.String(second))
 }
 
 func (cm *CommandManager) commandMP(
