@@ -24,16 +24,17 @@ type ReactionCounter struct {
 }
 
 // GetUserOrCreate gets a user or creates one and returns it
-func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User) {
-	err := m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
+func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User, err error) {
+	err = m.accounts.Find(bson.M{"discord_user_id": discordUserID}).One(&user)
 	if err != nil {
 		user.DiscordUserID = discordUserID
 		err = m.accounts.Insert(&User{
 			DiscordUserID: discordUserID,
 			BurgerVerify:  false,
 		})
+		return user, err
 	}
-	return user
+	return user, nil
 }
 
 // UpdateUser aims to update a full document of a user
@@ -45,7 +46,10 @@ func (m *MongoStorer) UpdateUser(user User) (err error) {
 
 // AddEmojiReactionToUser records an emoji reaction to a message of a discordUser.
 func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string) (err error) {
-	user := m.GetUserOrCreate(discordUserID)
+	user, err := m.GetUserOrCreate(discordUserID)
+	if err != nil {
+		return err
+	}
 	var found = false
 	for i, v := range user.ReceivedReactions {
 		if v.Reaction == emoji {
@@ -108,7 +112,10 @@ func (m *MongoStorer) GetTopReactions(top int, reaction string) (result []TopRea
 
 // RemoveEmojiReactionFromUser records an emoji reaction to a message of a discordUser.
 func (m *MongoStorer) RemoveEmojiReactionFromUser(discordUserID string, emoji string) (err error) {
-	user := m.GetUserOrCreate(discordUserID)
+	user, err := m.GetUserOrCreate(discordUserID)
+	if err != nil {
+		return err
+	}
 	for i, v := range user.ReceivedReactions {
 		if v.Reaction == emoji {
 			user.ReceivedReactions[i].Counter--
@@ -122,11 +129,11 @@ func (m *MongoStorer) RemoveEmojiReactionFromUser(discordUserID string, emoji st
 func (m *MongoStorer) UpdateUserUsername(discordUserID string, username string) (err error) {
 	err = m.accounts.Update(
 		bson.D{
-			{"discord_user_id", discordUserID},
+			{Name: "discord_user_id", Value: discordUserID},
 		},
 		bson.D{
-			{"$set", bson.D{
-				{"burger_user_name", username},
+			{Name: "$set", Value: bson.D{
+				{Name: "burger_user_name", Value: username},
 			}},
 		})
 
@@ -143,9 +150,9 @@ func (m *MongoStorer) RemoveUser(id string) (err error) {
 func (m *MongoStorer) IsUserVerified(discordUserID string) (verified bool, err error) {
 	count, err := m.accounts.Find(
 		bson.D{
-			{"discord_user_id", discordUserID},
-			{"burgershot_verified", bson.D{
-				{"$exists", true},
+			{Name: "discord_user_id", Value: discordUserID},
+			{Name: "burgershot_verified", Value: bson.D{
+				{Name: "$exists", Value: true},
 			}},
 		}).Count()
 	if err != nil {
@@ -162,9 +169,9 @@ func (m *MongoStorer) IsUserVerified(discordUserID string) (verified bool, err e
 func (m *MongoStorer) IsUserLegacyVerified(discordUserID string) (verified bool, err error) {
 	count, err := m.accounts.Find(
 		bson.D{
-			{"discord_user_id", discordUserID},
-			{"burgershot_verified", bson.D{
-				{"$exists", false},
+			{Name: "discord_user_id", Value: discordUserID},
+			{Name: "burgershot_verified", Value: bson.D{
+				{Name: "$exists", Value: false},
 			}},
 		}).Count()
 	if err != nil {

@@ -26,9 +26,10 @@ func (m *MongoStorer) GetCommandSettings(command string) (settings types.Command
 		}
 	}
 	err = m.settings.Find(bson.M{"command": command}).One(&settings)
-	if err == mgo.ErrNotFound {
+	switch err {
+	case mgo.ErrNotFound:
 		err = nil
-	} else if err == nil {
+	case nil:
 		found = true
 	}
 	return
