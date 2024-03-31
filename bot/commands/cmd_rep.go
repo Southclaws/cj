@@ -26,7 +26,11 @@ func (cm *CommandManager) commandRep(
 	err error,
 ) {
 	cm.sendThinkingResponse(interaction)
-	user := cm.Storage.GetUserOrCreate(interaction.Member.User.ID)
+	user, err := cm.Storage.GetUserOrCreate(interaction.Member.User.ID)
+	if err != nil {
+		cm.editOriginalResponse(interaction, fmt.Sprintf("Failed to get/create user with error %s", err.Error()))
+		return
+	}
 	sort.Slice(user.ReceivedReactions, func(i, j int) bool {
 		return user.ReceivedReactions[i].Counter > user.ReceivedReactions[j].Counter
 	})
