@@ -2,6 +2,7 @@ package discord
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron"
@@ -59,11 +60,11 @@ func (s *Session) GetCurrentChannelMessageFrequency(channelID string) (freq floa
 		return 0.0, nil
 	}
 
-	start, err := messages[0].Timestamp.Parse()
+	start, err := time.Parse(time.RFC3339, messages[0].Timestamp.Format(time.RFC3339))
 	if err != nil {
 		return
 	}
-	end, err := messages[len(messages)-1].Timestamp.Parse()
+	end, err := time.Parse(time.RFC3339, messages[len(messages)-1].Timestamp.Format(time.RFC3339))
 	if err != nil {
 		return
 	}
@@ -96,8 +97,6 @@ func (s *Session) cacheUsernames() {
 		}
 		s.UserIndex[name] = *u
 	}
-
-	return
 }
 
 func must(err error) {
