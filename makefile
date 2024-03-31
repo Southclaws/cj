@@ -18,8 +18,8 @@ local: fast
 	./$(SERVICE)
 
 test:
-	go test -v -race ./storage
-	go test -v -race ./bot/commands
+	CGO_ENABLED=1 go test -v -race ./storage
+	CGO_ENABLED=1 go test -v -race ./bot/commands
 
 version:
 	git tag $(VERSION)
