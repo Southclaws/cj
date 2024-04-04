@@ -1,7 +1,7 @@
 # -
 # Build workspace
 # -
-FROM golang:1.16 AS compile
+FROM golang:1.21 AS compile
 
 RUN apt-get update -y && apt-get install --no-install-recommends -y -q build-essential ca-certificates
 
