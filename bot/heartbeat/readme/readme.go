@@ -33,9 +33,11 @@ func (r *Readme) Init(
 
 //nolint:golint
 func (r *Readme) Register() (actions []common.Action) {
+	r.fetchReadme()
+
 	return []common.Action{
 		{
-			Schedule: "@every 12h",
+			Schedule: "@every 6h",
 			Chance:   1,
 			Call:     r.fetchReadme,
 		},
@@ -68,7 +70,7 @@ func (r *Readme) fetchReadme() (err error) {
 	}
 
 	// fetch upstream gist content
-	ctx, e := r.Storage.FetchReadmeMessage(r.Config.ReadmeGistID, r.Config.ReadmeGistFileName)
+	ctx, e := r.Storage.FetchReadmeMessage(r.Config.ReadmeGithubOwner, r.Config.ReadmeGithubRepository, r.Config.ReadmeFileName)
 	if e != nil {
 		err = e
 		return

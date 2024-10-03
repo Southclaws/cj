@@ -38,8 +38,9 @@ services:
       CJ_GUILD_ID: ${CJ_GUILD_ID:?required}
       CJ_VERIFIED_ROLE: ${CJ_VERIFIED_ROLE:?required}
       CJ_README_CHANNEL: ${CJ_README_CHANNEL:?required}
-      CJ_README_GIST_ID: ${CJ_README_GIST_ID:?required}
-      CJ_README_GIST_FILE_NAME: ${CJ_README_GIST_FILE_NAME:-samp-discord-rules.md}
+      CJ_README_GITHUB_OWNER: ${CJ_README_GITHUB_OWNER:-openmultiplayer}
+      CJ_README_GITHUB_REPOSITORY: ${CJ_README_GITHUB_REPOSITORY:-discord-rules}
+      CJ_README_GITHUB_FILE_NAME: ${CJ_README_GITHUB_FILE_NAME:-README.md}
       CJ_NO_DATABASE: ${CJ_NO_DATABASE:-false}
       DEBUG: ${DEBUG:-0}
     networks:

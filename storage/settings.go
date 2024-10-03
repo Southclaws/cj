@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
@@ -53,14 +54,19 @@ func (m *MongoStorer) GetReadmeMessage() (message string, err error) {
 }
 
 // FetchReadmeMessage fetches already sent message to upstream
-func (m *MongoStorer) FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error) {
+func (m *MongoStorer) FetchReadmeMessage(githubOwner string, githubRepoistory string, fileName string) (message string, err error) {
 	client := github.NewClient(nil)
-	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), "openmultiplayer", "discord-rules", "README.md", nil)
+	file, _, _, err := client.Repositories.GetContents(context.Background(), githubOwner, githubRepoistory, fileName, nil)
 	if err != nil {
 		return
 	}
 
-	message = *(fileContent.Content)
+	decoded, err := base64.StdEncoding.DecodeString(*file.Content)
+	if err != nil {
+		return
+	}
+
+	message = string(decoded)
 
 	return
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/globalsign/mgo"
-	"github.com/google/go-github/v28/github"
 	"github.com/patrickmn/go-cache"
 
 	"github.com/Southclaws/cj/types"
@@ -42,7 +41,7 @@ type Storer interface {
 	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)
 
 	GetReadmeMessage() (message string, err error)
-	FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error)
+	FetchReadmeMessage(githubOwner string, githubRepoistory string, fileName string) (message string, err error)
 	UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error)
 }
 

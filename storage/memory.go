@@ -3,7 +3,6 @@ package storage
 import (
 	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
-	"github.com/google/go-github/v28/github"
 )
 
 type Memory struct{}
@@ -83,7 +82,7 @@ func (m *Memory) GetCommandSettings(command string) (settings types.CommandSetti
 func (m *Memory) GetReadmeMessage() (message string, err error) {
 	return
 }
-func (m *Memory) FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error) {
+func (m *Memory) FetchReadmeMessage(githubOwner string, githubRepoistory string, fileName string) (message string, err error) {
 	return
 }
 func (m *Memory) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
