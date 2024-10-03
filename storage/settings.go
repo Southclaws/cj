@@ -8,7 +8,6 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/google/go-github/v28/github"
-	"github.com/pkg/errors"
 )
 
 // SetCommandSettings upsets command settings
@@ -56,17 +55,12 @@ func (m *MongoStorer) GetReadmeMessage() (message string, err error) {
 // FetchReadmeMessage fetches already sent message to upstream
 func (m *MongoStorer) FetchReadmeMessage(gistID string, gistFile github.GistFilename) (message string, err error) {
 	client := github.NewClient(nil)
-	gist, _, err := client.Gists.Get(context.Background(), gistID)
+	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), "openmultiplayer", "discord-rules", "README.md", nil)
 	if err != nil {
 		return
 	}
 
-	file, ok := gist.Files[gistFile]
-	if !ok {
-		err = errors.New("gist file not found (\"" + string(gistFile) + "\")")
-		return
-	}
-	message = *(file.Content)
+	message = *(fileContent.Content)
 
 	return
 }
