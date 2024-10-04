@@ -76,6 +76,13 @@ func (r *Readme) fetchReadme() (err error) {
 		return
 	}
 
+	if msg.Author.ID != r.Config.BotID {
+		msg, err = r.Discord.S.ChannelMessageSend(c.ID, ctx)
+		if err != nil {
+			return
+		}
+	}
+
 	// call update function
 	err = r.Storage.UpdateReadmeMessage(r.Discord.S, msg, ctx)
 	if err != nil {
