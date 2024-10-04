@@ -73,29 +73,27 @@ func (m *MongoStorer) FetchReadmeMessage(githubOwner string, githubRepoistory st
 
 // UpdateReadmeMessage updates the message in both channel and database
 func (m *MongoStorer) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
-	if original.Content != upstream {
-		_, err := session.ChannelMessageEdit(original.ChannelID, original.ID, upstream)
+	_, err = session.ChannelMessageEdit(original.ChannelID, original.ID, upstream)
+	if err != nil {
+		session.ChannelMessageSend("948604467887083550", err.Error())
+	}
+
+	var readme Readme
+	err = m.settings.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
+	if err == mgo.ErrNotFound {
+		err = m.settings.Insert(bson.D{{Name: "readme_message_id", Value: original.ID}})
 		if err != nil {
 			session.ChannelMessageSend("948604467887083550", err.Error())
+			return
 		}
+	} else if err != nil {
+		session.ChannelMessageSend("948604467887083550", err.Error())
+		return
 	} else {
-		var readme Readme
-		err = m.settings.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
-		if err == mgo.ErrNotFound {
-			err = m.settings.Insert(bson.D{{Name: "readme_message_id", Value: original.ID}})
-			if err != nil {
-				session.ChannelMessageSend("948604467887083550", err.Error())
-				return
-			}
-		} else if err != nil {
+		err = m.settings.Update(bson.M{}, bson.M{"$set": bson.M{"readme_message_id": original.ID}})
+		if err != nil {
 			session.ChannelMessageSend("948604467887083550", err.Error())
 			return
-		} else {
-			err = m.settings.Update(bson.M{}, bson.M{"$set": bson.M{"readme_message_id": original.ID}})
-			if err != nil {
-				session.ChannelMessageSend("948604467887083550", err.Error())
-				return
-			}
 		}
 	}
 	return
