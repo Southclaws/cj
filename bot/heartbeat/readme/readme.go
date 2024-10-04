@@ -45,6 +45,12 @@ func (r *Readme) Register() (actions []common.Action) {
 }
 
 func (r *Readme) fetchReadme() (err error) {
+	discord := r.Discord.S
+
+	discord.ChannelMessageSend("948604467887083550", "----- Starting to perform readme update")
+
+	discord.ChannelMessageSend("948604467887083550", "Trying to get readme message")
+
 	m, e := r.Storage.GetReadmeMessage()
 
 	// if it's not in the database, we return nil
@@ -55,12 +61,16 @@ func (r *Readme) fetchReadme() (err error) {
 		return
 	}
 
+	discord.ChannelMessageSend("948604467887083550", "Trying to get readme channel")
+
 	// get the readme channel
 	c, e := r.Discord.S.Channel(r.Config.ReadmeChannel)
 	if e != nil {
 		err = e
 		return
 	}
+
+	discord.ChannelMessageSend("948604467887083550", "Trying to get already sent readme message")
 
 	// get the already sent readme message
 	msg, e := r.Discord.S.ChannelMessage(c.ID, m)
@@ -69,6 +79,8 @@ func (r *Readme) fetchReadme() (err error) {
 		return
 	}
 
+	discord.ChannelMessageSend("948604467887083550", "Fetching readme message from rules repository")
+
 	// fetch upstream gist content
 	ctx, e := r.Storage.FetchReadmeMessage(r.Config.ReadmeGithubOwner, r.Config.ReadmeGithubRepository, r.Config.ReadmeFileName)
 	if e != nil {
@@ -76,11 +88,14 @@ func (r *Readme) fetchReadme() (err error) {
 		return
 	}
 
+	discord.ChannelMessageSend("948604467887083550", "Attempting to update readme message if needed")
+
 	// call update function
 	err = r.Storage.UpdateReadmeMessage(r.Discord.S, msg, ctx)
 	if err != nil {
 		return
 	}
 
+	discord.ChannelMessageSend("948604467887083550", "----- Updating readme task is finished")
 	return
 }
