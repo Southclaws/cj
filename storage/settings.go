@@ -73,8 +73,6 @@ func (m *MongoStorer) FetchReadmeMessage(githubOwner string, githubRepoistory st
 
 // UpdateReadmeMessage updates the message in both channel and database
 func (m *MongoStorer) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
-	session.ChannelMessageSend("948604467887083550", original.Content)
-	session.ChannelMessageSend("948604467887083550", upstream)
 	if original.Content != upstream {
 		session.ChannelMessageEdit(original.ChannelID, original.ID, upstream)
 	} else {
