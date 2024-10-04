@@ -51,7 +51,7 @@ func (app *App) ConnectDiscord() (err error) {
 	}
 
 	zap.L().Info("finished initialising discord module")
-	app.discordClient.S.UpdateGameStatus(0, fmt.Sprintf("🐧 R.I.P. - %s", app.config.Version))
+	app.discordClient.S.UpdateGameStatus(0, fmt.Sprintf("Open Multiplayer | 🐧 R.I.P. - %s", app.config.Version))
 
 	return
 }
