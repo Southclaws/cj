@@ -1,8 +1,6 @@
 package readme
 
 import (
-	"fmt"
-
 	"github.com/Southclaws/cj/bot/heartbeat/common"
 	"github.com/Southclaws/cj/discord"
 	"github.com/Southclaws/cj/forum"
@@ -48,7 +46,6 @@ func (r *Readme) Register() (actions []common.Action) {
 
 func (r *Readme) fetchReadme() (err error) {
 	m, e := r.Storage.GetReadmeMessage()
-	r.Discord.S.ChannelMessageSend("948604467887083550", fmt.Sprintf("Current readme message ID is %s", m))
 
 	// if it's not in the database, we return nil
 	// because it's accepted scenario
