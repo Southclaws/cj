@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -83,13 +82,6 @@ func Start(config *types.Config) {
 		if err != nil {
 			zap.L().Fatal("failed to initialise extension", zap.Error(err))
 		}
-	}
-
-	_, err = app.discordClient.S.ChannelMessageSend(
-		config.DefaultChannel,
-		fmt.Sprintf("Hey, what's cracking now? CJ initialised with version %s", config.Version))
-	if err != nil {
-		zap.L().Fatal("failed to send initialisation message", zap.Error(err))
 	}
 
 	zap.L().Debug("started with debug logging enabled",
