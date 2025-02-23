@@ -4,53 +4,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
-	"net/http"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/Southclaws/cj/types"
+
+	"github.com/algolia/algoliasearch-client-go/v4/algolia/search"
+
+	"go.uber.org/zap"
 )
 
 const cmdUsage = "USAGE: /wiki [function/callback]"
 
-type Results struct {
-	Status struct {
-		Total      int `json:"total"`
-		Failed     int `json:"failed"`
-		Successful int `json:"successful"`
-	} `json:"status"`
-	Request struct {
-		Query struct {
-			Query string `json:"query"`
-		} `json:"query"`
-		Size      int `json:"size"`
-		From      int `json:"from"`
-		Highlight struct {
-			Style  interface{} `json:"style"`
-			Fields interface{} `json:"fields"`
-		} `json:"highlight"`
-		Fields           interface{} `json:"fields"`
-		Facets           interface{} `json:"facets"`
-		Explain          bool        `json:"explain"`
-		Sort             []string    `json:"sort"`
-		IncludeLocations bool        `json:"includeLocations"`
-		SearchAfter      interface{} `json:"search_after"`
-		SearchBefore     interface{} `json:"search_before"`
-	} `json:"request"`
-	Hits      []Hit       `json:"hits"`
-	TotalHits int         `json:"total"`
-	Took      int64       `json:"took"`
-}
-
-type Hit struct {
-	Url                  string  `json:"url"`
-	Title                string  `json:"title"`
-	Description          string  `json:"desc"`
-	TitleFragments       string  `json:"title_fragment"`
-	DescriptionFragments string  `json:"desc_fragment"`
-	Score                float64 `json:"score"`
-}
+// Algolia config
+const (
+	algoliaAppID            = "AOKXGK39Z7"
+	algoliaAPIKey           = "54204f37e5c8fc2871052d595ee0505e" //Safe to commit
+	algoliaIndexName        = "open"
+	algoliaContextualSearch = true
+	algoliaInsights         = false
+)
 
 func (cm *CommandManager) commandWiki(
 	interaction *discordgo.InteractionCreate,
@@ -66,19 +40,32 @@ func (cm *CommandManager) commandWiki(
 		return
 	}
 
-	r, err := http.Get(fmt.Sprintf("https://api.open.mp/docs/search?q=%s", strings.ReplaceAll(searchTerm, " ", "%20")))
+	algoliaClient, algoliaErr := search.NewClient(algoliaAppID, algoliaAPIKey)
+
+	if algoliaErr != nil {
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to initialise Search client: \n%s", algoliaErr.Error()))
+		zap.L().Error("Failed to initialise Search client", zap.Error(algoliaErr))
+		return
+	}
+
+	response, err := algoliaClient.Search(algoliaClient.NewApiSearchRequest(
+		search.NewEmptySearchMethodParams().SetRequests(
+			[]search.SearchQuery{*search.SearchForHitsAsSearchQuery(
+				search.NewEmptySearchForHits().
+					SetIndexName(algoliaIndexName).
+					SetQuery(searchTerm).
+					SetHitsPerPage(3),
+			)},
+		),
+	))
 	if err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf("Failed to GET result for search term %s\nError: %s", searchTerm, err.Error()))
+		cm.replyDirectly(interaction, fmt.Sprintf("Failed to search: %s", err.Error()))
 		return
 	}
 
-	var results Results
-	if err = json.NewDecoder(r.Body).Decode(&results); err != nil {
-		cm.replyDirectly(interaction, fmt.Sprintf("Failed to decode result for search term %s\nError: %s\n", searchTerm, err.Error()))
-		return
-	}
+	finalResult := response.Results[0]
 
-	if results.TotalHits == 0 {
+	if *finalResult.SearchResponse.NbHits == 0 {
 		cm.replyDirectlyEmbed(interaction, "", &discordgo.MessageEmbed{
 			Type:        discordgo.EmbedTypeRich,
 			Title:       fmt.Sprintf("No results: %s", searchTerm),
@@ -89,24 +76,65 @@ func (cm *CommandManager) commandWiki(
 
 	desc := strings.Builder{}
 
-	rendered := 0
-	for _, hit := range results.Hits {
-		if rendered == 3 {
-			break
-		}
+	seenUrls := make(map[string]bool)
 
-		// Skip searching translations
-		if strings.Contains(hit.Url, "translations") {
+	actuallyFoundResults := 0
+	for _, hit := range finalResult.SearchResponse.Hits {
+		var hitData map[string]interface{}
+		hitJSON, err := json.Marshal(hit)
+		if err != nil {
+			// Would reply, but then it may error again - and we cant re-send messages
+			// cm.replyDirectly(interaction, fmt.Sprintf("Error marshalling hit: %s", err.Error()))
 			continue
 		}
 
+		if err := json.Unmarshal(hitJSON, &hitData); err != nil {
+			// Would reply, but then it may error again - and we cant re-send messages
+			// cm.replyDirectly(interaction, fmt.Sprintf("Error unmarshalling hit: %s", err.Error()))
+			continue
+		}
+
+		if seenUrls[hitData["url_without_anchor"].(string)] { //Already presented to user - Algolia does this thing of sending twice the same thing
+			continue
+		}
+
+		seenUrls[hitData["url_without_anchor"].(string)] = true
+
+		stringParts := strings.Split(strings.TrimSuffix(hitData["url_without_anchor"].(string), "/"), "/") //Algolia doesnt give the Function/Callback name - so I steal it from the URL
+
+		if stringParts[len(stringParts)-2] == "blog" { //Remove blog posts from results
+			continue
+		}
+
+		actuallyFoundResults++
+
+		content, ok := hitData["content"].(string)
+		description := ""
+		if !ok {
+			description = "(No description found)"
+		} else {
+			description = formatDescription(&content)
+		}
+
 		desc.WriteString(fmt.Sprintf(
-			"[%s](https://open.mp/%s): %s\n",
-			hit.Title,
-			strings.TrimSuffix(hit.Url, ".md"),
-			formatDescription(hit)))
-		rendered++
+			"[%s](%s) [%s/%s]: %s\n",
+			stringParts[len(stringParts)-1],
+			hitData["url_without_anchor"].(string),
+			stringParts[len(stringParts)-3],
+			stringParts[len(stringParts)-2],
+			description,
+		))
 	}
+
+	if actuallyFoundResults == 0 { //Hitting this means all results were filtered out
+		cm.replyDirectlyEmbed(interaction, "", &discordgo.MessageEmbed{
+			Type:        discordgo.EmbedTypeRich,
+			Title:       fmt.Sprintf("No results: %s", searchTerm),
+			Description: "There were no results for that query.",
+		})
+		return
+	}
+
 	embed := &discordgo.MessageEmbed{
 		Type:        discordgo.EmbedTypeRich,
 		Title:       fmt.Sprintf("Documentation Search Results: %s", searchTerm),
@@ -117,14 +145,10 @@ func (cm *CommandManager) commandWiki(
 	return false, err // Todo: remove this
 }
 
-func formatDescription(hit Hit) string {
-	if len(hit.Description) == 0 {
-		return "(No description found)"
-	}
-
+func formatDescription(hit *string) string {
 	return html.UnescapeString(strings.ReplaceAll(
 		strings.ReplaceAll(
-			hit.Description,
+			*hit,
 			"<mark>", "**"),
 		"</mark>", "**"))
 }
