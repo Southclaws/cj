@@ -54,7 +54,8 @@ func (cm *CommandManager) commandWiki(
 				search.NewEmptySearchForHits().
 					SetIndexName(algoliaIndexName).
 					SetQuery(searchTerm).
-					SetHitsPerPage(3),
+					SetHitsPerPage(3).
+					SetFilters("language:en"),
 			)},
 		),
 	))
