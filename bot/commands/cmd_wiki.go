@@ -26,6 +26,13 @@ const (
 	algoliaInsights         = false
 )
 
+func truncateText(s string, max int) string {
+	if max > len(s) {
+		return s
+	}
+	return s[:strings.LastIndex(s[:max], " ")] + " ..."
+}
+
 func (cm *CommandManager) commandWiki(
 	interaction *discordgo.InteractionCreate,
 	args map[string]*discordgo.ApplicationCommandInteractionDataOption,
@@ -123,7 +130,7 @@ func (cm *CommandManager) commandWiki(
 			hitData["url_without_anchor"].(string),
 			stringParts[len(stringParts)-3],
 			stringParts[len(stringParts)-2],
-			description,
+			truncateText(description, 200),
 		))
 	}
 
