@@ -20,9 +20,18 @@ type ChannelDM struct {
 
 // Define the roles that we want to track
 var trackedRoleIDs = map[string]string{
-	"1002922725553217648": "Clown",
-	"400250542628274177":  "Caged",
-	//more roles can be added here
+	"1002922725553217648": 	"Clown",
+	"400250542628274177":  	"Caged",
+	"995816487610753094":  	"annoyed me",
+	"1016047260364198008": 	"Not Cool",
+	"833325019252785173":  	"Doesnt deserve to embed",
+	"818457955690872832":  	"Doesnt deserve to react",
+	"996883259252297758": 	"No open.mp support",
+	"910950457680212088": 	"No Server Adverts",
+	"841368374356738078": 	"Suffers from dunning-kruger",
+	"987825514511220867": 	"Muted",
+	"1204891485867352144": 	"Can't @everyone",
+	
 }
 
 const greeting = `Hi! Welcome to the San Andreas Multiplayer unofficial Discord server!
