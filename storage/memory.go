@@ -88,3 +88,12 @@ func (m *Memory) FetchReadmeMessage(githubOwner string, githubRepoistory string,
 func (m *Memory) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
 	return
 }
+func (m *Memory) AddTrackedRole(discordUserID, roleID, roleName string) error {
+	return nil
+}
+func (m *Memory) RemoveTrackedRole(discordUserID, roleID string) error {
+	return nil
+}
+func (m *Memory) GetTrackedRoles(discordUserID string) ([]TrackedRole, error) {
+	return nil, nil
+}
