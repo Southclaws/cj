@@ -44,9 +44,11 @@ type Storer interface {
 	FetchReadmeMessage(githubOwner string, githubRepoistory string, fileName string) (message string, err error)
 	UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error)
 
+	/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 	AddTrackedRole(discordUserID, roleID, roleName string) error
 	RemoveTrackedRole(discordUserID, roleID string) error
 	GetTrackedRoles(discordUserID string) ([]TrackedRole, error)
+	*/
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot

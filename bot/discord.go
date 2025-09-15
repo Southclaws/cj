@@ -18,6 +18,7 @@ type ChannelDM struct {
 	LastMessageID string         `json:"last_message_id"`
 }
 
+/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 // Define the roles that we want to track
 var trackedRoleIDs = map[string]string{
 	"1002922725553217648": 	"Clown",
@@ -31,8 +32,8 @@ var trackedRoleIDs = map[string]string{
 	"841368374356738078": 	"Suffers from dunning-kruger",
 	"987825514511220867": 	"Muted",
 	"1204891485867352144": 	"Can't @everyone",
-	
 }
+*/
 
 const greeting = `Hi! Welcome to the San Andreas Multiplayer unofficial Discord server!
 
@@ -51,7 +52,9 @@ func (app *App) ConnectDiscord() (err error) {
 	app.discordClient.S.AddHandler(app.onJoin)
 	app.discordClient.S.AddHandler(app.onReactionAdd)
 	app.discordClient.S.AddHandler(app.onReactionRemove)
+	/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 	app.discordClient.S.AddHandler(app.onGuildMemberUpdate)
+	*/
 
 	intent := discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildMembers)
 
@@ -73,6 +76,7 @@ func (app *App) ConnectDiscord() (err error) {
 	return
 }
 
+/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 // nolint:gocyclo
 func (app *App) onGuildMemberUpdate(s *discordgo.Session, event *discordgo.GuildMemberUpdate) {
 	member := event.Member
@@ -124,6 +128,7 @@ func (app *App) onGuildMemberUpdate(s *discordgo.Session, event *discordgo.Guild
 		}
 	}
 }
+*/
 
 // nolint:gocyclo
 func (app *App) onReady(s *discordgo.Session, event *discordgo.Ready) {
@@ -236,12 +241,15 @@ func (app *App) onJoin(s *discordgo.Session, event *discordgo.GuildMemberAdd) {
 		}
 	}
 
+	/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 	err = app.reapplyTrackedRoles(event.Member.User.ID, event.GuildID)
 	if err != nil {
 		zap.L().Error("failed to reapply tracked roles", zap.Error(err))
 	}
+	*/
 }
 
+/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 func (app *App) reapplyTrackedRoles(userID, guildID string) error {
 	trackedRoles, err := app.storage.GetTrackedRoles(userID)
 	if err != nil {
@@ -268,3 +276,4 @@ func (app *App) reapplyTrackedRoles(userID, guildID string) error {
 
 	return nil
 }
+*/
