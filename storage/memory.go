@@ -88,6 +88,7 @@ func (m *Memory) FetchReadmeMessage(githubOwner string, githubRepoistory string,
 func (m *Memory) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
 	return
 }
+/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 func (m *Memory) AddTrackedRole(discordUserID, roleID, roleName string) error {
 	return nil
 }
@@ -97,3 +98,4 @@ func (m *Memory) RemoveTrackedRole(discordUserID, roleID string) error {
 func (m *Memory) GetTrackedRoles(discordUserID string) ([]TrackedRole, error) {
 	return nil, nil
 }
+*/
