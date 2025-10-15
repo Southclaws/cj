@@ -1167,7 +1167,7 @@ func (s *Service) IsThisReal(ctx context.Context, message string) (*IsThisRealRe
 	cjExamples := getRandomCJQuotes(10)
 	var systemPrompt string
 	if articleContent != nil {
-		systemPrompt = fmt.Sprintf(`Yo, you're CJ from GTA San Andreas. Someone asked you to check if this news article is real or fake. You gotta give your street-smart take on it.
+		systemPrompt = fmt.Sprintf(`You're CJ from GTA San Andreas. Someone asked you to check if this news article is real or fake. Give your street-smart take on it.
 
 Here's how CJ talks (real examples from the game):
 %s
@@ -1178,36 +1178,41 @@ Source: %s
 URL: %s
 Content: %s
 
-Your job: Look at this shit and figure out if it's real or fake. Then respond with ONLY this JSON format:
-{
-  "is_real": true/false,
-  "confidence": "high/medium/low", 
-  "explanation": "your street-smart reasoning in CJ's voice",
-  "cj_response": "what CJ would actually say about this, 1-2 sentences max"
-}
-
-IMPORTANT: Only respond with the JSON, nothing else.
-
-Make it sound like CJ is actually talking. If it's fake news, he'll call it out. If it's real, he might acknowledge it or make a comment. Keep it authentic to his character.`, strings.Join(cjExamples, "\n"), articleContent.Title, articleContent.Source, articleContent.URL, articleContent.Content)
+Analyze whether this is real or fake news. Determine your confidence level (high/medium/low). Give your street-smart reasoning in CJ's voice for the explanation, and provide what CJ would actually say about this in 1-2 sentences for the cj_response. Make it sound authentic to his character - if it's fake news, he'll call it out; if it's real, he might acknowledge it or make a comment.`, strings.Join(cjExamples, "\n"), articleContent.Title, articleContent.Source, articleContent.URL, articleContent.Content)
 	} else {
-		systemPrompt = fmt.Sprintf(`Yo, you're CJ from GTA San Andreas. Someone asked you to check if this message is real or fake. You gotta give your street-smart take on it.
+		systemPrompt = fmt.Sprintf(`You're CJ from GTA San Andreas. Someone asked you to check if this message is real or fake. Give your street-smart take on it.
 
 Here's how CJ talks (real examples from the game):
 %s
 
 MESSAGE TO CHECK OUT: "%s"
 
-Your job: Look at this shit and figure out if it's real or fake. Then respond with ONLY this JSON format:
-{
-  "is_real": true/false,
-  "confidence": "high/medium/low",
-  "explanation": "your street-smart reasoning in CJ's voice", 
-  "cj_response": "what CJ would actually say about this, 1-2 sentences max"
-}
+Analyze whether this is real or fake. Determine your confidence level (high/medium/low). Give your street-smart reasoning in CJ's voice for the explanation, and provide what CJ would actually say about this in 1-2 sentences for the cj_response. Make it sound authentic to his character - if it's fake, he'll call it out; if it's real, he might acknowledge it or make a comment.`, strings.Join(cjExamples, "\n"), message)
+	}
 
-IMPORTANT: Only respond with the JSON, nothing else.
-
-Make it sound like CJ is actually talking. If it's fake, he'll call it out. If it's real, he might acknowledge it or make a comment. Keep it authentic to his character.`, strings.Join(cjExamples, "\n"), message)
+	schema := map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"is_real": map[string]interface{}{
+				"type":        "boolean",
+				"description": "Whether the content is real or fake",
+			},
+			"confidence": map[string]interface{}{
+				"type":        "string",
+				"enum":        []string{"high", "medium", "low"},
+				"description": "Confidence level in the assessment",
+			},
+			"explanation": map[string]interface{}{
+				"type":        "string",
+				"description": "Street-smart reasoning in CJ's voice",
+			},
+			"cj_response": map[string]interface{}{
+				"type":        "string",
+				"description": "What CJ would actually say, 1-2 sentences max",
+			},
+		},
+		"required":             []string{"is_real", "confidence", "explanation", "cj_response"},
+		"additionalProperties": false,
 	}
 
 	req := openai.ChatCompletionRequest{
@@ -1220,6 +1225,14 @@ Make it sound like CJ is actually talking. If it's fake, he'll call it out. If i
 			{
 				Role:    openai.ChatMessageRoleUser,
 				Content: fmt.Sprintf("Analyze this message: \"%s\"", message),
+			},
+		},
+		ResponseFormat: &openai.ChatCompletionResponseFormat{
+			Type: openai.ChatCompletionResponseFormatTypeJSONSchema,
+			JSONSchema: &openai.ChatCompletionResponseFormatJSONSchema{
+				Name:   "is_this_real_response",
+				Schema: schema,
+				Strict: true,
 			},
 		},
 		Temperature: 0.8,
@@ -1236,31 +1249,11 @@ Make it sound like CJ is actually talking. If it's fake, he'll call it out. If i
 	}
 
 	responseText := resp.Choices[0].Message.Content
-	
+
 	var parsedResponse IsThisRealResponse
-	if err := json.Unmarshal([]byte(responseText), &parsedResponse); err == nil {
-		return &parsedResponse, nil
+	if err := json.Unmarshal([]byte(responseText), &parsedResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
-	explanations := []string{
-		"Man, I looked at this shit but I can't really tell what's going on here",
-		"Yo, this is some confusing shit right here",
-		"I checked this out but it's all mixed up",
-		"This shit is all over the place, man",
-	}
-	
-	cjResponses := []string{
-		"I don't know, fool! This shit is confusing as hell!",
-		"Man, this is some weird shit! I can't figure it out!",
-		"Yo, this is too confusing for me right now!",
-		"This shit is messed up! I can't tell what's going on!",
-	}
-	
-	rand.Seed(time.Now().UnixNano())
-	
-	return &IsThisRealResponse{
-		IsReal:      false, // Doesn't matter since we check confidence first
-		Confidence:  "low",
-		Explanation: explanations[rand.Intn(len(explanations))],
-		CJResponse:  cjResponses[rand.Intn(len(cjResponses))],
-	}, nil
+
+	return &parsedResponse, nil
 }
