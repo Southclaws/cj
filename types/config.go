@@ -29,6 +29,7 @@ type Config struct {
 	ReadmeGithubOwner      string        `split_words:"true" required:"true" default:"openmultiplayer"`     // the readme repository owner
 	ReadmeGithubRepository string        `split_words:"true" required:"true" default:"discord-rules"`       // the readme repository name
 	ReadmeFileName         string        `split_words:"true" required:"true" default:"README.md"`           // the file name from readme in repository
+	ChatGPTToken           string        `split_words:"true" required:"false"`                              // OpenAI API token for ChatGPT integration
 
 	AdministrativeChannel string `split_words:"true" required:"false"` // DEPRECATED
 	PrimaryChannel        string `split_words:"true" required:"false"` // DEPRECATED
