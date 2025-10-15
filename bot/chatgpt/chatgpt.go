@@ -1190,7 +1190,7 @@ MESSAGE TO CHECK OUT: "%s"
 Analyze whether this is real or fake. Determine your confidence level (high/medium/low). Give your street-smart reasoning in CJ's voice for the explanation, and provide what CJ would actually say about this in 1-2 sentences for the cj_response. Make it sound authentic to his character - if it's fake, he'll call it out; if it's real, he might acknowledge it or make a comment.`, strings.Join(cjExamples, "\n"), message)
 	}
 
-	schema := map[string]interface{}{
+	schemaMap := map[string]interface{}{
 		"type": "object",
 		"properties": map[string]interface{}{
 			"is_real": map[string]interface{}{
@@ -1215,6 +1215,11 @@ Analyze whether this is real or fake. Determine your confidence level (high/medi
 		"additionalProperties": false,
 	}
 
+	schemaBytes, err := json.Marshal(schemaMap)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal schema: %w", err)
+	}
+
 	req := openai.ChatCompletionRequest{
 		Model: openai.GPT4oMini,
 		Messages: []openai.ChatCompletionMessage{
@@ -1231,7 +1236,7 @@ Analyze whether this is real or fake. Determine your confidence level (high/medi
 			Type: openai.ChatCompletionResponseFormatTypeJSONSchema,
 			JSONSchema: &openai.ChatCompletionResponseFormatJSONSchema{
 				Name:   "is_this_real_response",
-				Schema: schema,
+				Schema: json.RawMessage(schemaBytes),
 				Strict: true,
 			},
 		},
