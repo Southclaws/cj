@@ -99,7 +99,7 @@ func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
 			},
 		},
 		{
-			"$match": bson.M{"count": bson.M{"$gt": messageCount}},
+			"$match": bson.M{"count": bson.M{"$gt": messageCount-1}}, //messageCount-1 otherwise the result will be empty for topmost user
 		},
 		{
 			"$count": "rank",
@@ -107,7 +107,7 @@ func (m *MongoStorer) GetUserRank(discordUserID string) (rank int, err error) {
 	})
 	tempMap := make(map[string]int)
 	err = myPipe.One(tempMap)
-	rank = tempMap["rank"] + 1 // +1 otherwise the top user will have rank 0
+	rank = tempMap["rank"]
 	return
 }
 
