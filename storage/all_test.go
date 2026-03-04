@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"context"
 	"os"
 	"testing"
+	"time"
 )
 
 var api *MongoStorer
@@ -11,7 +13,7 @@ func TestMain(m *testing.M) {
 	var err error
 	mongoHost := os.Getenv("MONGO_HOST")
 	if mongoHost == "" {
-		mongoHost = "localhost"
+		mongoHost = "127.0.0.1"
 	}
 
 	mongoPort := os.Getenv("MONGO_PORT")
@@ -38,8 +40,11 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	api.accounts.DropCollection()
-	api.chat.DropCollection()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_ = api.accounts.Drop(ctx)
+	_ = api.chat.Drop(ctx)
 
 	ret := m.Run()
 	os.Exit(ret)
