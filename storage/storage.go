@@ -109,3 +109,14 @@ func New(config Config) (m *MongoStorer, err error) {
 func (m *MongoStorer) newContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 10*time.Second)
 }
+
+func (m *MongoStorer) Close() error {
+	if m == nil || m.mongo == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return m.mongo.Disconnect(ctx)
+}

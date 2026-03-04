@@ -90,13 +90,13 @@ func (fc *ForumClient) getUserName(root *xmlpath.Node) (string, error) {
 			continue
 		}
 
-		if strings.Contains(result, "Profile of ") {
-			result = strings.TrimSpace(strings.TrimPrefix(result, "Profile of "))
-		} else if strings.Contains(result, " - Profile of ") {
+		if strings.Contains(result, " - Profile of ") {
 			parts := strings.SplitN(result, " - Profile of ", 2)
 			if len(parts) == 2 {
 				result = strings.TrimSpace(parts[1])
 			}
+		} else if strings.HasPrefix(result, "Profile of ") {
+			result = strings.TrimSpace(strings.TrimPrefix(result, "Profile of "))
 		} else if strings.Contains(result, "'s Forum Info") {
 			result = strings.TrimSpace(strings.TrimSuffix(result, "'s Forum Info"))
 		} else if strings.Contains(result, "'s Profile") {

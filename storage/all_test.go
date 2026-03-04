@@ -47,5 +47,6 @@ func TestMain(m *testing.M) {
 	_ = api.chat.Drop(ctx)
 
 	ret := m.Run()
+	_ = api.Close()
 	os.Exit(ret)
 }

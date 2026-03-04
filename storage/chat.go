@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // ChatLog represents a single logged chat message from Discord
@@ -173,6 +174,9 @@ func (m *MongoStorer) GetRandomMessage() (log ChatLog, err error) {
 		return
 	}
 	err = cursor.Err()
+	if err == nil {
+		err = mongo.ErrNoDocuments
+	}
 	return
 }
 
@@ -200,6 +204,9 @@ func (m *MongoStorer) GetRandomMessageFromUsers(users []string) (result ChatLog,
 		return
 	}
 	err = cursor.Err()
+	if err == nil {
+		err = mongo.ErrNoDocuments
+	}
 	return
 }
 
