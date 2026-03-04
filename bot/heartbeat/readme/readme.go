@@ -6,7 +6,7 @@ import (
 	"github.com/Southclaws/cj/forum"
 	"github.com/Southclaws/cj/storage"
 	"github.com/Southclaws/cj/types"
-	"github.com/globalsign/mgo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // Readme fetches the upsream gist
@@ -50,7 +50,7 @@ func (r *Readme) fetchReadme() (err error) {
 	// if it's not in the database, we return nil
 	// because it's accepted scenario
 	// in that case /readme needs to be called manually
-	if e == mgo.ErrNotFound {
+	if e == mongo.ErrNoDocuments {
 		err = nil
 		return
 	}

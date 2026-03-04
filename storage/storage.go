@@ -1,12 +1,15 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/globalsign/mgo"
 	"github.com/patrickmn/go-cache"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 
 	"github.com/Southclaws/cj/types"
 )
@@ -53,10 +56,10 @@ type Storer interface {
 
 // MongoStorer exposes a storage MongoStorer for the bot
 type MongoStorer struct {
-	mongo    *mgo.Session
-	accounts *mgo.Collection
-	chat     *mgo.Collection
-	settings *mgo.Collection
+	mongo    *mongo.Client
+	accounts *mongo.Collection
+	chat     *mongo.Collection
+	settings *mongo.Collection
 	cache    *cache.Cache
 }
 
@@ -72,25 +75,48 @@ type Config struct {
 // New constructs a new storage API and connects to the database
 func New(config Config) (m *MongoStorer, err error) {
 	m = new(MongoStorer)
-	m.mongo, err = mgo.Dial(fmt.Sprintf("%s:%s", config.MongoHost, config.MongoPort))
+
+	clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s", config.MongoHost, config.MongoPort))
+	if config.MongoUser != "" {
+		clientOptions.SetAuth(options.Credential{
+			Username: config.MongoUser,
+			Password: config.MongoPass,
+		})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	m.mongo, err = mongo.Connect(clientOptions)
 	if err != nil {
 		return
 	}
 
-	if config.MongoPass != "" {
-		err = m.mongo.Login(&mgo.Credential{
-			Username: config.MongoUser,
-			Password: config.MongoPass,
-		})
-		if err != nil {
-			return
-		}
+	err = m.mongo.Ping(ctx, readpref.Primary())
+	if err != nil {
+		return
 	}
 
-	m.accounts = m.mongo.DB(config.MongoName).C("accounts")
-	m.chat = m.mongo.DB(config.MongoName).C("chat")
-	m.settings = m.mongo.DB(config.MongoName).C("settings")
+	db := m.mongo.Database(config.MongoName)
+	m.accounts = db.Collection("accounts")
+	m.chat = db.Collection("chat")
+	m.settings = db.Collection("settings")
 	m.cache = cache.New(time.Hour*24, time.Hour*12)
 
 	return
+}
+
+func (m *MongoStorer) newContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), 10*time.Second)
+}
+
+func (m *MongoStorer) Close() error {
+	if m == nil || m.mongo == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return m.mongo.Disconnect(ctx)
 }

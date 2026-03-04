@@ -71,16 +71,51 @@ func (fc *ForumClient) GetUserProfilePage(url string) (UserProfile, error) {
 
 // getUserName returns the user profile page owner name
 func (fc *ForumClient) getUserName(root *xmlpath.Node) (string, error) {
-	var result string
-
-	path := xmlpath.MustCompile(`//span[@class='largetext']//strong//span`)
-
-	result, ok := path.String(root)
-	if !ok {
-		return result, errors.New("user name xmlpath did not return a result")
+	paths := []*xmlpath.Path{
+		xmlpath.MustCompile(`//span[@class='largetext']//strong//span`),
+		xmlpath.MustCompile(`//span[@class='largetext']//strong`),
+		xmlpath.MustCompile(`//span[@class='active']`),
+		xmlpath.MustCompile(`//div[contains(@class,'profile-side')]`),
+		xmlpath.MustCompile(`//title`),
 	}
 
-	return strings.Trim(result, "\n "), nil
+	for _, path := range paths {
+		result, ok := path.String(root)
+		if !ok {
+			continue
+		}
+
+		result = strings.TrimSpace(result)
+		if result == "" {
+			continue
+		}
+
+		if strings.Contains(result, " - Profile of ") {
+			parts := strings.SplitN(result, " - Profile of ", 2)
+			if len(parts) == 2 {
+				result = strings.TrimSpace(parts[1])
+			}
+		} else if strings.HasPrefix(result, "Profile of ") {
+			result = strings.TrimSpace(strings.TrimPrefix(result, "Profile of "))
+		} else if strings.Contains(result, "'s Forum Info") {
+			result = strings.TrimSpace(strings.TrimSuffix(result, "'s Forum Info"))
+		} else if strings.Contains(result, "'s Profile") {
+			result = strings.TrimSpace(strings.TrimSuffix(result, "'s Profile"))
+		}
+
+		if strings.Contains(result, " - ") {
+			parts := strings.Split(result, " - ")
+			if len(parts) > 0 {
+				result = strings.TrimSpace(parts[0])
+			}
+		}
+
+		if result != "" && result != "open.mp forum" {
+			return result, nil
+		}
+	}
+
+	return "", errors.New("user name xmlpath did not return a result")
 }
 
 // getJoinDate returns the user join date
