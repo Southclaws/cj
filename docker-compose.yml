@@ -9,7 +9,7 @@ networks:
 
 services:
   mongodb:
-    image: "mongo:${MONGODB_IMAGE_TAG:-3.4}"
+    image: "mongo:${MONGODB_IMAGE_TAG:-8.2}"
     restart: on-failure
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${CJ_MONGO_USER}
