@@ -91,4 +91,11 @@ func Start(config *types.Config) {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT)
 	<-signals
+
+	if closer, ok := app.storage.(interface{ Close() error }); ok {
+		err = closer.Close()
+		if err != nil {
+			zap.L().Error("failed to close storage", zap.Error(err))
+		}
+	}
 }

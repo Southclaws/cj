@@ -6,15 +6,24 @@ import (
 
 	"github.com/Southclaws/cj/types"
 	"github.com/bwmarrin/discordgo"
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	"github.com/google/go-github/v28/github"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // SetCommandSettings upsets command settings
 func (m *MongoStorer) SetCommandSettings(command string, settings types.CommandSettings) (err error) {
 	settings.Command = command
-	_, err = m.settings.Upsert(bson.M{"command": command}, settings)
+	ctx, cancel := m.newContext()
+	defer cancel()
+
+	_, err = m.settings.UpdateOne(
+		ctx,
+		bson.M{"command": command},
+		bson.M{"$set": settings},
+		options.UpdateOne().SetUpsert(true),
+	)
 	return
 }
 
@@ -25,9 +34,12 @@ func (m *MongoStorer) GetCommandSettings(command string) (settings types.Command
 			return
 		}
 	}
-	err = m.settings.Find(bson.M{"command": command}).One(&settings)
+	ctx, cancel := m.newContext()
+	defer cancel()
+
+	err = m.settings.FindOne(ctx, bson.M{"command": command}).Decode(&settings)
 	switch err {
-	case mgo.ErrNotFound:
+	case mongo.ErrNoDocuments:
 		err = nil
 	case nil:
 		found = true
@@ -42,8 +54,11 @@ type Readme struct {
 
 // GetReadmeMessage gets the readme message id from the database
 func (m *MongoStorer) GetReadmeMessage() (message string, err error) {
+	ctx, cancel := m.newContext()
+	defer cancel()
+
 	var readme Readme
-	err = m.settings.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
+	err = m.settings.FindOne(ctx, bson.M{"readme_message_id": bson.M{"$exists": true}}).Decode(&readme)
 	if err != nil {
 		return
 	}
@@ -78,10 +93,13 @@ func (m *MongoStorer) UpdateReadmeMessage(session *discordgo.Session, original *
 		session.ChannelMessageSend("948604467887083550", err.Error())
 	}
 
+	ctx, cancel := m.newContext()
+	defer cancel()
+
 	var readme Readme
-	err = m.settings.Find(bson.M{"readme_message_id": bson.M{"$exists": true}}).One(&readme)
-	if err == mgo.ErrNotFound {
-		err = m.settings.Insert(bson.D{{Name: "readme_message_id", Value: original.ID}})
+	err = m.settings.FindOne(ctx, bson.M{"readme_message_id": bson.M{"$exists": true}}).Decode(&readme)
+	if err == mongo.ErrNoDocuments {
+		_, err = m.settings.InsertOne(ctx, bson.D{{Key: "readme_message_id", Value: original.ID}})
 		if err != nil {
 			session.ChannelMessageSend("948604467887083550", err.Error())
 			return
@@ -90,7 +108,11 @@ func (m *MongoStorer) UpdateReadmeMessage(session *discordgo.Session, original *
 		session.ChannelMessageSend("948604467887083550", err.Error())
 		return
 	} else {
-		err = m.settings.Update(bson.M{}, bson.M{"$set": bson.M{"readme_message_id": original.ID}})
+		_, err = m.settings.UpdateOne(
+			ctx,
+			bson.M{"readme_message_id": bson.M{"$exists": true}},
+			bson.M{"$set": bson.M{"readme_message_id": original.ID}},
+		)
 		if err != nil {
 			session.ChannelMessageSend("948604467887083550", err.Error())
 			return

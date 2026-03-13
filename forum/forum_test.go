@@ -24,13 +24,13 @@ func TestForumClient_GetUserProfilePage(t *testing.T) {
 	}{
 		{
 			name:    "admin",
-			args:    args{url: "https://www.burgershot.gg/member.php?action=profile&uid=3"},
+			args:    args{url: "https://forum.open.mp/member.php?action=profile&uid=3"},
 			want:    "Josh",
 			wantErr: false,
 		},
 		{
 			name:    "user",
-			args:    args{url: "https://www.burgershot.gg/member.php?action=profile&uid=398"},
+			args:    args{url: "https://forum.open.mp/member.php?action=profile&uid=398"},
 			want:    "forza giampy",
 			wantErr: false,
 		},
