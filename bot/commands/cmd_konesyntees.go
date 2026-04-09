@@ -66,7 +66,6 @@ func parseVoiceParams(text string) (string, int, int, error) {
 		return "", 0, 0, errors.New("the command must have some sort of params")
 	}
 
-	text = text[13:]
 	params := strings.Split(text, " ")
 	speed := 0
 	voice := 0
