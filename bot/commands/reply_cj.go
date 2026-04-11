@@ -1000,7 +1000,11 @@ func (cm *CommandManager) commandCJQuote(
 	message *discordgo.Message,
 ) {
 	if lastUseTime.Add(time.Second * 60).After(time.Now()) {
-		cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, "🕛")
+		clock := pcd(time.Since(lastUseTime), time.Second*60)
+		if clock == "" {
+			clock = "🕛"
+		}
+		cm.Discord.S.MessageReactionAdd(message.ChannelID, message.ID, clock)
 		return
 	}
 	lastUseTime = time.Now()
