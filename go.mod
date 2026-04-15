@@ -18,7 +18,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron v1.2.0
 	github.com/stretchr/testify v1.11.1
-	go.mongodb.org/mongo-driver/v2 v2.5.0
+	go.mongodb.org/mongo-driver/v2 v2.5.1
 	go.uber.org/zap v1.27.1
 	golang.org/x/text v0.36.0
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc
