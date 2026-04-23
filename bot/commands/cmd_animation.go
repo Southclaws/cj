@@ -1,8 +1,6 @@
 package commands
 
 import (
-	_ "embed"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -12,23 +10,72 @@ import (
 	"github.com/Southclaws/cj/types"
 )
 
-//go:embed animations.json
-var animationsJSON []byte
-
 type animEntry struct {
 	Library string `json:"library"`
 	Name    string `json:"name"`
 }
 
 var (
-	animData       []animEntry
-	validAnimParam = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
+	animationLibraries      []string
+	animationNames          []string
+	animationNamesByLibrary map[string][]string
+	validAnimParam          = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
 )
 
 func init() {
-	if err := json.Unmarshal(animationsJSON, &animData); err != nil {
-		panic("failed to parse animations.json: " + err.Error())
+	animationLibraries, animationNames, animationNamesByLibrary = buildAnimationIndexes(animationEntries)
+}
+
+func buildAnimationIndexes(entries []animEntry) ([]string, []string, map[string][]string) {
+	libraries := make([]string, 0)
+	names := make([]string, 0, len(entries))
+	namesByLibrary := make(map[string][]string)
+	seenLibraries := make(map[string]struct{})
+
+	for _, entry := range entries {
+		libraryKey := strings.ToLower(entry.Library)
+		if _, seen := seenLibraries[libraryKey]; !seen {
+			libraries = append(libraries, entry.Library)
+			seenLibraries[libraryKey] = struct{}{}
+		}
+
+		names = append(names, entry.Name)
+		namesByLibrary[libraryKey] = append(namesByLibrary[libraryKey], entry.Name)
 	}
+
+	return libraries, names, namesByLibrary
+}
+
+func autocompleteChoices(values []string, typedValue string) []*discordgo.ApplicationCommandOptionChoice {
+	choices := make([]*discordgo.ApplicationCommandOptionChoice, 0, min(len(values), 25))
+	lower := strings.ToLower(typedValue)
+
+	for _, value := range values {
+		if lower == "" || strings.Contains(strings.ToLower(value), lower) {
+			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+				Name:  value,
+				Value: value,
+			})
+		}
+		if len(choices) >= 25 {
+			break
+		}
+	}
+
+	return choices
+}
+
+func autocompleteOptionString(opt *discordgo.ApplicationCommandInteractionDataOption) string {
+	if opt == nil || opt.Value == nil {
+		return ""
+	}
+
+	value, ok := opt.Value.(string)
+	if !ok {
+		return ""
+	}
+
+	return value
 }
 
 func (cm *CommandManager) commandAnimationAutocomplete(
@@ -43,10 +90,10 @@ func (cm *CommandManager) commandAnimationAutocomplete(
 	for _, opt := range data.Options {
 		if opt.Focused {
 			focusedField = opt.Name
-			typedValue = opt.StringValue()
+			typedValue = autocompleteOptionString(opt)
 		}
 		if opt.Name == "library" {
-			typedLibrary = opt.StringValue()
+			typedLibrary = autocompleteOptionString(opt)
 		}
 	}
 
@@ -54,40 +101,11 @@ func (cm *CommandManager) commandAnimationAutocomplete(
 
 	switch focusedField {
 	case "library":
-		seen := map[string]bool{}
-		lower := strings.ToLower(typedValue)
-		for _, a := range animData {
-			if seen[a.Library] {
-				continue
-			}
-			if lower == "" || strings.Contains(strings.ToLower(a.Library), lower) {
-				choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-					Name:  a.Library,
-					Value: a.Library,
-				})
-				seen[a.Library] = true
-			}
-			if len(choices) >= 25 {
-				break
-			}
-		}
+		choices = autocompleteChoices(animationLibraries, typedValue)
 
 	case "animation":
-		lower := strings.ToLower(typedValue)
-		lowerLib := strings.ToLower(typedLibrary)
-		for _, a := range animData {
-			if lowerLib != "" && strings.ToLower(a.Library) != lowerLib {
-				continue
-			}
-			if lower == "" || strings.Contains(strings.ToLower(a.Name), lower) {
-				choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-					Name:  a.Name,
-					Value: a.Name,
-				})
-			}
-			if len(choices) >= 25 {
-				break
-			}
+		if typedLibrary != "" {
+			choices = autocompleteChoices(animationNamesByLibrary[strings.ToLower(typedLibrary)], typedValue)
 		}
 	}
 
