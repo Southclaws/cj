@@ -8,7 +8,7 @@ replace gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v
 
 require (
 	github.com/Bios-Marcel/discordemojimap v1.0.1
-	github.com/algolia/algoliasearch-client-go/v4 v4.37.2
+	github.com/algolia/algoliasearch-client-go/v4 v4.38.0
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/google/go-github/v28 v28.1.1
 	github.com/joho/godotenv v1.5.1
