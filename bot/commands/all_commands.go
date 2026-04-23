@@ -66,6 +66,27 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "the next big unique dynamic server.",
 		},
 		{
+			Function:    cm.commandAnimation,
+			Name:        "/anim",
+			Description: "Preview an open.mp animation with a video.",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:         "library",
+					Type:         discordgo.ApplicationCommandOptionString,
+					Description:  "The animation library",
+					Required:     true,
+					Autocomplete: true,
+				},
+				{
+					Name:         "animation",
+					Type:         discordgo.ApplicationCommandOptionString,
+					Description:  "The animation name",
+					Required:     true,
+					Autocomplete: true,
+				},
+			},
+		},
+		{
 			Function:    cm.commandWiki,
 			Name:        "/wiki",
 			Description: "Returns an article from open.mp wiki.",

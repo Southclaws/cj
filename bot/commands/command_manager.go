@@ -78,6 +78,13 @@ func (cm *CommandManager) OnMessage(message discordgo.Message) (err error) {
 }
 
 func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.InteractionCreate) {
+	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
+		if interaction.ApplicationCommandData().Name == "anim" {
+			cm.commandAnimationAutocomplete(interaction)
+		}
+		return
+	}
+
 	zap.L().Info("User attempting command", zap.Any("user", interaction.Member.User.ID), zap.Any("command", interaction.ApplicationCommandData().Name))
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.ApplicationCommandData().Name {
