@@ -2,7 +2,6 @@ package storage
 
 import (
 	"regexp"
-	// "time" // ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -18,79 +17,12 @@ type User struct {
 	BurgerUserName    string            `json:"burger_user_name" bson:"burger_user_name"`
 	BurgerVerify      bool              `json:"burgershot_verified" bson:"burgershot_verified"`
 	ReceivedReactions []ReactionCounter `json:"received_reactions" bson:"received_reactions,omitempty"`
-	/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-	TrackedRoles      []TrackedRole     `json:"tracked_roles" bson:"tracked_roles,omitempty"`
-	*/
 }
 
 type ReactionCounter struct {
 	Counter  int
 	Reaction string
 }
-
-/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-// TrackedRole tracks the user roles
-type TrackedRole struct {
-	RoleID   string `json:"role_id" bson:"role_id"`
-	RoleName string `json:"role_name" bson:"role_name"`
-	AddedAt  int64  `json:"added_at" bson:"added_at"`
-}
-*/
-
-/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-// AddTrackedRole adds a tracked role to a user
-func (m *MongoStorer) AddTrackedRole(discordUserID, roleID, roleName string) error {
-	user, err := m.GetUserOrCreate(discordUserID)
-	if err != nil {
-		return err
-	}
-
-	for _, role := range user.TrackedRoles {
-		if role.RoleID == roleID {
-			return nil
-		}
-	}
-
-	newRole := TrackedRole{
-		RoleID:   roleID,
-		RoleName: roleName,
-		AddedAt:  time.Now().Unix(),
-	}
-	user.TrackedRoles = append(user.TrackedRoles, newRole)
-	return m.UpdateUser(user)
-}
-*/
-
-/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-// RemoveTrackedRole removes a tracked role
-func (m *MongoStorer) RemoveTrackedRole(discordUserID, roleID string) error {
-	user, err := m.GetUserOrCreate(discordUserID)
-	if err != nil {
-		return err
-	}
-
-	for i, role := range user.TrackedRoles {
-		if role.RoleID == roleID {
-			user.TrackedRoles = append(user.TrackedRoles[:i], user.TrackedRoles[i+1:]...)
-			break
-		}
-	}
-
-	return m.UpdateUser(user)
-}
-*/
-
-/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-// GetTrackedRoles returns all tracked roles for a user
-func (m *MongoStorer) GetTrackedRoles(discordUserID string) ([]TrackedRole, error) {
-	user, err := m.GetUserOrCreate(discordUserID)
-	if err != nil {
-		return nil, err
-	}
-
-	return user.TrackedRoles, nil
-}
-*/
 
 // GetUserOrCreate gets a user or creates one and returns it
 func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User, err error) {

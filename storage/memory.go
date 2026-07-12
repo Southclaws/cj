@@ -37,6 +37,9 @@ func (m *Memory) GetRandomUser() (result string, err error) {
 func (m *Memory) GetMessageByID(messageID string) (message ChatLog, err error) {
 	return
 }
+func (m *Memory) SearchMessages(discordUserID, query string) (messages []ChatLog, err error) {
+	return
+}
 func (m *Memory) UpdateUserUsername(discordUserID string, username string) (err error) {
 	return
 }
@@ -88,14 +91,3 @@ func (m *Memory) FetchReadmeMessage(githubOwner string, githubRepoistory string,
 func (m *Memory) UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error) {
 	return
 }
-/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-func (m *Memory) AddTrackedRole(discordUserID, roleID, roleName string) error {
-	return nil
-}
-func (m *Memory) RemoveTrackedRole(discordUserID, roleID string) error {
-	return nil
-}
-func (m *Memory) GetTrackedRoles(discordUserID string) ([]TrackedRole, error) {
-	return nil, nil
-}
-*/
