@@ -1,12 +1,15 @@
 package commands
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/Southclaws/cj/types"
 )
+
+const sayWebhookName = "CJ Say"
 
 var sayDeniedRoleIDs = []string{
 	"1002922725553217648", // Clown
@@ -36,16 +39,83 @@ func (cm *CommandManager) commandSay(
 	}
 
 	if message == "" {
-		cm.replyDirectly(interaction, "Message cannot be empty.")
+		cm.replyDirectly(interaction, "You gotta give me something to say, homie.")
 		return
 	}
 
 	err = cm.Discord.S.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content:         message,
-			AllowedMentions: &discordgo.MessageAllowedMentions{},
+			Flags: discordgo.MessageFlagsEphemeral,
 		},
 	})
+	if err != nil {
+		return
+	}
+
+	webhook, threadID, webhookErr := cm.getSayWebhook(interaction.ChannelID)
+	if webhookErr != nil {
+		cm.editOriginalResponse(interaction, "Ah shit, I can't say that here. Give me permission to manage webhooks, homie.")
+		err = webhookErr
+		return
+	}
+
+	member := *interaction.Member
+	member.GuildID = interaction.GuildID
+	params := &discordgo.WebhookParams{
+		Content:         message,
+		Username:        member.DisplayName(),
+		AvatarURL:       member.AvatarURL(""),
+		AllowedMentions: &discordgo.MessageAllowedMentions{},
+	}
+	if threadID == "" {
+		_, err = cm.Discord.S.WebhookExecute(webhook.ID, webhook.Token, true, params)
+	} else {
+		_, err = cm.Discord.S.WebhookThreadExecute(webhook.ID, webhook.Token, true, threadID, params)
+	}
+	if err != nil {
+		cm.editOriginalResponse(interaction, "Ah shit, the webhook let me down. Try that again, homie.")
+		return
+	}
+
+	err = cm.Discord.S.InteractionResponseDelete(interaction.Interaction)
 	return
+}
+
+func (cm *CommandManager) getSayWebhook(channelID string) (*discordgo.Webhook, string, error) {
+	channel, err := cm.Discord.S.Channel(channelID)
+	if err != nil {
+		return nil, "", fmt.Errorf("get /say channel: %w", err)
+	}
+
+	webhookChannelID := channel.ID
+	threadID := ""
+	if channel.IsThread() {
+		webhookChannelID = channel.ParentID
+		threadID = channel.ID
+	}
+
+	webhooks, err := cm.Discord.S.ChannelWebhooks(webhookChannelID)
+	if err != nil {
+		return nil, "", fmt.Errorf("get /say webhooks: %w", err)
+	}
+
+	botUser := cm.Discord.S.State.User
+	for _, webhook := range webhooks {
+		if webhook.Name == sayWebhookName && webhook.User != nil && botUser != nil && webhook.User.ID == botUser.ID {
+			return webhook, threadID, nil
+		}
+	}
+
+	webhook, err := cm.Discord.S.WebhookCreate(
+		webhookChannelID,
+		sayWebhookName,
+		"",
+		discordgo.WithAuditLogReason("Webhook for /say messages"),
+	)
+	if err != nil {
+		return nil, "", fmt.Errorf("create /say webhook: %w", err)
+	}
+
+	return webhook, threadID, nil
 }
