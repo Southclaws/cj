@@ -59,3 +59,32 @@ func TestAPI_GetTopMessages(t *testing.T) {
 		})
 	}
 }
+
+func TestAPI_SearchMessages(t *testing.T) {
+	err := api.RecordChatLog("search-user", "search-channel", "The complete searchable message", "search-message-id")
+	assert.NoError(t, err)
+	err = api.RecordChatLog("search-user", "search-channel-2", "Another searchable result", "search-message-id-2")
+	assert.NoError(t, err)
+
+	got, err := api.SearchMessages("search-user", "SEARCHABLE")
+	assert.NoError(t, err)
+	assert.Len(t, got, 2)
+	assert.Equal(t, ChatLog{
+		Timestamp:        got[0].Timestamp,
+		DiscordUserID:    "search-user",
+		DiscordChannel:   "search-channel-2",
+		Message:          "Another searchable result",
+		DiscordMessageID: "search-message-id-2",
+	}, got[0])
+	assert.Equal(t, ChatLog{
+		Timestamp:        got[1].Timestamp,
+		DiscordUserID:    "search-user",
+		DiscordChannel:   "search-channel",
+		Message:          "The complete searchable message",
+		DiscordMessageID: "search-message-id",
+	}, got[1])
+
+	got, err = api.SearchMessages("search-user", "does not exist")
+	assert.NoError(t, err)
+	assert.Empty(t, got)
+}

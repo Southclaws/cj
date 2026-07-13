@@ -25,6 +25,7 @@ type Storer interface {
 	GetRandomMessageFromUsers([]string) (result ChatLog, err error)
 	GetRandomUser() (result string, err error)
 	GetMessageByID(messageID string) (message ChatLog, err error)
+	SearchMessages(discordUserID, query string) (messages []ChatLog, err error)
 
 	GetUserOrCreate(discordUserID string) (result User, err error)
 	UpdateUserUsername(discordUserID, username string) (err error)
@@ -46,12 +47,6 @@ type Storer interface {
 	GetReadmeMessage() (message string, err error)
 	FetchReadmeMessage(githubOwner string, githubRepoistory string, fileName string) (message string, err error)
 	UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error)
-
-	/* ROLE TRACKING: Commented out atm and needs to be reviewed after converting the database
-	AddTrackedRole(discordUserID, roleID, roleName string) error
-	RemoveTrackedRole(discordUserID, roleID string) error
-	GetTrackedRoles(discordUserID string) ([]TrackedRole, error)
-	*/
 }
 
 // MongoStorer exposes a storage MongoStorer for the bot

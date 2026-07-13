@@ -5,6 +5,8 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
+
+	"github.com/Southclaws/cj/types"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
@@ -41,6 +43,28 @@ func (cm *CommandManager) LoadCommands() {
 					Name:        "message-id",
 					Type:        discordgo.ApplicationCommandOptionString,
 					Description: "The message ID to retrieve from the DB",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Function:    cm.commandSearchMessage,
+			Name:        "/searchmessage",
+			Description: "Search a user's archived messages.",
+			Settings: types.CommandSettings{
+				Roles: []string{searchMessageRoleID},
+			},
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "account-id",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The Discord account ID whose messages should be searched",
+					Required:    true,
+				},
+				{
+					Name:        "message",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "Text contained in the message",
 					Required:    true,
 				},
 			},
@@ -115,6 +139,23 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Know how many reactions your messages have gotten",
 		},
 		{
+			Function:    cm.commandSay,
+			Name:        "/say",
+			Description: "Make CJ say something.",
+			Settings: types.CommandSettings{
+				Roles: []string{cm.Config.DefaultRole},
+			},
+			DeniedRoles: sayDeniedRoleIDs,
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Name:        "message",
+					Type:        discordgo.ApplicationCommandOptionString,
+					Description: "The message CJ should say",
+					Required:    true,
+				},
+			},
+		},
+		{
 			Function:    cm.commandMyTop,
 			Name:        "/mytop",
 			Description: "Know your rank.",
@@ -136,7 +177,9 @@ func (cm *CommandManager) LoadCommands() {
 
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
-		v.Settings.Roles = []string{"all"}
+		if len(v.Settings.Roles) == 0 {
+			v.Settings.Roles = []string{"all"}
+		}
 		if v.IsAdministrative {
 			// Operator, Admin, Test server role, Cj Config Man
 			v.Settings.Roles = []string{"363383930143113216", "282353010192023552", "825041993251029032", "783100099969548288"}
@@ -193,7 +236,12 @@ func (cm *CommandManager) LoadCommands() {
 	cm.Discord.S.ApplicationCommandBulkOverwrite(cm.Discord.S.State.User.ID, "", discordCommands)
 
 	cm.Discord.S.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		cm.TryFindAndFireCommand(i)
+		switch i.Type {
+		case discordgo.InteractionApplicationCommand:
+			cm.TryFindAndFireCommand(i)
+		case discordgo.InteractionMessageComponent:
+			cm.handleSearchMessageComponent(i)
+		}
 	})
 
 	cm.Commands = commands

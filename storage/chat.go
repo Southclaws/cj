@@ -1,11 +1,13 @@
 package storage
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // ChatLog represents a single logged chat message from Discord
@@ -216,4 +218,31 @@ func (m *MongoStorer) GetMessageByID(messageID string) (message ChatLog, err err
 
 	err = m.chat.FindOne(ctx, bson.M{"discordmessageid": messageID}).Decode(&message)
 	return message, err
+}
+
+// SearchMessages returns messages from a user containing query, newest first.
+func (m *MongoStorer) SearchMessages(discordUserID, query string) (messages []ChatLog, err error) {
+	ctx, cancel := m.newContext()
+	defer cancel()
+
+	filter := bson.M{
+		"discorduserid": discordUserID,
+		"message": bson.M{
+			"$regex":   regexp.QuoteMeta(query),
+			"$options": "i",
+		},
+	}
+	sort := bson.D{
+		{Key: "timestamp", Value: -1},
+		{Key: "_id", Value: -1},
+	}
+
+	cursor, err := m.chat.Find(ctx, filter, options.Find().SetSort(sort))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	err = cursor.All(ctx, &messages)
+	return messages, err
 }

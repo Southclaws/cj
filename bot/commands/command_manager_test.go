@@ -25,3 +25,24 @@ func Test_percentageToClock(t *testing.T) {
 		})
 	}
 }
+
+func TestHasAnyRole(t *testing.T) {
+	tests := []struct {
+		name        string
+		roles       []string
+		memberRoles []string
+		want        bool
+	}{
+		{name: "no denied roles", roles: []string{"123"}, memberRoles: []string{"456"}, want: false},
+		{name: "has denied role", roles: []string{"123", "456"}, memberRoles: []string{"456", "789"}, want: true},
+		{name: "empty denied role list", memberRoles: []string{"456"}, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := hasAnyRole(tt.roles, tt.memberRoles); got != tt.want {
+				t.Errorf("hasAnyRole() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
