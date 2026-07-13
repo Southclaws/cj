@@ -9,6 +9,8 @@ import (
 	"github.com/Southclaws/cj/types"
 )
 
+const fightClubRoleID = "375975563233591296"
+
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
 func (cm *CommandManager) LoadCommands() {
@@ -52,7 +54,7 @@ func (cm *CommandManager) LoadCommands() {
 			Name:        "/searchmessage",
 			Description: "Search a user's archived messages.",
 			Settings: types.CommandSettings{
-				Roles: []string{searchMessageRoleID},
+				Roles: []string{fightClubRoleID},
 			},
 			Options: []*discordgo.ApplicationCommandOption{
 				{
@@ -143,7 +145,7 @@ func (cm *CommandManager) LoadCommands() {
 			Name:        "/say",
 			Description: "Make CJ say something.",
 			Settings: types.CommandSettings{
-				Roles: []string{cm.Config.DefaultRole},
+				Roles: []string{fightClubRoleID},
 			},
 			DeniedRoles: sayDeniedRoleIDs,
 			Options: []*discordgo.ApplicationCommandOption{
