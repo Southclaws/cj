@@ -51,6 +51,9 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandSearchMessage,
 			Name:        "/searchmessage",
 			Description: "Search a user's archived messages.",
+			Settings: types.CommandSettings{
+				Roles: []string{searchMessageRoleID},
+			},
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "account-id",

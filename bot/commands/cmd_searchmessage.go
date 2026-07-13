@@ -13,6 +13,7 @@ import (
 
 const (
 	searchMessageChannelID     = "790877366439247913"
+	searchMessageRoleID        = "375975563233591296"
 	searchMessageContextPrefix = "searchmessage:"
 )
 
