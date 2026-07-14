@@ -104,6 +104,7 @@ var scripts = []string{
 	"Vibrator System",
 	"Weapon control",
 	"Weapon shop",
+	"#include <Kristoforus.go>",
 }
 
 var features = []string{
@@ -134,6 +135,12 @@ var features = []string{
 	"streamer",
 	"with advanced anti db",
 	"zcmd",
+	"Wadin_Dynamic",
+	"Golang",
+	"pySAMP",
+	"samp.js",	
+	"samp.cpp",
+	"samp.so",
 }
 
 func makeDynamic() string {

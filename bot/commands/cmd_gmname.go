@@ -47,6 +47,10 @@ var coolwordsxd = []string{
 	"mengheran",
 	"mengakak",
 	"menghadeh",
+	"Ayonima",
+	"Acumalaka",
+	"Megawati-Chan",
+	"Puan-Chan",
 }
 
 var morewords = []string{
