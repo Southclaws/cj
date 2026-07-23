@@ -9,7 +9,11 @@ import (
 	"github.com/Southclaws/cj/types"
 )
 
-const fightClubRoleID = "375975563233591296"
+const (
+	// TODO: Move these role IDs later as dicussed.
+	searchMessageAdminRoleID    = "282353010192023552"
+	searchMessageOperatorRoleID = "363383930143113216"
+)
 
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
@@ -54,8 +58,9 @@ func (cm *CommandManager) LoadCommands() {
 			Name:        "/searchmessage",
 			Description: "Search a user's archived messages.",
 			Settings: types.CommandSettings{
-				Roles: []string{fightClubRoleID},
+				Roles: []string{searchMessageAdminRoleID, searchMessageOperatorRoleID},
 			},
+			RequiredRoles: []string{searchMessageAdminRoleID, searchMessageOperatorRoleID},
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "account-id",
@@ -141,23 +146,6 @@ func (cm *CommandManager) LoadCommands() {
 			Description: "Know how many reactions your messages have gotten",
 		},
 		{
-			Function:    cm.commandSay,
-			Name:        "/say",
-			Description: "Make CJ say something.",
-			Settings: types.CommandSettings{
-				Roles: []string{fightClubRoleID},
-			},
-			DeniedRoles: sayDeniedRoleIDs,
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Name:        "message",
-					Type:        discordgo.ApplicationCommandOptionString,
-					Description: "The message CJ should say",
-					Required:    true,
-				},
-			},
-		},
-		{
 			Function:    cm.commandMyTop,
 			Name:        "/mytop",
 			Description: "Know your rank.",
@@ -201,6 +189,9 @@ func (cm *CommandManager) LoadCommands() {
 				zap.L().Fatal("failed to assign command settings",
 					zap.Error(err))
 			}
+		}
+		if len(v.RequiredRoles) > 0 {
+			v.Settings.Roles = v.RequiredRoles
 		}
 
 		commands[k] = v
