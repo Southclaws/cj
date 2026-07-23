@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	searchMessageChannelID     = "790877366439247913"
+	searchMessageChannelID     = "948604467887083550"
 	searchMessageContextPrefix = "searchmessage:"
 )
 

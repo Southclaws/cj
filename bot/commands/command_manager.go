@@ -54,6 +54,7 @@ type Command struct {
 	Description      string
 	Settings         types.CommandSettings
 	Options          []*discordgo.ApplicationCommandOption
+	RequiredRoles    []string
 	DeniedRoles      []string
 	IsAdministrative bool
 }
@@ -82,7 +83,11 @@ func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.Interacti
 	zap.L().Info("User attempting command", zap.Any("user", interaction.Member.User.ID), zap.Any("command", interaction.ApplicationCommandData().Name))
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.ApplicationCommandData().Name {
-			if hasPermissions(command.Settings.Roles, interaction.Member.Roles) &&
+			requiredRoles := command.Settings.Roles
+			if len(command.RequiredRoles) > 0 {
+				requiredRoles = command.RequiredRoles
+			}
+			if hasPermissions(requiredRoles, interaction.Member.Roles) &&
 				!hasAnyRole(command.DeniedRoles, interaction.Member.Roles) {
 				args := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
 				for _, option := range interaction.ApplicationCommandData().Options {
