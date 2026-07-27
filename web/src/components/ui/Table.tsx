@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+
+import type { SortDir } from "../../lib/useSort";
 
 export function Table({ children }: { children: ReactNode }) {
   return (
@@ -11,15 +14,38 @@ export function Table({ children }: { children: ReactNode }) {
 export function Thead({ children }: { children: ReactNode }) {
   return (
     <thead>
-      <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-ink-faint">
+      <tr className="sticky top-0 z-10 border-b border-border bg-surface-2 text-xs font-medium uppercase tracking-wider text-ink-faint">
         {children}
       </tr>
     </thead>
   );
 }
 
-export function Th({ children }: { children?: ReactNode }) {
-  return <th className="px-4 py-3 font-medium">{children}</th>;
+interface ThProps {
+  children?: ReactNode;
+  onSort?: () => void;
+  sortDir?: SortDir | null;
+}
+
+export function Th({ children, onSort, sortDir }: ThProps) {
+  if (!onSort) {
+    return <th className="px-4 py-3 font-medium">{children}</th>;
+  }
+
+  const Icon = sortDir === "asc" ? ArrowUp : sortDir === "desc" ? ArrowDown : ArrowUpDown;
+
+  return (
+    <th className="px-4 py-3 font-medium">
+      <button
+        type="button"
+        onClick={onSort}
+        className={`flex items-center gap-1 transition-colors hover:text-ink ${sortDir ? "text-ink" : ""}`}
+      >
+        {children}
+        <Icon className={`h-3 w-3 shrink-0 ${sortDir ? "" : "opacity-40"}`} />
+      </button>
+    </th>
+  );
 }
 
 export function Td({ children, className = "" }: { children?: ReactNode; className?: string }) {

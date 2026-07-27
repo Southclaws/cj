@@ -17,7 +17,7 @@ export function Button({ variant = "secondary", className = "", ...props }: Butt
     <button
       type="button"
       className={[
-        "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+        "rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100",
         variantClasses[variant],
         className,
       ].join(" ")}

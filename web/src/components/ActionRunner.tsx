@@ -9,6 +9,7 @@ import { Badge, riskTone } from "./ui/Badge";
 import { Button } from "./ui/Button";
 import { errorMessage } from "../lib/errors";
 import { useRoleOptions } from "../lib/entitySearch";
+import { pushToast } from "../lib/toast";
 import {
   type ActionInfoRecord,
   type ActionOutcomeRecord,
@@ -220,7 +221,13 @@ export function ActionRunner({ action, presetUserId }: ActionRunnerProps) {
 
   const executeMutation = useMutation({
     mutationFn: () => executeAction(action.name, input),
-    onSuccess: setOutcome,
+    onSuccess: (result) => {
+      setOutcome(result);
+      pushToast(result.summary, "good");
+    },
+    onError: (error) => {
+      pushToast(`${action.name} failed: ${errorMessage(error)}`, "bad");
+    },
   });
 
   const busy = previewMutation.isPending || executeMutation.isPending;

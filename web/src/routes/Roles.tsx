@@ -7,22 +7,26 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { ErrorState, LoadingState } from "../components/ui/States";
 import { Table, Thead, Th, Td, Tr } from "../components/ui/Table";
 import { errorMessage } from "../lib/errors";
-import { fetchRoles } from "../lib/api";
+import { roleColor } from "../lib/roleColor";
+import { sortRows, useSort } from "../lib/useSort";
+import { fetchRoles, type RoleRecord } from "../lib/api";
 
-function roleColor(color: number): string {
-  if (color === 0) {
-    return "#99a1af";
-  }
-  return `#${color.toString(16).padStart(6, "0")}`;
-}
+type SortKey = "hierarchy" | "name" | "members";
+
+const comparators: Record<SortKey, (a: RoleRecord, b: RoleRecord) => number> = {
+  hierarchy: (a, b) => a.position - b.position,
+  name: (a, b) => a.name.localeCompare(b.name),
+  members: (a, b) => a.memberCount - b.memberCount,
+};
 
 export function Roles() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["discord-roles"],
     queryFn: fetchRoles,
   });
+  const sort = useSort<SortKey>("hierarchy", "desc");
 
-  const sorted = data ? [...data].sort((a, b) => b.position - a.position) : [];
+  const sorted = data ? sortRows(data, comparators[sort.key], sort.dir) : [];
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -36,9 +40,16 @@ export function Roles() {
         <div className="max-w-4xl">
           <Table>
             <Thead>
-              <Th>Role</Th>
-              <Th>Members</Th>
+              <Th onSort={() => sort.toggle("name")} sortDir={sort.key === "name" ? sort.dir : null}>
+                Role
+              </Th>
+              <Th onSort={() => sort.toggle("members")} sortDir={sort.key === "members" ? sort.dir : null}>
+                Members
+              </Th>
               <Th>Permissions</Th>
+              <Th onSort={() => sort.toggle("hierarchy")} sortDir={sort.key === "hierarchy" ? sort.dir : null}>
+                Hierarchy
+              </Th>
               <Th>CJ can manage</Th>
             </Thead>
             <tbody>
@@ -56,6 +67,7 @@ export function Roles() {
                   <Td className="text-ink-muted">
                     {role.permissions.length === 0 ? <span className="text-ink-faint">none</span> : role.permissions.join(", ")}
                   </Td>
+                  <Td className="text-ink-muted">{role.position}</Td>
                   <Td>
                     <Badge tone={role.cjCanManage ? "good" : "neutral"}>{role.cjCanManage ? "Yes" : "No"}</Badge>
                     {!role.cjCanManage && role.reasons && role.reasons.length > 0 && (

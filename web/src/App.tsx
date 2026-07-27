@@ -1,69 +1,18 @@
 import { useEffect } from "react";
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useLocation } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ClipboardList,
-  Hash,
-  History as HistoryIcon,
-  IdCard,
-  LayoutDashboard,
-  MessagesSquare,
-  ScrollText,
-  ShieldCheck,
-  SlidersHorizontal,
-  Users,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
 
+import { CommandPalette } from "./components/CommandPalette";
 import { UserSearch } from "./components/UserSearch";
 import { StatusDot } from "./components/ui/StatusDot";
+import { Toaster } from "./components/ui/Toaster";
 import { fetchStatus } from "./lib/api";
-
-interface NavItem {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-}
-
-interface NavSection {
-  heading?: string;
-  items: NavItem[];
-}
-
-const navSections: NavSection[] = [
-  { items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard }] },
-  {
-    heading: "Operate",
-    items: [
-      { to: "/logs", label: "Logs", icon: ScrollText },
-      { to: "/history", label: "History", icon: HistoryIcon },
-    ],
-  },
-  {
-    heading: "Discord",
-    items: [
-      { to: "/discord/members", label: "Members", icon: Users },
-      { to: "/discord/roles", label: "Roles", icon: ShieldCheck },
-      { to: "/discord/channels", label: "Channels", icon: Hash },
-      { to: "/discord/audit-log", label: "Audit Log", icon: ClipboardList },
-    ],
-  },
-  {
-    heading: "Data",
-    items: [
-      { to: "/data/users", label: "Users", icon: IdCard },
-      { to: "/data/messages", label: "Messages", icon: MessagesSquare },
-      { to: "/data/settings", label: "Settings", icon: SlidersHorizontal },
-    ],
-  },
-  { items: [{ to: "/configuration", label: "Configuration", icon: Wrench }] },
-];
+import { navSections } from "./lib/navigation";
 
 function navLinkClassName({ isActive }: { isActive: boolean }): string {
   return [
-    "group flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors",
-    isActive ? "bg-accent-soft text-ink" : "text-ink-muted hover:bg-surface-3 hover:text-ink",
+    "group flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-all duration-150",
+    isActive ? "bg-accent-soft text-ink" : "text-ink-muted hover:translate-x-0.5 hover:bg-surface-3 hover:text-ink",
   ].join(" ");
 }
 
@@ -104,6 +53,8 @@ function isTypingTarget(target: EventTarget | null): boolean {
 }
 
 export function App() {
+  const location = useLocation();
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key !== "/" || isTypingTarget(e.target)) return;
@@ -118,7 +69,13 @@ export function App() {
     <div className="flex h-full">
       <nav className="flex w-64 shrink-0 flex-col gap-5 border-r border-border bg-surface p-4">
         <BrandMark />
-        <UserSearch />
+        <div className="flex flex-col gap-1.5">
+          <UserSearch />
+          <div className="flex items-center gap-1.5 px-3 text-[11px] text-ink-faint">
+            <kbd className="rounded border border-border-strong bg-surface-2 px-1.5 py-0.5 font-mono">⌘K</kbd>
+            to jump anywhere
+          </div>
+        </div>
         <div className="flex flex-1 flex-col gap-5 overflow-y-auto">
           {navSections.map((section, index) => (
             <div key={section.heading ?? index} className="flex flex-col gap-1">
@@ -144,8 +101,12 @@ export function App() {
         </div>
       </nav>
       <main className="min-w-0 flex-1 overflow-y-auto">
-        <Outlet />
+        <div key={location.pathname} className="animate-page-in">
+          <Outlet />
+        </div>
       </main>
+      <CommandPalette />
+      <Toaster />
     </div>
   );
 }

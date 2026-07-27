@@ -30,8 +30,8 @@ func TestForumClient_GetUserProfilePage(t *testing.T) {
 		},
 		{
 			name:    "user",
-			args:    args{url: "https://forum.open.mp/member.php?action=profile&uid=398"},
-			want:    "forza giampy",
+			args:    args{url: "https://forum.open.mp/member.php?action=profile&uid=5"},
+			want:    "JustMichael",
 			wantErr: false,
 		},
 	}

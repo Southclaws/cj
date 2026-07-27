@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 
 import { ChannelPicker } from "../components/ChannelPicker";
 import { LazyUserLabel } from "../components/LazyUserLabel";
@@ -11,6 +11,7 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { ErrorState, LoadingState } from "../components/ui/States";
 import { errorMessage } from "../lib/errors";
 import { useMemberAndUserSearch } from "../lib/entitySearch";
+import { pushToast } from "../lib/toast";
 import { fetchGuildSettings, saveGuildSettings, type GuildSettings } from "../lib/api";
 
 const emptySettings: GuildSettings = {
@@ -69,6 +70,10 @@ export function Settings() {
     mutationFn: saveGuildSettings,
     onSuccess: (saved) => {
       queryClient.setQueryData(["guild-settings"], saved);
+      pushToast("Settings saved.", "good");
+    },
+    onError: (error) => {
+      pushToast(`Failed to save settings: ${errorMessage(error)}`, "bad");
     },
   });
 
@@ -119,12 +124,6 @@ export function Settings() {
               <Button type="submit" variant="primary" disabled={mutation.isPending}>
                 {mutation.isPending ? "Saving..." : "Save"}
               </Button>
-              {mutation.isSuccess && (
-                <span className="flex items-center gap-1.5 text-sm text-good">
-                  <CheckCircle2 className="h-4 w-4" /> Saved.
-                </span>
-              )}
-              {mutation.isError && <span className="text-sm text-bad">{errorMessage(mutation.error)}</span>}
             </div>
           </form>
         </Card>

@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, Clock, Heart, LayoutDashboard, Server, Trophy, Zap } from "lucide-react";
+import { Activity, Clock, Heart, LayoutDashboard, Server, ShieldCheck, Trophy, Zap } from "lucide-react";
 
 import { ActionRunner, isUserScopedAction } from "../components/ActionRunner";
 import { Modal } from "../components/Modal";
+import { RelativeBar } from "../components/ui/Bar";
 import { Card, CardHeader } from "../components/ui/Card";
 import { PageHeader } from "../components/ui/PageHeader";
 import { PersonTag } from "../components/ui/PersonTag";
 import { EmptyState } from "../components/ui/States";
 import { StatusDot, statusTone } from "../components/ui/StatusDot";
+import { roleColor } from "../lib/roleColor";
 import {
   fetchActions,
   fetchJobs,
+  fetchRoles,
   fetchServices,
   fetchStatus,
   fetchTopMessages,
@@ -91,6 +94,7 @@ function JobsPanel() {
 function TopMessagesPanel() {
   const { data } = useQuery({ queryKey: ["top-messages", 10], queryFn: () => fetchTopMessages(10) });
   if (!data) return null;
+  const max = data[0]?.messages ?? 0;
   return (
     <Card>
       <CardHeader title="Top messages" icon={<Trophy className="h-4 w-4" />} />
@@ -98,16 +102,21 @@ function TopMessagesPanel() {
         {data.length === 0 ? (
           <EmptyState message="No messages recorded yet." />
         ) : (
-          <ol className="flex flex-col gap-2.5 text-sm">
+          <ol className="flex flex-col gap-3 text-sm">
             {data.map((entry, index) => (
-              <li key={entry.person.id} className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="w-4 shrink-0 text-right text-ink-faint">{index + 1}</span>
-                  <PersonTag person={entry.person} size={24} showId={false} />
+              <li key={entry.person.id} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="w-4 shrink-0 text-right text-ink-faint">{index + 1}</span>
+                    <PersonTag person={entry.person} size={24} showId={false} />
+                  </div>
+                  <span className="shrink-0 rounded-full bg-surface-3 px-2 py-0.5 text-xs text-ink-muted">
+                    {entry.messages}
+                  </span>
                 </div>
-                <span className="shrink-0 rounded-full bg-surface-3 px-2 py-0.5 text-xs text-ink-muted">
-                  {entry.messages}
-                </span>
+                <div className="pl-6">
+                  <RelativeBar value={entry.messages} max={max} />
+                </div>
               </li>
             ))}
           </ol>
@@ -120,6 +129,7 @@ function TopMessagesPanel() {
 function TopReactionsPanel() {
   const { data } = useQuery({ queryKey: ["top-reactions", 10], queryFn: () => fetchTopReactions(10) });
   if (!data) return null;
+  const max = data[0]?.counter ?? 0;
   return (
     <Card>
       <CardHeader title="Top reactions" icon={<Heart className="h-4 w-4" />} />
@@ -127,19 +137,64 @@ function TopReactionsPanel() {
         {data.length === 0 ? (
           <EmptyState message="No reactions recorded yet." />
         ) : (
-          <ol className="flex flex-col gap-2.5 text-sm">
+          <ol className="flex flex-col gap-3 text-sm">
             {data.map((entry, index) => (
-              <li key={`${entry.person.id}-${entry.reaction}`} className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="w-4 shrink-0 text-right text-ink-faint">{index + 1}</span>
-                  <PersonTag person={entry.person} size={24} showId={false} />
+              <li key={`${entry.person.id}-${entry.reaction}`} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="w-4 shrink-0 text-right text-ink-faint">{index + 1}</span>
+                    <PersonTag person={entry.person} size={24} showId={false} />
+                  </div>
+                  <span className="shrink-0 rounded-full bg-surface-3 px-2 py-0.5 text-xs text-ink-muted">
+                    {entry.counter} {entry.reaction}
+                  </span>
                 </div>
-                <span className="shrink-0 rounded-full bg-surface-3 px-2 py-0.5 text-xs text-ink-muted">
-                  {entry.counter} {entry.reaction}
-                </span>
+                <div className="pl-6">
+                  <RelativeBar value={entry.counter} max={max} />
+                </div>
               </li>
             ))}
           </ol>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function RoleDistributionPanel() {
+  const { data } = useQuery({ queryKey: ["discord-roles"], queryFn: fetchRoles });
+  if (!data) return null;
+
+  const top = [...data]
+    .filter((role) => role.memberCount > 0)
+    .sort((a, b) => b.memberCount - a.memberCount)
+    .slice(0, 8);
+  const max = top[0]?.memberCount ?? 0;
+
+  return (
+    <Card>
+      <CardHeader title="Role distribution" icon={<ShieldCheck className="h-4 w-4" />} />
+      <div className="p-5">
+        {top.length === 0 ? (
+          <EmptyState message="No roles with members yet." />
+        ) : (
+          <ul className="flex flex-col gap-3 text-sm">
+            {top.map((role) => (
+              <li key={role.id} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex min-w-0 items-center gap-2 truncate text-ink">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: roleColor(role.color) }}
+                    />
+                    <span className="truncate">{role.name}</span>
+                  </span>
+                  <span className="shrink-0 text-xs text-ink-muted">{role.memberCount}</span>
+                </div>
+                <RelativeBar value={role.memberCount} max={max} color={roleColor(role.color)} />
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </Card>
@@ -194,6 +249,7 @@ export function Overview() {
         <JobsPanel />
         <TopMessagesPanel />
         <TopReactionsPanel />
+        <RoleDistributionPanel />
         <QuickActionsPanel />
       </div>
     </div>

@@ -6,7 +6,16 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { Table, Thead, Th, Td, Tr } from "../components/ui/Table";
 import { errorMessage } from "../lib/errors";
-import { fetchActionRuns } from "../lib/api";
+import { sortRows, useSort } from "../lib/useSort";
+import { fetchActionRuns, type ActionRunRecord } from "../lib/api";
+
+type SortKey = "time" | "action" | "duration";
+
+const comparators: Record<SortKey, (a: ActionRunRecord, b: ActionRunRecord) => number> = {
+  time: (a, b) => a.timestamp.localeCompare(b.timestamp),
+  action: (a, b) => a.action.localeCompare(b.action),
+  duration: (a, b) => a.durationMs - b.durationMs,
+};
 
 export function History() {
   const { data, isLoading, isError, error } = useQuery({
@@ -14,6 +23,8 @@ export function History() {
     queryFn: fetchActionRuns,
     refetchInterval: 10000,
   });
+  const sort = useSort<SortKey>("time", "desc");
+  const sorted = data ? sortRows(data, comparators[sort.key], sort.dir) : [];
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -33,16 +44,22 @@ export function History() {
         <div className="max-w-4xl">
           <Table>
             <Thead>
-              <Th>Time</Th>
-              <Th>Action</Th>
+              <Th onSort={() => sort.toggle("time")} sortDir={sort.key === "time" ? sort.dir : null}>
+                Time
+              </Th>
+              <Th onSort={() => sort.toggle("action")} sortDir={sort.key === "action" ? sort.dir : null}>
+                Action
+              </Th>
               <Th>Mode</Th>
               <Th>Risk</Th>
               <Th>Outcome</Th>
-              <Th>Duration</Th>
+              <Th onSort={() => sort.toggle("duration")} sortDir={sort.key === "duration" ? sort.dir : null}>
+                Duration
+              </Th>
               <Th>Summary</Th>
             </Thead>
             <tbody>
-              {data.map((run) => (
+              {sorted.map((run) => (
                 <Tr key={run.id}>
                   <Td className="whitespace-nowrap align-top text-ink-faint">{new Date(run.timestamp).toLocaleString()}</Td>
                   <Td className="align-top font-mono text-xs text-ink">{run.action}</Td>

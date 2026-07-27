@@ -11,14 +11,23 @@ import { SearchInput } from "../components/ui/SearchInput";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { Table, Thead, Th, Td, Tr } from "../components/ui/Table";
 import { errorMessage } from "../lib/errors";
-import { fetchMembers, fetchRoles } from "../lib/api";
+import { sortRows, useSort } from "../lib/useSort";
+import { fetchMembers, fetchRoles, type MemberRecord } from "../lib/api";
 
 const PAGE_SIZE = 50;
+
+type SortKey = "name" | "joined";
+
+const comparators: Record<SortKey, (a: MemberRecord, b: MemberRecord) => number> = {
+  name: (a, b) => (a.nickname || a.username).localeCompare(b.nickname || b.username),
+  joined: (a, b) => (a.joinedAt ?? "").localeCompare(b.joinedAt ?? ""),
+};
 
 export function Members() {
   const navigate = useNavigate();
   const [offset, setOffset] = useState(0);
   const [query, setQuery] = useState("");
+  const sort = useSort<SortKey>("name", "asc");
 
   const members = useQuery({
     queryKey: ["discord-members", offset, query],
@@ -27,6 +36,7 @@ export function Members() {
   const roles = useQuery({ queryKey: ["discord-roles"], queryFn: fetchRoles });
 
   const roleNames = new Map((roles.data ?? []).map((role) => [role.id, role.name]));
+  const sortedMembers = members.data ? sortRows(members.data.members, comparators[sort.key], sort.dir) : [];
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -60,13 +70,17 @@ export function Members() {
           <div className="max-w-4xl">
             <Table>
               <Thead>
-                <Th>Member</Th>
+                <Th onSort={() => sort.toggle("name")} sortDir={sort.key === "name" ? sort.dir : null}>
+                  Member
+                </Th>
                 <Th>Roles</Th>
-                <Th>Joined</Th>
+                <Th onSort={() => sort.toggle("joined")} sortDir={sort.key === "joined" ? sort.dir : null}>
+                  Joined
+                </Th>
                 <Th>CJ can act on</Th>
               </Thead>
               <tbody>
-                {members.data.members.map((member) => (
+                {sortedMembers.map((member) => (
                   <Tr key={member.id} clickable onClick={() => navigate(`/users/${member.id}`)}>
                     <Td>
                       <PersonTag

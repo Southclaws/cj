@@ -11,7 +11,9 @@ export function Card({ children, className = "", interactive = false }: CardProp
     <div
       className={[
         "rounded-xl border border-border bg-surface-2 shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]",
-        interactive ? "transition-colors hover:border-border-strong hover:bg-surface-3" : "",
+        interactive
+          ? "transition-all duration-150 hover:-translate-y-0.5 hover:border-border-strong hover:bg-surface-3 hover:shadow-lg"
+          : "",
         className,
       ].join(" ")}
     >
