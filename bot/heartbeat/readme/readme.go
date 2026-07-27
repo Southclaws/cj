@@ -44,6 +44,10 @@ func (r *Readme) Register() (actions []common.Action) {
 	}
 }
 
+func (r *Readme) Refresh() error {
+	return r.fetchReadme()
+}
+
 func (r *Readme) fetchReadme() (err error) {
 	m, e := r.Storage.GetReadmeMessage()
 

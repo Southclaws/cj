@@ -1,0 +1,79 @@
+version: "3"
+
+vars:
+  SERVICE: cj
+  OWNER: southclaws
+  VERSION:
+    sh: git describe --tags --dirty --always
+  LDFLAGS: -ldflags "-X main.version={{.VERSION}}"
+
+dotenv: [".env"]
+
+tasks:
+  web:
+    desc: Build the dashboard frontend
+    dir: web
+    cmds:
+      - npm install
+      - npm run build
+
+  static:
+    desc: Build a static Linux binary with the embedded frontend
+    deps: [web]
+    cmds:
+      - CGO_ENABLED=0 GOOS=linux go build -a -tags embed_web {{.LDFLAGS}} -o {{.SERVICE}} .
+
+  fast:
+    desc: Build a binary with the embedded frontend
+    deps: [web]
+    cmds:
+      - go build -tags embed_web {{.LDFLAGS}} -o {{.SERVICE}}
+
+  local:
+    desc: Build and run locally
+    deps: [fast]
+    cmds:
+      - ./{{.SERVICE}}
+
+  test:
+    desc: Run the Go test suite
+    cmds:
+      - CGO_ENABLED=1 go test -v -race ./...
+
+  version:
+    desc: Tag and push a new release version
+    cmds:
+      - git tag {{.VERSION}}
+      - git push
+      - git push origin {{.VERSION}}
+
+  build:
+    desc: Build the Docker image
+    cmds:
+      - docker build --no-cache -t {{.OWNER}}/{{.SERVICE}}:{{.VERSION}} .
+
+  push:
+    desc: Push the Docker image
+    cmds:
+      - docker push {{.OWNER}}/{{.SERVICE}}:{{.VERSION}}
+      - docker tag {{.OWNER}}/{{.SERVICE}}:{{.VERSION}} {{.OWNER}}/{{.SERVICE}}:latest
+      - docker push {{.OWNER}}/{{.SERVICE}}:latest
+
+  mongodb-stop:
+    desc: Stop and remove the local MongoDB test containers
+    cmds:
+      - cmd: docker stop mongodb
+        ignore_error: true
+      - cmd: docker rm mongodb
+        ignore_error: true
+      - cmd: docker stop express
+        ignore_error: true
+      - cmd: docker rm express
+        ignore_error: true
+
+  mongodb:
+    desc: Start a local MongoDB plus mongo-express for testing
+    deps: [mongodb-stop]
+    cmds:
+      - docker run --name mongodb -p 27017:27017 -d mongo
+      - docker run --name express --link mongodb:mongo -p 8080:8081 -d mongo-express

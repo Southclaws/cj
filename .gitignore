@@ -38,3 +38,8 @@ cj
 
 # devcontainer
 .devcontainer/data
+
+# dashboard frontend
+web/node_modules
+web/dist
+web/*.tsbuildinfo

@@ -2,6 +2,8 @@ module github.com/Southclaws/cj
 
 go 1.25.0
 
+ignore ./web/node_modules
+
 replace github.com/go-resty/resty => gopkg.in/resty.v1 v1.12.0
 
 replace gopkg.in/russross/blackfriday.v2 => github.com/russross/blackfriday/v2 v2.0.1

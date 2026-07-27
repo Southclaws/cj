@@ -3,7 +3,6 @@ package heartbeat
 import (
 	"fmt"
 	"math/rand"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -35,6 +34,30 @@ type Heartbeat struct {
 	Discord *discord.Session
 	Storage storage.Storer
 	Forum   *forum.ForumClient
+
+	Readme *readme.Readme
+
+	jobs      *jobRegistry
+	callables map[string]func() error
+}
+
+func (a *Heartbeat) Statuses() []JobStatus {
+	if a.jobs == nil {
+		return nil
+	}
+	return a.jobs.snapshot()
+}
+
+var ErrJobNotFound = errors.New("no such job is registered")
+
+func (a *Heartbeat) RunJob(name string) error {
+	fn, ok := a.callables[name]
+	if !ok {
+		return ErrJobNotFound
+	}
+	err := fn()
+	a.jobs.recordRun(name, err)
+	return err
 }
 
 //nolint:golint
@@ -51,11 +74,16 @@ func (a *Heartbeat) Init(
 
 	zap.L().Debug("initialising heartbeat module")
 
+	a.jobs = newJobRegistry()
+	a.callables = make(map[string]func() error)
+
+	readmeProvider := &readme.Readme{}
+	a.Readme = readmeProvider
+
 	aps := []ActionProvider{
-		// &hello{}, // for testing lol
 		&stats.Aggregator{},
 		&talking.Talk{},
-		&readme.Readme{},
+		readmeProvider,
 	}
 
 	cr := cron.New()
@@ -70,10 +98,19 @@ func (a *Heartbeat) Init(
 			zap.Int("actions", len(actions)))
 		for i := range actions {
 			action := actions[i]
+			jobName := name
+			if len(actions) > 1 {
+				jobName = fmt.Sprintf("%s.%d", name, i)
+			}
+			a.jobs.register(jobName, name, action.Schedule)
+			a.callables[jobName] = action.Call
+
 			zap.L().Debug("adding action call", zap.String("schedule", action.Schedule))
 			if err = cr.AddFunc(action.Schedule, func() {
 				if rand.Float64() < action.Chance {
-					if e := action.Call(); e != nil {
+					e := action.Call()
+					a.jobs.recordRun(jobName, e)
+					if e != nil {
 						zap.L().Error("action failed", zap.Error(e))
 					}
 				}
@@ -89,28 +126,4 @@ func (a *Heartbeat) Init(
 //nolint:golint
 func (a *Heartbeat) OnMessage(discordgo.Message) (err error) {
 	return
-}
-
-// testing type
-
-type hello struct {
-	d *discord.Session
-}
-
-func (h *hello) Init(c *types.Config, d *discord.Session, s storage.Storer, f *forum.ForumClient) error {
-	h.d = d
-	return nil
-}
-
-func (h *hello) Register() []common.Action {
-	return []common.Action{
-		{
-			Schedule: "* * * * *",
-			Chance:   0.1,
-			Call: func() error {
-				h.d.ChannelMessageSend("465142687985696788", fmt.Sprintf("%v", time.Now()))
-				return nil
-			},
-		},
-	}
 }

@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto, sans-serif;
+
+  --color-base: #08090d;
+  --color-surface: #101218;
+  --color-surface-2: #15171f;
+  --color-surface-3: #1c1f2a;
+  --color-border: #23262f;
+  --color-border-strong: #34394a;
+
+  --color-ink: #eceef3;
+  --color-ink-muted: #9a9fb0;
+  --color-ink-faint: #666b7a;
+
+  --color-accent: #6d5ef8;
+  --color-accent-hover: #8071fa;
+  --color-accent-ink: #efedff;
+  --color-accent-soft: #6d5ef81f;
+
+  --color-good: #3ba55d;
+  --color-good-soft: #3ba55d1a;
+  --color-warn: #f0b232;
+  --color-warn-soft: #f0b2321a;
+  --color-bad: #ed4245;
+  --color-bad-soft: #ed42451a;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 900px 500px at 12% -8%, #6d5ef814, transparent),
+    radial-gradient(ellipse 700px 500px at 100% 0%, #3ba55d0d, transparent),
+    var(--color-base);
+  color: var(--color-ink);
+  font-feature-settings: "cv11", "ss01";
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+}
+
+* {
+  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-3);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, #ffffff0a, transparent);
+  animation: shimmer 1.6s infinite;
+}
