@@ -43,7 +43,7 @@ jobs:
         run: go vet ./...
 
       - name: Start MongoDB for tests
-        uses: supercharge/mongodb-github-action@1.12.0
+        uses: supercharge/mongodb-github-action@1.12.1
 
       - name: Test
         run: go test -v -race ./...
