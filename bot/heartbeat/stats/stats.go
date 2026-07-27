@@ -20,7 +20,8 @@ type Aggregator struct {
 	Storage storage.Storer
 	Forum   *forum.ForumClient
 
-	topMessages storage.TopMessages
+	topMessages          storage.TopMessages
+	leaderboardChannelID string
 }
 
 //nolint:golint
@@ -34,6 +35,13 @@ func (a *Aggregator) Init(
 	a.Storage = api
 	a.Discord = discord
 	a.Forum = fc
+
+	guildSettings, err := api.GetGuildSettings()
+	if err != nil {
+		return "", err
+	}
+	a.leaderboardChannelID = guildSettings.LeaderboardChannelID
+
 	return "aggregator", nil
 }
 
@@ -57,11 +65,14 @@ func (a *Aggregator) gather() (err error) {
 }
 
 func (a *Aggregator) announce() (err error) {
+	if a.leaderboardChannelID == "" {
+		return nil
+	}
 	rankings, err := FormatMessageRankings(a.topMessages, a.Discord)
 	if err != nil {
 		return
 	}
-	_, err = a.Discord.S.ChannelMessageSendEmbed(a.Config.PrimaryChannel, rankings)
+	_, err = a.Discord.S.ChannelMessageSendEmbed(a.leaderboardChannelID, rankings)
 	return
 }
 

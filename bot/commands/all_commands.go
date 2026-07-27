@@ -5,19 +5,17 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
-
-	"github.com/Southclaws/cj/types"
-)
-
-const (
-	// TODO: Move these role IDs later as dicussed.
-	searchMessageAdminRoleID    = "282353010192023552"
-	searchMessageOperatorRoleID = "363383930143113216"
 )
 
 // LoadCommands is called on initialisation and is responsible for registering
 // all commands and binding them to functions.
 func (cm *CommandManager) LoadCommands() {
+	guildSettings, err := cm.Storage.GetGuildSettings()
+	if err != nil {
+		zap.L().Error("failed to load guild settings, database-configured features will stay disabled", zap.Error(err))
+	}
+	cm.GuildSettings = guildSettings
+
 	commands := []Command{
 		{
 			Function:         cm.commandConfig,
@@ -57,10 +55,6 @@ func (cm *CommandManager) LoadCommands() {
 			Function:    cm.commandSearchMessage,
 			Name:        "/searchmessage",
 			Description: "Search a user's archived messages.",
-			Settings: types.CommandSettings{
-				Roles: []string{searchMessageAdminRoleID, searchMessageOperatorRoleID},
-			},
-			RequiredRoles: []string{searchMessageAdminRoleID, searchMessageOperatorRoleID},
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Name:        "account-id",
@@ -167,12 +161,8 @@ func (cm *CommandManager) LoadCommands() {
 
 	for k, v := range commands {
 		v.Settings.Cooldown = cm.Config.DefaultCooldown
-		if len(v.Settings.Roles) == 0 {
+		if !v.IsAdministrative && len(v.Settings.Roles) == 0 {
 			v.Settings.Roles = []string{"all"}
-		}
-		if v.IsAdministrative {
-			// Operator, Admin, Test server role, Cj Config Man
-			v.Settings.Roles = []string{"363383930143113216", "282353010192023552", "825041993251029032", "783100099969548288"}
 		}
 		v.Settings.Command = v.Name
 
@@ -190,18 +180,16 @@ func (cm *CommandManager) LoadCommands() {
 					zap.Error(err))
 			}
 		}
-		if len(v.RequiredRoles) > 0 {
-			v.Settings.Roles = v.RequiredRoles
-		}
 
 		commands[k] = v
 
-		// Add an entry for the bulk overwrite list
-		discordCommands = append(discordCommands, &discordgo.ApplicationCommand{
-			Name:        strings.TrimLeft(v.Name, "/"),
-			Description: v.Description,
-			Options:     v.Options,
-		})
+		if commandEnabled(v, guildSettings) {
+			discordCommands = append(discordCommands, &discordgo.ApplicationCommand{
+				Name:        strings.TrimLeft(v.Name, "/"),
+				Description: v.Description,
+				Options:     v.Options,
+			})
+		}
 	}
 
 	// Cleanup of old commands

@@ -22,6 +22,9 @@ type Talk struct {
 	Discord *discord.Session
 	Storage storage.Storer
 	Forum   *forum.ForumClient
+
+	channelID string
+	userIDs   []string
 }
 
 //nolint:golint
@@ -35,11 +38,22 @@ func (t *Talk) Init(
 	t.Storage = api
 	t.Discord = discord
 	t.Forum = fc
+
+	guildSettings, err := api.GetGuildSettings()
+	if err != nil {
+		return "", err
+	}
+	t.channelID = guildSettings.LTFChannelID
+	t.userIDs = guildSettings.LTFUserIDs
+
 	return "talking", nil
 }
 
 //nolint:golint
 func (t *Talk) Register() (actions []common.Action) {
+	if t.channelID == "" || len(t.userIDs) == 0 {
+		return nil
+	}
 	return []common.Action{
 		{
 			Schedule: "@every 1h",
@@ -50,9 +64,7 @@ func (t *Talk) Register() (actions []common.Action) {
 }
 
 func (t *Talk) ltf() (err error) {
-	channelID := "831189475480436746"
-
-	f, err := t.Discord.GetCurrentChannelMessageFrequency(channelID)
+	f, err := t.Discord.GetCurrentChannelMessageFrequency(t.channelID)
 	if err != nil {
 		return
 	}
@@ -60,10 +72,7 @@ func (t *Talk) ltf() (err error) {
 		return
 	}
 
-	message, err := t.Storage.GetRandomMessageFromUsers([]string{
-		"456226577798135808",
-		"778144453751078913",
-	})
+	message, err := t.Storage.GetRandomMessageFromUsers(t.userIDs)
 	if err != nil {
 		return errors.Wrap(err, "failed to get messages for user")
 	}
@@ -71,7 +80,7 @@ func (t *Talk) ltf() (err error) {
 	nick := "LinuxTheFish"
 	time := time.Unix(message.Timestamp, 0)
 
-	t.Discord.ChannelMessageSend(channelID, fmt.Sprintf(
+	t.Discord.ChannelMessageSend(t.channelID, fmt.Sprintf(
 		"> %s\n - **%s** (%s, %d)",
 		message.Message, nick, time.Month().String(), time.Year()))
 

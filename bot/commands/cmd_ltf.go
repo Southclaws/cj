@@ -18,17 +18,11 @@ func (cm *CommandManager) ltf(
 	context bool,
 	err error,
 ) {
-	channelID := "831189475480436746"
-
-	if interaction.ChannelID != channelID {
+	if interaction.ChannelID != cm.GuildSettings.LTFChannelID {
 		return
 	}
 
-	msg, err := cm.Storage.GetRandomMessageFromUsers([]string{
-		"468356073095430144",
-		"778144453751078913",
-		"123456789987654321",
-	})
+	msg, err := cm.Storage.GetRandomMessageFromUsers(cm.GuildSettings.LTFUserIDs)
 	if err != nil {
 		cm.replyDirectly(interaction, fmt.Sprint(errors.Wrap(err, "failed to get messages for user").Error()))
 		return

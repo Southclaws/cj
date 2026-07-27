@@ -17,7 +17,7 @@ import (
 // Storer describes a type that is capable of persisting data
 type Storer interface {
 	RecordChatLog(discordUserID, discordChannel, message, messageID string) (err error)
-	GetMessagesForUser(discordUserID string) (messages []ChatLog, err error)
+	GetRecentMessagesForUser(discordUserID string, limit int) (messages []ChatLog, err error)
 	GetTopMessages(top int) (result TopMessages, err error)
 	GetUserMessageCount(discordUserID string) (messageCount int, err error)
 	GetUserRank(discordUserID string) (rank int, err error)
@@ -26,8 +26,11 @@ type Storer interface {
 	GetRandomUser() (result string, err error)
 	GetMessageByID(messageID string) (message ChatLog, err error)
 	SearchMessages(discordUserID, query string) (messages []ChatLog, err error)
+	SearchAllMessages(query string, limit int) (messages []ChatLog, err error)
 
 	GetUserOrCreate(discordUserID string) (result User, err error)
+	GetUser(discordUserID string) (result User, found bool, err error)
+	ListUsers(query string, limit, offset int) (users []User, total int, err error)
 	UpdateUserUsername(discordUserID, username string) (err error)
 	UpdateUser(user User) (err error)
 	RemoveUser(id string) (err error)
@@ -44,6 +47,18 @@ type Storer interface {
 	SetCommandSettings(command string, settings types.CommandSettings) (err error)
 	GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error)
 
+	GetGuildSettings() (settings GuildSettings, err error)
+	SetGuildSettings(settings GuildSettings) (err error)
+
+	RecordAuditEvent(event AuditEvent) (err error)
+	ListAuditEvents(limit int) (events []AuditEvent, err error)
+
+	RecordActionRun(run ActionRun) (id string, err error)
+	ListActionRuns(limit int) (runs []ActionRun, err error)
+	GetActionRun(id string) (run ActionRun, found bool, err error)
+
+	Ping() (err error)
+
 	GetReadmeMessage() (message string, err error)
 	FetchReadmeMessage(githubOwner string, githubRepoistory string, fileName string) (message string, err error)
 	UpdateReadmeMessage(session *discordgo.Session, original *discordgo.Message, upstream string) (err error)
@@ -51,11 +66,13 @@ type Storer interface {
 
 // MongoStorer exposes a storage MongoStorer for the bot
 type MongoStorer struct {
-	mongo    *mongo.Client
-	accounts *mongo.Collection
-	chat     *mongo.Collection
-	settings *mongo.Collection
-	cache    *cache.Cache
+	mongo      *mongo.Client
+	accounts   *mongo.Collection
+	chat       *mongo.Collection
+	settings   *mongo.Collection
+	audit      *mongo.Collection
+	actionRuns *mongo.Collection
+	cache      *cache.Cache
 }
 
 // Config represents database connection info
@@ -96,6 +113,8 @@ func New(config Config) (m *MongoStorer, err error) {
 	m.accounts = db.Collection("accounts")
 	m.chat = db.Collection("chat")
 	m.settings = db.Collection("settings")
+	m.audit = db.Collection("audit")
+	m.actionRuns = db.Collection("action_runs")
 	m.cache = cache.New(time.Hour*24, time.Hour*12)
 
 	return
@@ -103,6 +122,12 @@ func New(config Config) (m *MongoStorer, err error) {
 
 func (m *MongoStorer) newContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 10*time.Second)
+}
+
+func (m *MongoStorer) Ping() error {
+	ctx, cancel := m.newContext()
+	defer cancel()
+	return m.mongo.Ping(ctx, readpref.Primary())
 }
 
 func (m *MongoStorer) Close() error {

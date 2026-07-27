@@ -1,13 +1,19 @@
 package bot
 
 import (
+	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
+	"github.com/Southclaws/cj/admin"
+	"github.com/Southclaws/cj/admin/logs"
 	"github.com/Southclaws/cj/bot/admod"
 	"github.com/Southclaws/cj/bot/commands"
 	"github.com/Southclaws/cj/bot/heartbeat"
@@ -19,13 +25,16 @@ import (
 
 // App stores program state
 type App struct {
-	config        *types.Config
-	discordClient *discord.Session
-	storage       storage.Storer
-	forum         *forum.ForumClient
-	ready         chan error
-	extensions    []Extension
-	channels      map[string]*discordgo.Channel
+	config         *types.Config
+	discordClient  *discord.Session
+	storage        storage.Storer
+	forum          *forum.ForumClient
+	ready          chan error
+	extensions     []Extension
+	channels       map[string]*discordgo.Channel
+	admin          *admin.Server
+	heartbeat      *heartbeat.Heartbeat
+	commandManager *commands.CommandManager
 }
 
 // Extension represents an extension to the bot that receives a pointer to the
@@ -70,9 +79,11 @@ func Start(config *types.Config) {
 		zap.L().Fatal("failed to connect to discord", zap.Error(err))
 	}
 
+	app.heartbeat = &heartbeat.Heartbeat{}
+	app.commandManager = &commands.CommandManager{}
 	app.extensions = []Extension{
-		&commands.CommandManager{},
-		&heartbeat.Heartbeat{},
+		app.commandManager,
+		app.heartbeat,
 		&admod.Watcher{},
 	}
 
@@ -88,9 +99,19 @@ func Start(config *types.Config) {
 		zap.Int("extensions", len(app.extensions)),
 		zap.Any("config", config))
 
+	app.startDashboard(config)
+
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGTERM, syscall.SIGINT)
 	<-signals
+
+	if app.admin != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := app.admin.Shutdown(ctx); err != nil {
+			zap.L().Error("failed to shut down dashboard", zap.Error(err))
+		}
+		cancel()
+	}
 
 	if closer, ok := app.storage.(interface{ Close() error }); ok {
 		err = closer.Close()
@@ -98,4 +119,42 @@ func Start(config *types.Config) {
 			zap.L().Error("failed to close storage", zap.Error(err))
 		}
 	}
+}
+
+func (app *App) startDashboard(config *types.Config) {
+	if !config.DashboardEnabled {
+		return
+	}
+
+	logBuffer := logs.NewBuffer(config.DashboardLogBufferSize, config.DashboardLogRetention)
+	logStream := logs.NewStream()
+	logRedactor := logs.NewRedactor(config.DiscordToken, config.MongoPass)
+	logCore := logs.NewCore(zap.NewAtomicLevelAt(zap.DebugLevel), logBuffer, logStream, logRedactor)
+
+	zap.ReplaceGlobals(zap.L().WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return zapcore.NewTee(core, logCore)
+	})))
+
+	server, err := admin.New(config, config.Version, admin.Dependencies{
+		Storage:        app.storage,
+		Discord:        app.discordClient,
+		Heartbeat:      app.heartbeat,
+		CommandManager: app.commandManager,
+		LogBuffer:      logBuffer,
+		LogStream:      logStream,
+	})
+	if errors.Is(err, admin.ErrDisabled) {
+		return
+	}
+	if err != nil {
+		zap.L().Error("dashboard configuration invalid, dashboard disabled", zap.Error(err))
+		return
+	}
+
+	if err := server.Start(context.Background()); err != nil {
+		zap.L().Error("failed to start dashboard", zap.Error(err))
+		return
+	}
+
+	app.admin = server
 }

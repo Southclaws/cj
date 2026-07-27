@@ -16,14 +16,15 @@ import (
 
 // CommandManager stores command state
 type CommandManager struct {
-	Config    *types.Config
-	Discord   *discord.Session
-	Storage   storage.Storer
-	Forum     *forum.ForumClient
-	Commands  []Command
-	Contexts  *cache.Cache
-	Cooldowns map[string]time.Time
-	Cache     *cache.Cache
+	Config        *types.Config
+	Discord       *discord.Session
+	Storage       storage.Storer
+	Forum         *forum.ForumClient
+	Commands      []Command
+	Contexts      *cache.Cache
+	Cooldowns     map[string]time.Time
+	Cache         *cache.Cache
+	GuildSettings storage.GuildSettings
 }
 
 // Init creates a command manager for the app
@@ -54,7 +55,6 @@ type Command struct {
 	Description      string
 	Settings         types.CommandSettings
 	Options          []*discordgo.ApplicationCommandOption
-	RequiredRoles    []string
 	DeniedRoles      []string
 	IsAdministrative bool
 }
@@ -83,12 +83,7 @@ func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.Interacti
 	zap.L().Info("User attempting command", zap.Any("user", interaction.Member.User.ID), zap.Any("command", interaction.ApplicationCommandData().Name))
 	for _, command := range cm.Commands {
 		if strings.TrimLeft(command.Name, "/") == interaction.ApplicationCommandData().Name {
-			requiredRoles := command.Settings.Roles
-			if len(command.RequiredRoles) > 0 {
-				requiredRoles = command.RequiredRoles
-			}
-			if hasPermissions(requiredRoles, interaction.Member.Roles) &&
-				!hasAnyRole(command.DeniedRoles, interaction.Member.Roles) {
+			if cm.authorized(command, interaction.Member) {
 				args := make(map[string]*discordgo.ApplicationCommandInteractionDataOption)
 				for _, option := range interaction.ApplicationCommandData().Options {
 					args[option.Name] = option
@@ -106,6 +101,28 @@ func (cm *CommandManager) TryFindAndFireCommand(interaction *discordgo.Interacti
 			}
 			break
 		}
+	}
+}
+
+func (cm *CommandManager) authorized(command Command, member *discordgo.Member) bool {
+	if !commandEnabled(command, cm.GuildSettings) {
+		return false
+	}
+	roles := command.Settings.Roles
+	if command.IsAdministrative && len(roles) == 0 {
+		return member.Permissions&discordgo.PermissionAdministrator != 0
+	}
+	return hasPermissions(roles, member.Roles) && !hasAnyRole(command.DeniedRoles, member.Roles)
+}
+
+func commandEnabled(command Command, guildSettings storage.GuildSettings) bool {
+	switch command.Name {
+	case "/searchmessage":
+		return guildSettings.SearchMessageChannelID != "" && len(command.Settings.Roles) > 0
+	case "/ltf":
+		return guildSettings.LTFChannelID != "" && len(guildSettings.LTFUserIDs) > 0
+	default:
+		return true
 	}
 }
 

@@ -12,11 +12,11 @@ import (
 
 // ChatLog represents a single logged chat message from Discord
 type ChatLog struct {
-	Timestamp        int64
-	DiscordUserID    string
-	DiscordChannel   string
-	Message          string
-	DiscordMessageID string
+	Timestamp        int64  `json:"timestamp"`
+	DiscordUserID    string `json:"discordUserId"`
+	DiscordChannel   string `json:"discordChannel"`
+	Message          string `json:"message"`
+	DiscordMessageID string `json:"discordMessageId"`
 }
 
 // RecordChatLog records a chat message from a user in a channel
@@ -40,17 +40,24 @@ func (m *MongoStorer) RecordChatLog(discordUserID, discordChannel, message, mess
 	return
 }
 
-// GetMessagesForUser returns all messages from the given discord user.
-func (m *MongoStorer) GetMessagesForUser(discordUserID string) (messages []ChatLog, err error) {
+// GetRecentMessagesForUser returns the most recent messages from the given
+// discord user across every channel, newest first.
+func (m *MongoStorer) GetRecentMessagesForUser(discordUserID string, limit int) (messages []ChatLog, err error) {
 	ctx, cancel := m.newContext()
 	defer cancel()
 
-	cursor, err := m.chat.Find(ctx, bson.M{"discorduserid": discordUserID})
+	sort := bson.D{
+		{Key: "timestamp", Value: -1},
+		{Key: "_id", Value: -1},
+	}
+
+	cursor, err := m.chat.Find(ctx, bson.M{"discorduserid": discordUserID}, options.Find().SetSort(sort).SetLimit(int64(limit)))
 	if err != nil {
 		return
 	}
 	defer cursor.Close(ctx)
 
+	messages = []ChatLog{}
 	err = cursor.All(ctx, &messages)
 	return
 }
@@ -60,8 +67,8 @@ type TopMessages []TopMessagesEntry
 
 // TopMessagesEntry is a user and their message count
 type TopMessagesEntry struct {
-	User     string `bson:"_id"`
-	Messages int    `bson:"count"`
+	User     string `bson:"_id" json:"user"`
+	Messages int    `bson:"count" json:"messages"`
 }
 
 func (s TopMessages) Len() int           { return len(s) }
@@ -243,6 +250,32 @@ func (m *MongoStorer) SearchMessages(discordUserID, query string) (messages []Ch
 	}
 	defer cursor.Close(ctx)
 
+	err = cursor.All(ctx, &messages)
+	return messages, err
+}
+
+func (m *MongoStorer) SearchAllMessages(query string, limit int) (messages []ChatLog, err error) {
+	ctx, cancel := m.newContext()
+	defer cancel()
+
+	filter := bson.M{
+		"message": bson.M{
+			"$regex":   regexp.QuoteMeta(query),
+			"$options": "i",
+		},
+	}
+	sort := bson.D{
+		{Key: "timestamp", Value: -1},
+		{Key: "_id", Value: -1},
+	}
+
+	cursor, err := m.chat.Find(ctx, filter, options.Find().SetSort(sort).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	messages = []ChatLog{}
 	err = cursor.All(ctx, &messages)
 	return messages, err
 }

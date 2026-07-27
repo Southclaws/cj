@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // User is a recorded and verified burgershot forum user.
@@ -42,6 +43,62 @@ func (m *MongoStorer) GetUserOrCreate(discordUserID string) (user User, err erro
 		return user, err
 	}
 	return user, nil
+}
+
+func (m *MongoStorer) GetUser(discordUserID string) (user User, found bool, err error) {
+	ctx, cancel := m.newContext()
+	defer cancel()
+
+	err = m.accounts.FindOne(ctx, bson.M{"discord_user_id": discordUserID}).Decode(&user)
+	switch err {
+	case mongo.ErrNoDocuments:
+		err = nil
+	case nil:
+		found = true
+	}
+	return
+}
+
+func (m *MongoStorer) ListUsers(query string, limit, offset int) (users []User, total int, err error) {
+	ctx, cancel := m.newContext()
+	defer cancel()
+
+	filter := userSearchFilter(query)
+
+	count, err := m.accounts.CountDocuments(ctx, filter)
+	if err != nil {
+		return
+	}
+	total = int(count)
+
+	cursor, err := m.accounts.Find(
+		ctx,
+		filter,
+		options.Find().
+			SetSort(bson.D{{Key: "discord_user_id", Value: 1}}).
+			SetSkip(int64(offset)).
+			SetLimit(int64(limit)),
+	)
+	if err != nil {
+		return
+	}
+	defer cursor.Close(ctx)
+
+	users = []User{}
+	err = cursor.All(ctx, &users)
+	return
+}
+
+func userSearchFilter(query string) bson.M {
+	if query == "" {
+		return bson.M{}
+	}
+	pattern := bson.M{"$regex": regexp.QuoteMeta(query), "$options": "i"}
+	return bson.M{"$or": []bson.M{
+		{"discord_user_id": pattern},
+		{"forum_user_name": pattern},
+		{"burger_user_name": pattern},
+	}}
 }
 
 // UpdateUser aims to update a full document of a user
@@ -82,9 +139,9 @@ func (m *MongoStorer) AddEmojiReactionToUser(discordUserID string, emoji string)
 }
 
 type TopReactionEntry struct {
-	UserID   string `bson:"discord_user_id"`
-	Counter  int    `bson:"counter"`
-	Reaction string `bson:"reaction"`
+	UserID   string `bson:"discord_user_id" json:"userId"`
+	Counter  int    `bson:"counter" json:"counter"`
+	Reaction string `bson:"reaction" json:"reaction"`
 }
 
 // GetTopReactions gets the top <top> amount of people who received reaction <reaction>

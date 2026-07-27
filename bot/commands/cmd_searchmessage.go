@@ -11,10 +11,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const (
-	searchMessageChannelID     = "948604467887083550"
-	searchMessageContextPrefix = "searchmessage:"
-)
+const searchMessageContextPrefix = "searchmessage:"
 
 type searchMessageContext struct {
 	ID            string
@@ -33,7 +30,7 @@ func (cm *CommandManager) commandSearchMessage(
 	context bool,
 	err error,
 ) {
-	if interaction.ChannelID != searchMessageChannelID {
+	if interaction.ChannelID != cm.GuildSettings.SearchMessageChannelID {
 		return
 	}
 

@@ -34,12 +34,19 @@ func (w *Watcher) Init(
 	w.api = api
 	w.fc = fc
 
-	w.channel = config.AdsChannel
+	guildSettings, err := api.GetGuildSettings()
+	if err != nil {
+		return err
+	}
+	w.channel = guildSettings.AdsChannelID
 
 	return nil
 }
 
 func (w *Watcher) OnMessage(m discordgo.Message) error {
+	if w.channel == "" {
+		return nil
+	}
 	if m.ChannelID != w.channel {
 		return nil
 	}

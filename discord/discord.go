@@ -1,23 +1,29 @@
 package discord
 
 import (
-	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron"
+	"go.uber.org/zap"
 
 	"github.com/Southclaws/cj/types"
 )
 
-// Session wraps the discordgo session and provides some additional features
+const memberPageSize = 1000
+
 type Session struct {
-	S         *discordgo.Session
-	Config    types.Config
-	UserIndex map[string]discordgo.Member
+	S      *discordgo.Session
+	Config types.Config
+
+	mu               sync.RWMutex
+	userIndex        map[string]discordgo.Member
+	membersByID      map[string]*discordgo.Member
+	members          []*discordgo.Member
+	membersUpdatedAt time.Time
 }
 
-// New creates a new wrapped discord session
 func New(s *discordgo.Session, c types.Config) (d *Session) {
 	d = &Session{
 		S:      s,
@@ -27,29 +33,80 @@ func New(s *discordgo.Session, c types.Config) (d *Session) {
 	return
 }
 
-// GetUserFromName returns a discordgo.Member from a discord username
 func (s *Session) GetUserFromName(name string) (user discordgo.Member, exists bool) {
-	user, exists = s.UserIndex[name]
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	user, exists = s.userIndex[name]
 	return
 }
 
-func (s *Session) GetRandomChannel() (channel string, err error) {
-	channels, err := s.S.GuildChannels(s.Config.GuildID)
+func (s *Session) Members() ([]*discordgo.Member, time.Time) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	out := make([]*discordgo.Member, len(s.members))
+	copy(out, s.members)
+	return out, s.membersUpdatedAt
+}
+
+func (s *Session) MemberByID(id string) (discordgo.Member, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	m, ok := s.membersByID[id]
+	if !ok {
+		return discordgo.Member{}, false
+	}
+	return *m, true
+}
+
+func (s *Session) RefreshMembers() error {
+	members, err := paginateAllMembers(func(after string) ([]*discordgo.Member, error) {
+		return s.S.GuildMembers(s.Config.GuildID, after, memberPageSize)
+	})
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	active := []string{}
-	for _, ch := range channels {
-		if ch.ParentID == "375285284079665153" {
-			active = append(active, ch.ID)
+	index := make(map[string]discordgo.Member, len(members))
+	byID := make(map[string]*discordgo.Member, len(members))
+	for _, m := range members {
+		m.GuildID = s.Config.GuildID
+
+		name := m.Nick
+		if name == "" && m.User != nil {
+			name = m.User.Username
+		}
+		index[name] = *m
+		if m.User != nil {
+			byID[m.User.ID] = m
 		}
 	}
 
-	return active[rand.Intn(len(active))], nil
+	s.mu.Lock()
+	s.userIndex = index
+	s.membersByID = byID
+	s.members = members
+	s.membersUpdatedAt = time.Now()
+	s.mu.Unlock()
+
+	return nil
 }
 
-// GetCurrentChannelMessageFrequency returns messages-per-second
+func paginateAllMembers(fetch func(after string) ([]*discordgo.Member, error)) ([]*discordgo.Member, error) {
+	var all []*discordgo.Member
+	after := ""
+	for {
+		batch, err := fetch(after)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, batch...)
+		if len(batch) < memberPageSize {
+			return all, nil
+		}
+		after = batch[len(batch)-1].User.ID
+	}
+}
+
 func (s *Session) GetCurrentChannelMessageFrequency(channelID string) (freq float64, err error) {
 	messages, err := s.S.ChannelMessages(channelID, 20, "", "", "")
 	if err != nil {
@@ -77,26 +134,19 @@ func (s *Session) GetCurrentChannelMessageFrequency(channelID string) (freq floa
 }
 
 func (s *Session) ready(session *discordgo.Session, event *discordgo.Ready) {
-	s.cacheUsernames()
-	c := cron.New()
-	must(c.AddFunc("@every 2h", s.cacheUsernames))
-	c.Start()
-}
-
-func (s *Session) cacheUsernames() {
-	users, err := s.S.GuildMembers(s.Config.GuildID, "", 1000)
-	if err != nil {
-		return
-	}
-
-	s.UserIndex = make(map[string]discordgo.Member)
-	for _, u := range users {
-		name := u.Nick
-		if name == "" {
-			name = u.User.Username
+	go func() {
+		if err := s.RefreshMembers(); err != nil {
+			zap.L().Error("failed to build initial member cache", zap.Error(err))
 		}
-		s.UserIndex[name] = *u
-	}
+	}()
+
+	c := cron.New()
+	must(c.AddFunc("@every 2h", func() {
+		if err := s.RefreshMembers(); err != nil {
+			zap.L().Error("failed to refresh member cache", zap.Error(err))
+		}
+	}))
+	c.Start()
 }
 
 func must(err error) {

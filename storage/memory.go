@@ -10,10 +10,16 @@ type Memory struct{}
 func (m *Memory) GetUserOrCreate(discordUserID string) (result User, err error) {
 	return
 }
+func (m *Memory) GetUser(discordUserID string) (result User, found bool, err error) {
+	return
+}
+func (m *Memory) ListUsers(query string, limit, offset int) (users []User, total int, err error) {
+	return
+}
 func (m *Memory) RecordChatLog(discordUserID string, discordChannel string, message string, messageID string) (err error) {
 	return
 }
-func (m *Memory) GetMessagesForUser(discordUserID string) (messages []ChatLog, err error) {
+func (m *Memory) GetRecentMessagesForUser(discordUserID string, limit int) (messages []ChatLog, err error) {
 	return
 }
 func (m *Memory) GetTopMessages(top int) (result TopMessages, err error) {
@@ -38,6 +44,9 @@ func (m *Memory) GetMessageByID(messageID string) (message ChatLog, err error) {
 	return
 }
 func (m *Memory) SearchMessages(discordUserID, query string) (messages []ChatLog, err error) {
+	return
+}
+func (m *Memory) SearchAllMessages(query string, limit int) (messages []ChatLog, err error) {
 	return
 }
 func (m *Memory) UpdateUserUsername(discordUserID string, username string) (err error) {
@@ -80,6 +89,30 @@ func (m *Memory) SetCommandSettings(command string, settings types.CommandSettin
 	return
 }
 func (m *Memory) GetCommandSettings(command string) (settings types.CommandSettings, found bool, err error) {
+	return
+}
+func (m *Memory) GetGuildSettings() (settings GuildSettings, err error) {
+	return
+}
+func (m *Memory) SetGuildSettings(settings GuildSettings) (err error) {
+	return
+}
+func (m *Memory) RecordAuditEvent(event AuditEvent) (err error) {
+	return
+}
+func (m *Memory) ListAuditEvents(limit int) (events []AuditEvent, err error) {
+	return
+}
+func (m *Memory) RecordActionRun(run ActionRun) (id string, err error) {
+	return
+}
+func (m *Memory) ListActionRuns(limit int) (runs []ActionRun, err error) {
+	return
+}
+func (m *Memory) GetActionRun(id string) (run ActionRun, found bool, err error) {
+	return
+}
+func (m *Memory) Ping() (err error) {
 	return
 }
 func (m *Memory) GetReadmeMessage() (message string, err error) {

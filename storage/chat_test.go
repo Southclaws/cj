@@ -88,3 +88,41 @@ func TestAPI_SearchMessages(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Empty(t, got)
 }
+
+func TestAPI_SearchAllMessages(t *testing.T) {
+	err := api.RecordChatLog("global-search-user-1", "channel-a", "A globally searchable phrase", "global-message-id-1")
+	assert.NoError(t, err)
+	err = api.RecordChatLog("global-search-user-2", "channel-b", "Another globally searchable phrase", "global-message-id-2")
+	assert.NoError(t, err)
+
+	got, err := api.SearchAllMessages("GLOBALLY SEARCHABLE", 10)
+	assert.NoError(t, err)
+	assert.Len(t, got, 2)
+
+	got, err = api.SearchAllMessages("GLOBALLY SEARCHABLE", 1)
+	assert.NoError(t, err)
+	assert.Len(t, got, 1, "expected the limit to cap the number of results")
+
+	got, err = api.SearchAllMessages("no such phrase exists anywhere", 10)
+	assert.NoError(t, err)
+	assert.Empty(t, got)
+}
+
+func TestAPI_GetRecentMessagesForUser(t *testing.T) {
+	err := api.RecordChatLog("recent-user", "channel-a", "first message", "recent-message-id-1")
+	assert.NoError(t, err)
+	err = api.RecordChatLog("recent-user", "channel-b", "second message", "recent-message-id-2")
+	assert.NoError(t, err)
+	err = api.RecordChatLog("recent-user", "channel-a", "third message", "recent-message-id-3")
+	assert.NoError(t, err)
+
+	got, err := api.GetRecentMessagesForUser("recent-user", 2)
+	assert.NoError(t, err)
+	assert.Len(t, got, 2, "expected the limit to cap the number of results")
+	assert.Equal(t, "third message", got[0].Message, "expected newest first")
+	assert.Equal(t, "second message", got[1].Message)
+
+	got, err = api.GetRecentMessagesForUser("no-such-user", 10)
+	assert.NoError(t, err)
+	assert.Empty(t, got)
+}
