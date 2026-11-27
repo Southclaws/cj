@@ -46,6 +46,11 @@ var rpfirsts = []string{
 	"kungkingkang",
 	"mengontol",
 	"misebah",
+	"Nusantara Project",
+	"Corvus",
+	"Mega-Chan",
+	"Wadin",
+	"Wagyu Adinarta",
 }
 var rpseconds = []string{
 	"SAMP",
